@@ -25,7 +25,7 @@ HEADERS  += tsview.h \
     tscurvebuffer.h \
     tsusb3000reader.h \
     tsreaderthread.h
-
+LIBS += -L"dll/*.dll"
 FORMS    += \
     tsview.ui
 
