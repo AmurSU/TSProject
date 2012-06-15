@@ -7,5 +7,7 @@ TSController::TSController(TSIView *iview, TSModel *mod, QObject *parent) :
 
 void TSController::handle()
 {
+    qDebug()<<"Hellow georg";
+    qDebug()<<"Say hallow!";
     view->showGUI();
 }
