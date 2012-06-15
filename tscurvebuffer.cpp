@@ -3,6 +3,10 @@
 TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     QObject(parent)
 {
+    ts_end = 0;
+    ts_volume[ts_end] = 0;
+    ts_tempIn[ts_end] = 0;
+    ts_tempOut[ts_end] = 0;
 }
 
 int TSCurveBuffer::end()

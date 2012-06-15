@@ -15,6 +15,9 @@ public:
 signals:
 
 public slots:
+    void viewNewResearchRequested();
+    void viewNewResearchAccepted();
+    void listeningDeviceRequested();
 private:
     TSIView *view;
     TSModel *model;

@@ -27,6 +27,13 @@
     <item>
      <layout class="QHBoxLayout" name="mainArea">
       <item>
+       <widget class="QLabel" name="verticalLine">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QScrollArea" name="graphicsPlotArea">
         <property name="autoFillBackground">
          <bool>false</bool>
@@ -42,13 +49,22 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>726</width>
+           <width>772</width>
            <height>458</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="horisontalLine">
             <property name="maximumSize">
              <size>
               <width>16777215</width>
@@ -83,13 +99,6 @@
           </item>
          </layout>
         </widget>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
        </widget>
       </item>
      </layout>

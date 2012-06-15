@@ -10,3 +10,8 @@ TSCurveBuffer* TSModel::curveModel()
 {
     return &ts_curveModel;
 }
+
+TSPatientProfileModel* TSModel::patientProfileModel()
+{
+    return &ts_patientProfileModel;
+}
