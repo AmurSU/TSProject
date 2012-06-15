@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TSView</class>
+ <widget class="QMainWindow" name="TSView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Термоспирометр</string>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonIconOnly</enum>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="mainArea">
+      <item>
+       <widget class="QScrollArea" name="graphicsPlotArea">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAsNeeded</enum>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>726</width>
+           <height>458</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>15</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="gVolume">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="gTempIn">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="gTempOut">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="bottomButtonsBlock">
+      <item>
+       <widget class="QCommandLinkButton" name="cbStart">
+        <property name="acceptDrops">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Начать</string>
+        </property>
+        <property name="icon">
+         <iconset resource="iconResourse.qrc">
+          <normaloff>:/images/startIcon.png</normaloff>:/images/startIcon.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+        <property name="autoRepeat">
+         <bool>false</bool>
+        </property>
+        <property name="autoExclusive">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCommandLinkButton" name="cbStop">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Остановить</string>
+        </property>
+        <property name="icon">
+         <iconset resource="iconResourse.qrc">
+          <normaloff>:/images/stopIcon.png</normaloff>:/images/stopIcon.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>&amp;Файл</string>
+    </property>
+    <addaction name="actionNewResearch"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpenResearch"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveAS"/>
+    <addaction name="separator"/>
+    <addaction name="actionCLose"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Исследование</string>
+    </property>
+    <addaction name="actionStart"/>
+    <addaction name="actionStop"/>
+    <addaction name="separator"/>
+    <addaction name="actionPatient"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="baseToolBar">
+   <property name="acceptDrops">
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Основное</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNewResearch"/>
+   <addaction name="actionOpenResearch"/>
+   <addaction name="actionSave"/>
+  </widget>
+  <widget class="QToolBar" name="researchToolBar">
+   <property name="acceptDrops">
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Иследование</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionPatient"/>
+  </widget>
+  <action name="actionNewResearch">
+   <property name="icon">
+    <iconset resource="iconResourse.qrc">
+     <normaloff>:/images/newIcon.png</normaloff>:/images/newIcon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Новое исследование...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionOpenResearch">
+   <property name="icon">
+    <iconset resource="iconResourse.qrc">
+     <normaloff>:/images/openIcon.png</normaloff>:/images/openIcon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Открыть исследование...</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="iconResourse.qrc">
+     <normaloff>:/images/saveIcon.png</normaloff>:/images/saveIcon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Сохранить</string>
+   </property>
+  </action>
+  <action name="actionSaveAS">
+   <property name="icon">
+    <iconset resource="iconResourse.qrc">
+     <normaloff>:/images/saveIcon.png</normaloff>:/images/saveIcon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Сохранить  как...</string>
+   </property>
+  </action>
+  <action name="actionCLose">
+   <property name="text">
+    <string>Закрыть исследование</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Выход</string>
+   </property>
+  </action>
+  <action name="actionStart">
+   <property name="text">
+    <string>Запустить</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Остановить</string>
+   </property>
+  </action>
+  <action name="actionPatient">
+   <property name="icon">
+    <iconset resource="iconResourse.qrc">
+     <normaloff>:/images/privateIcon.png</normaloff>:/images/privateIcon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Анкета поциента</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="iconResourse.qrc"/>
+ </resources>
+ <connections/>
+</ui>
