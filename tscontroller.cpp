@@ -10,10 +10,8 @@ TSController::TSController(TSIView *iview, TSModel *mod, QObject *parent) :
 void TSController::handle()
 {
     TSReaderThread  *trd = new TSReaderThread(model->curveModel());
-    /*TSUsb3000Reader *tur = new TSUsb3000Reader();
-    tur->initDevice();
-    tur->moveToThread(trd);
-    trd->run(tur);*/
+    trd->startRead();
+    trd->stopRead();
 
     view->showGUI();
 }
