@@ -68,7 +68,6 @@ void TSView::plotNow()
     ui->gVolume->setPixmap(bVolume);
     ui->gTempIn->setPixmap(bTempIn);
     ui->gTempOut->setPixmap(bTempOut);
-    curveBuffer->append(0,0,0);
 }
 
 void TSView::showNewResearchDialog(TSPatientProfileModel *model)

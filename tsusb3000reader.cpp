@@ -16,15 +16,17 @@ bool TSUsb3000Reader::initDevice(TSCurveBuffer *_bf){
         if (RtGetDllVersion() == CURRENT_VERSION_RTUSBAPI){
             qDebug() << "Dll version is correct";
         }
-        else
+        else{
             qDebug() << "Dll version isn`t correct";
-        this->setLastError("Dll version isn`t correct");
-        return false;
+            this->setLastError("Dll version isn`t correct");
+            return false;
+        }
     }
 
     CreateInstance RtCreateInstance = (CreateInstance) myLib.resolve("RtCreateInstance");
     if (RtCreateInstance) {
         pModule = static_cast<IRTUSB3000 *> (RtCreateInstance("usb3000"));
+        qDebug() << "Create usb3000 instance";
     }
     else{
         qDebug() << "Can`t create usb3000 instance";
@@ -148,14 +150,20 @@ void TSUsb3000Reader::setLastError(QString last_error){
 }
 bool TSUsb3000Reader::readData(){
     if (pModule->READ_KADR(AdcBuffer)) {
-        buffer->append(AdcBuffer[0]/400,AdcBuffer[1]/400,AdcBuffer[2]/400);
+        buffer->append(AdcBuffer[0]/100,AdcBuffer[1]/200,AdcBuffer[2]/200);
         return true;
     }
     else
     {
         this->setLastError("Can`t read from device");
         return false;
-    }
+    }/*
+    pModule->READ_KADR(AdcBuffer);
+    LPTSTR lpBuffer;
+    DWORD nSize=100;
+    pModule->GetLastErrorString(lpBuffer,nSize);
+    qDebug()<<lpBuffer;
+    return true;*/
 }
 void TSUsb3000Reader::TerminateApplication(char *ErrorString, bool TerminationFlag) {
     // подчищаем интерфейс модуля

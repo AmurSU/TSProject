@@ -21,23 +21,27 @@ void TSReaderThread::stopRead (){
 void TSReaderThread::run(){
     TSUsb3000Reader *reader = new TSUsb3000Reader(this);
     reader->initDevice(buffer);
-    int* volume= buffer->volume();
+    /*int* volume= buffer->volume();
     int* tempIn = buffer->tempIn();
     int* tempOut = buffer->tempOut();
-    int end = buffer->end();
+    int end = buffer->end();*/
+
     while(this->ReadingStarted){
+        /*Debug()<<"It works";*/
         if (reader->readData()){
             /*qDebug()<<"It works";*/
-            volume= buffer->volume();
+            /*volume= buffer->volume();
             tempIn = buffer->tempIn();
             tempOut = buffer->tempOut();
-            end = buffer->end();
-            /*qDebug()<<volume[end]<<tempIn[end]<<tempOut[end];*/
-            sleep(0.007);
+            end = buffer->end();*/
+            //qDebug()<<volume[end]<<tempIn[end]<<tempOut[end];
+            sleep(0.01);
         }
-        else
+        else{
             qDebug()<<"Get crashe";
+            sleep(0.01);
+        }
     }
-    emit done(reader);
+    /*emit done(reader);*/
     exec();
 }
