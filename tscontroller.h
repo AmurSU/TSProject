@@ -15,6 +15,10 @@ public:
 signals:
 
 public slots:
+    void newResearchRequesdted();
+    void editPatientProfileRequested();
+    void newResearchAccepted();
+    void startRecordingRequested();
 private:
     TSIView *view;
     TSModel *model;
