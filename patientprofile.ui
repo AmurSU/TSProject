@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TSPatientProfile</class>
+ <widget class="QDialog" name="TSPatientProfile">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>431</width>
+    <height>227</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Анкета пользователя</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="idLabel">
+     <property name="text">
+      <string>Идентификационный номер</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="TSLineEdit" name="idEdit">
+     <property name="minimumSize">
+      <size>
+       <width>200</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="frame">
+      <bool>true</bool>
+     </property>
+     <property name="dragEnabled">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="nameBlock">
+     <item row="0" column="0">
+      <widget class="QLabel" name="snameLabel">
+       <property name="text">
+        <string>Фамилия</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="TSLineEdit" name="snEdit"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="nameLabel">
+       <property name="text">
+        <string>Имя</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="TSLineEdit" name="nameEdit"/>
+     </item>
+     <item row="1" column="2">
+      <widget class="TSLineEdit" name="inameEdit"/>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="inameLabel">
+       <property name="text">
+        <string>Отчество</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="commonBlock">
+     <item row="0" column="0">
+      <widget class="QLabel" name="ageLabel">
+       <property name="text">
+        <string>Возраст</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="TSLineEdit" name="ageEdit"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="genderLabel">
+       <property name="text">
+        <string>Пол</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="TSComboBox" name="genderComboBox"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="mvlLabel">
+     <property name="text">
+      <string>Должная МВЛ</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="TSLineEdit" name="mvlEdit"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buttonsBlock">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton">
+       <property name="text">
+        <string>Отмена</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="aceptButton">
+       <property name="text">
+        <string>Создать</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TSLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>inputs\tslineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TSComboBox</class>
+   <extends>QComboBox</extends>
+   <header>inputs\tscombobox.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>aceptButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TSPatientProfile</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>383</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>215</x>
+     <y>113</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cancelButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TSPatientProfile</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>302</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>215</x>
+     <y>113</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

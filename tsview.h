@@ -11,6 +11,7 @@
 
 namespace Ui {
     class TSView;
+    class TSPatientProfile;
 }
 
 class TSView : public QMainWindow,public TSIView
@@ -20,18 +21,35 @@ public:
     explicit TSView(QWidget *parent = 0);
     ~TSView();
     void showGUI();
+    void showNewResearchDialog(TSPatientProfileModel *model);
+    void showEditPatientProfileDialog(TSPatientProfileModel *model);
+    void showResearchwindow(TSCurveBuffer *model);
+    void startRecording();
     void setController(TSController *c);
+protected:
+    void initPatientProfileUi();
+private slots:
+    void plotNow();
 private:
     Ui::TSView *ui;
+    Ui::TSPatientProfile *patientProfileUi;
     TSController *control;
     // Все для рисования
-    QPixmap volPixmap;
-    QPixmap tinPixmap;
-    QPixmap toutPixmap;
-    QPainter vol;
-    QPainter tin;
-    QPainter tout;
-    QTimer *paintTimer;
+    TSCurveBuffer* curveBuffer;
+    QTimer plotingTimer;
+    QPixmap bVolume;
+    QPixmap bTempIn;
+    QPixmap bTempOut;
+    QPainter pVolume;
+    QPainter pTempIn;
+    QPainter pTempOut;
+    int* volume;
+    int* tempIn;
+    int* tempOut;
+    int screenLimit;
+    int startIndex;
+    int W;
+    int H;
 };
 
 #endif // TSVIEW_H
