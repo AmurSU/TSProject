@@ -1,7 +1,5 @@
 #include "tscontroller.h"
 #include "tscurvebuffer.h"
-#include "tsreaderthread.h"
-#include "tsusb3000reader.h"
 #include <QTextCodec>
 
 TSController::TSController(TSIView *iview, TSModel *mod, QObject *parent) :
@@ -34,8 +32,14 @@ void TSController::newResearchAccepted()
 
 void TSController::startRecordingRequested()
 {
-    TSReaderThread  *trd = new TSReaderThread(model->curveModel());
+    trd = new TSReaderThread(model->curveModel());
     trd->startRead();
     // trd->stopRead();
     view->startRecording();
+}
+
+void TSController::stopRecoringRequested()
+{
+    trd->stopRead();
+    view->stopRecording();
 }

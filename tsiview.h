@@ -11,6 +11,7 @@ public:
     virtual void showEditPatientProfileDialog(TSPatientProfileModel *model)=0;
     virtual void showResearchwindow(TSCurveBuffer *model)=0;
     virtual void startRecording()=0;
+    virtual void stopRecording()=0;
 };
 
 #endif // TSIVIEW_H

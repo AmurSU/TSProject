@@ -13,6 +13,7 @@ TSView::TSView(QWidget *parent) :
     patientProfileUi = 0;
     ui->cbStart->setVisible(false);
     ui->cbStop->setVisible(false);
+    recordingStarted = false;
 }
 
 TSView::~TSView()
@@ -50,14 +51,37 @@ void TSView::plotNow()
     {
         screenLimit+=10;
         startIndex+=10;
-        ui->horizontalScrollBar->setMaximum(startIndex/100);
-        ui->horizontalScrollBar->setValue(startIndex/100);
     }
-
+    int step = h/10;
+    if(h%10>=5)
+    {
+        h+=step/2;
+    }
     pVolume.fillRect(0,0,W,H,Qt::white);
     pTempIn.fillRect(0,0,W,H,Qt::white);
     pTempOut.fillRect(0,0,W,H,Qt::white);
     int i;
+    pVolume.setPen(QColor(225,225,225));
+    pTempIn.setPen(QColor(225,225,225));
+    pTempOut.setPen(QColor(225,225,225));
+    for(i=step;i<h;i+=step)
+    {
+        pVolume.drawLine(0,h+i,W,h+i);
+        pTempIn.drawLine(0,h+i,W,h+i);
+        pTempOut.drawLine(0,h+i,W,h+i);
+        pVolume.drawLine(0,h-i,W,h-i);
+        pTempIn.drawLine(0,h-i,W,h-i);
+        pTempOut.drawLine(0,h-i,W,h-i);
+    }
+    for(i=10;i<W;i+=10)
+    {
+        pVolume.drawLine(i,0,i,h<<1);
+        pTempIn.drawLine(i,0,i,h<<1);
+        pTempOut.drawLine(i,0,i,h<<1);
+    }
+    pVolume.setPen(QColor(0,0,0));
+    pTempIn.setPen(QColor(0,0,0));
+    pTempOut.setPen(QColor(0,0,0));
     float k = (float)h/8000;
     for(i=0;i<screenLimit;i++)
     {
@@ -66,9 +90,24 @@ void TSView::plotNow()
         pTempIn.drawLine(i,h-k*tempIn[i+startIndex],i+1,h-k*tempIn[i+startIndex+1]);
         pTempOut.drawLine(i,h-k*tempOut[i+startIndex],i+1,h-k*tempOut[i+startIndex+1]);
     }
+    pVolume.drawLine(0,h,W,h);
+    pTempIn.drawLine(0,h,W,h);
+    pTempOut.drawLine(0,h,W,h);
     ui->gVolume->setPixmap(bVolume);
     ui->gTempIn->setPixmap(bTempIn);
     ui->gTempOut->setPixmap(bTempOut);
+    if(recordingStarted)
+    {
+        ui->horizontalScrollBar->setEnabled(false);
+        ui->horizontalScrollBar->setMaximum(startIndex/10);
+        ui->horizontalScrollBar->setValue(startIndex/10);
+    }
+}
+
+void TSView::scrollValueChanged(int val)
+{
+    startIndex = val*10;
+    plotNow();
 }
 
 void TSView::showNewResearchDialog(TSPatientProfileModel *model)
@@ -131,10 +170,23 @@ void TSView::showResearchwindow(TSCurveBuffer *model)
     ui->cbStart->setVisible(true);
     ui->cbStop->setVisible(true);
     connect(ui->cbStart,SIGNAL(clicked()),control,SLOT(startRecordingRequested()));
+    connect(ui->cbStop,SIGNAL(clicked()),control,SLOT(stopRecoringRequested()));
     connect(&plotingTimer,SIGNAL(timeout()),this,SLOT(plotNow()));
 }
 
 void TSView::startRecording()
 {
     plotingTimer.start(100);
+    recordingStarted = true;
+    ui->cbStart->setEnabled(false);
+    ui->cbStop->setEnabled(true);
+}
+
+void TSView::stopRecording()
+{
+    ui->horizontalScrollBar->setEnabled(true);
+    connect(ui->horizontalScrollBar,SIGNAL(valueChanged(int)),this,SLOT(scrollValueChanged(int)));
+    plotingTimer.stop();
+    recordingStarted = false;
+    ui->cbStop->setEnabled(false);
 }

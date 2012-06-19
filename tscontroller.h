@@ -4,6 +4,7 @@
 #include <QObject>
 #include "tsiview.h"
 #include "tsmodel.h"
+#include "tsreaderthread.h"
 #include <QTimer>
 
 class TSController : public QObject
@@ -19,10 +20,12 @@ public slots:
     void editPatientProfileRequested();
     void newResearchAccepted();
     void startRecordingRequested();
+    void stopRecoringRequested();
 private:
     TSIView *view;
     TSModel *model;
     QTimer* requestTimer;
+    TSReaderThread  *trd;
 };
 
 #endif // TSCONTROLLER_H

@@ -25,11 +25,13 @@ public:
     void showEditPatientProfileDialog(TSPatientProfileModel *model);
     void showResearchwindow(TSCurveBuffer *model);
     void startRecording();
+    void stopRecording();
     void setController(TSController *c);
 protected:
     void initPatientProfileUi();
 private slots:
     void plotNow();
+    void scrollValueChanged(int val);
 private:
     Ui::TSView *ui;
     Ui::TSPatientProfile *patientProfileUi;
@@ -50,6 +52,7 @@ private:
     int startIndex;
     int W;
     int H;
+    bool recordingStarted;
 };
 
 #endif // TSVIEW_H
