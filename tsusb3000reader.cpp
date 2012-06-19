@@ -157,13 +157,7 @@ bool TSUsb3000Reader::readData(){
     {
         this->setLastError("Can`t read from device");
         return false;
-    }/*
-    pModule->READ_KADR(AdcBuffer);
-    LPTSTR lpBuffer;
-    DWORD nSize=100;
-    pModule->GetLastErrorString(lpBuffer,nSize);
-    qDebug()<<lpBuffer;
-    return true;*/
+    }
 }
 void TSUsb3000Reader::TerminateApplication(char *ErrorString, bool TerminationFlag) {
     // подчищаем интерфейс модуля
