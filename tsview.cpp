@@ -44,7 +44,7 @@ void TSView::initPatientProfileUi()
 void TSView::plotNow()
 {
     int endIndex = curveBuffer->end();
-    int h = H/2;
+    int h = ui->gVolume->height()/2;
     if(endIndex == 17999)plotingTimer.stop();
     if(endIndex+35>=screenLimit)
     {
@@ -58,12 +58,13 @@ void TSView::plotNow()
     pTempIn.fillRect(0,0,W,H,Qt::white);
     pTempOut.fillRect(0,0,W,H,Qt::white);
     int i;
+    float k = (float)h/8000;
     for(i=0;i<screenLimit;i++)
     {
         if(i+startIndex>=endIndex)break;
-        pVolume.drawLine(i,h+volume[i+startIndex],i+1,h+volume[i+startIndex+1]);
-        pTempIn.drawLine(i,h+tempIn[i+startIndex],i+1,h+tempIn[i+startIndex+1]);
-        pTempOut.drawLine(i,h+tempOut[i+startIndex],i+1,h+tempOut[i+startIndex+1]);
+        pVolume.drawLine(i,h-k*volume[i+startIndex],i+1,h-k*volume[i+startIndex+1]);
+        pTempIn.drawLine(i,h-k*tempIn[i+startIndex],i+1,h-k*tempIn[i+startIndex+1]);
+        pTempOut.drawLine(i,h-k*tempOut[i+startIndex],i+1,h-k*tempOut[i+startIndex+1]);
     }
     ui->gVolume->setPixmap(bVolume);
     ui->gTempIn->setPixmap(bTempIn);

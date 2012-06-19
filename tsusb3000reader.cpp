@@ -150,7 +150,8 @@ void TSUsb3000Reader::setLastError(QString last_error){
 }
 bool TSUsb3000Reader::readData(){
     if (pModule->READ_KADR(AdcBuffer)) {
-        buffer->append(AdcBuffer[0]/100,AdcBuffer[1]/200,AdcBuffer[2]/200);
+        buffer->append(AdcBuffer[0],AdcBuffer[1],AdcBuffer[2]);
+        qDebug()<<AdcBuffer[2];
         return true;
     }
     else

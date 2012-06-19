@@ -3,10 +3,7 @@
 TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     QObject(parent)
 {
-    ts_volume[0]=0;
-    ts_tempIn[0]=0;
-    ts_tempOut[0]=0;
-    ts_end = 0;
+    ts_end = -1;
 }
 
 int TSCurveBuffer::end()
@@ -37,9 +34,12 @@ void TSCurveBuffer::append(int v, int tI, int tO)
         return;
     }
     CurvesSegnments segs;
-    segs.prevV = ts_volume[ts_end];
-    segs.prevTin = ts_tempIn[ts_end];
-    segs.prevTout = ts_tempOut[ts_end];
+    if(ts_end>0)
+    {
+        segs.prevV = ts_volume[ts_end];
+        segs.prevTin = ts_tempIn[ts_end];
+        segs.prevTout = ts_tempOut[ts_end];
+    }
     ts_end++;
     ts_volume[ts_end] = segs.curV = v;
     ts_tempIn[ts_end] = segs.curTin = tI;
