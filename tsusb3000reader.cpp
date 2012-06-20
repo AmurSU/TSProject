@@ -27,6 +27,7 @@ bool TSUsb3000Reader::initDevice(TSCurveBuffer *_bf){
     if (RtCreateInstance) {
         pModule = static_cast<IRTUSB3000 *> (RtCreateInstance("usb3000"));
         qDebug() << "Create usb3000 instance";
+
     }
     else{
         qDebug() << "Can`t create usb3000 instance";
@@ -151,7 +152,6 @@ void TSUsb3000Reader::setLastError(QString last_error){
 bool TSUsb3000Reader::readData(){
     if (pModule->READ_KADR(AdcBuffer)) {
         buffer->append(AdcBuffer[0],AdcBuffer[1],AdcBuffer[2]);
-        qDebug()<<AdcBuffer[2];
         return true;
     }
     else
@@ -160,6 +160,17 @@ bool TSUsb3000Reader::readData(){
         return false;
     }
 }
+bool TSUsb3000Reader::closeReader(){
+    if (pModule->CloseDevice()) {
+        return true;
+    }
+    else
+    {
+        this->setLastError("Can`t close device");
+        return false;
+    }
+}
+
 void TSUsb3000Reader::TerminateApplication(char *ErrorString, bool TerminationFlag) {
     // подчищаем интерфейс модуля
     if (pModule) {
@@ -176,4 +187,22 @@ void TSUsb3000Reader::TerminateApplication(char *ErrorString, bool TerminationFl
     // если нужно - аварийно завершаем программу
     if (TerminationFlag) exit(1);
     else return;
+}
+
+int TSUsb3000Reader::calibtateVolume()
+{
+    int avg=0;
+    for(int i = 0;i<500;i++)
+    {
+        if (pModule->READ_KADR(AdcBuffer)) {
+            avg+=AdcBuffer[0];
+        }
+        else
+        {
+            this->setLastError("Can`t read from device");
+            return 16000;
+        }
+    }
+
+    return avg/500;
 }

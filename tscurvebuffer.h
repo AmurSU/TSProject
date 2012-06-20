@@ -20,8 +20,12 @@ public:
     int* tempIn();
     int* tempOut();
     int* volume();
+    void setVolumeColibration(int c);
     void setValues(int* volume,int* tin,int* tout, int n);
     void append(int v, int tIn, int tO);
+    void setScreenLimit(int sl);
+    int startIndex();
+    void setStartIndex(int s);
 signals:
     void changed(CurvesSegnments s);
     void overflowed();
@@ -30,7 +34,11 @@ private:
     int ts_volume[18000];
     int ts_tempIn[18000];
     int ts_tempOut[18000];
+    int ts_integral[18000];
     int ts_end;
+    int ts_volumeColibration;
+    int ts_screenLimit;
+    int ts_startIndex;
 };
 
 #endif // TSCURVEBUFFER_H

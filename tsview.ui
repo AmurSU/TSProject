@@ -194,6 +194,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionPatient"/>
+   <addaction name="actionColibrate"/>
   </widget>
   <action name="actionNewResearch">
    <property name="icon">
@@ -261,6 +262,11 @@
    </property>
    <property name="text">
     <string>Анкета поциента</string>
+   </property>
+  </action>
+  <action name="actionColibrate">
+   <property name="text">
+    <string>Калибровка</string>
    </property>
   </action>
  </widget>

@@ -12,7 +12,7 @@ public:
     explicit TSModel(QObject *parent = 0);
     TSCurveBuffer* curveModel();
     TSPatientProfileModel* newResearchModel();
-
+    TSCalibrateDialogModel* calibrateModel();
 signals:
 
 public slots:
@@ -20,6 +20,7 @@ public slots:
 private:
     TSCurveBuffer ts_curveModel;
     TSPatientProfileModel ts_patientProfileModel;
+    TSCalibrateDialogModel ts_calibrateModel;
 };
 
 #endif // TSMODEL_H

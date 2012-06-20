@@ -32,7 +32,8 @@ HEADERS  += tsview.h \
 LIBS += -L"dll/*.dll"
 FORMS    += \
     tsview.ui \
-    patientprofile.ui
+    patientprofile.ui \
+    colibrateDialog.ui
 
 RESOURCES += \
     iconResourse.qrc \

@@ -21,6 +21,9 @@ public slots:
     void newResearchAccepted();
     void startRecordingRequested();
     void stopRecoringRequested();
+    void calibrateDialogRequested();
+    void calibrateDialogAccepted();
+    void startVolumeCalibrationRequested();
 private:
     TSIView *view;
     TSModel *model;

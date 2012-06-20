@@ -1,6 +1,7 @@
 #include "tsview.h"
 #include "ui_tsview.h"
 #include "ui_patientprofile.h"
+#include "ui_colibrateDialog.h"
 #include <QDebug>
 #include <QDialog>
 #include <QStringList>
@@ -11,6 +12,7 @@ TSView::TSView(QWidget *parent) :
 {
     ui->setupUi(this);
     patientProfileUi = 0;
+    calibrateDialogUi = 0;
     ui->cbStart->setVisible(false);
     ui->cbStop->setVisible(false);
     recordingStarted = false;
@@ -31,6 +33,7 @@ void TSView::setController(TSController *c)
     control = c;
     connect(ui->actionNewResearch,SIGNAL(triggered()),control,SLOT(newResearchRequesdted()));
     connect(ui->actionPatient,SIGNAL(triggered()),control,SLOT(editPatientProfileRequested()));
+    connect(ui->actionColibrate,SIGNAL(triggered()),control,SLOT(calibrateDialogRequested()));
 }
 
 void TSView::initPatientProfileUi()
@@ -46,12 +49,14 @@ void TSView::plotNow()
 {
     int endIndex = curveBuffer->end();
     int h = ui->gVolume->height()/2;
+    int h1 = ui->gVolume->height()-5;
     if(endIndex == 17999)plotingTimer.stop();
-    if(endIndex+35>=screenLimit)
+    /*if(endIndex+35>=screenLimit)
     {
         screenLimit+=10;
         startIndex+=10;
-    }
+    }*/
+    startIndex = curveBuffer->startIndex();
     int step = h/10;
     if(h%10>=5)
     {
@@ -82,17 +87,19 @@ void TSView::plotNow()
     pVolume.setPen(QColor(0,0,0));
     pTempIn.setPen(QColor(0,0,0));
     pTempOut.setPen(QColor(0,0,0));
-    float k = (float)h/8000;
-    for(i=0;i<screenLimit;i++)
-    {
-        if(i+startIndex>=endIndex)break;
-        pVolume.drawLine(i,h-k*volume[i+startIndex],i+1,h-k*volume[i+startIndex+1]);
-        pTempIn.drawLine(i,h-k*tempIn[i+startIndex],i+1,h-k*tempIn[i+startIndex+1]);
-        pTempOut.drawLine(i,h-k*tempOut[i+startIndex],i+1,h-k*tempOut[i+startIndex+1]);
-    }
     pVolume.drawLine(0,h,W,h);
     pTempIn.drawLine(0,h,W,h);
     pTempOut.drawLine(0,h,W,h);
+    pVolume.setPen(QColor(255,0,0));
+    float k = (float)h/8000;
+    float k1 = (float)h/800;
+    for(i=0;i<W;i++)
+    {
+        if(i+startIndex>=endIndex)break;
+        pVolume.drawLine(i,h-k1*volume[i+startIndex],i+1,h-k1*volume[i+startIndex+1]);
+        pTempIn.drawLine(i,h-k*tempIn[i+startIndex],i+1,h-k*tempIn[i+startIndex+1]);
+        pTempOut.drawLine(i,h-k*tempOut[i+startIndex],i+1,h-k*tempOut[i+startIndex+1]);
+    }
     ui->gVolume->setPixmap(bVolume);
     ui->gTempIn->setPixmap(bTempIn);
     ui->gTempOut->setPixmap(bTempOut);
@@ -166,6 +173,7 @@ void TSView::showResearchwindow(TSCurveBuffer *model)
     pTempIn.begin(&bTempIn);
     pTempOut.begin(&bTempOut);
     screenLimit = W;
+    curveBuffer->setScreenLimit(W);
     startIndex = 0;
     ui->cbStart->setVisible(true);
     ui->cbStop->setVisible(true);
@@ -189,4 +197,34 @@ void TSView::stopRecording()
     plotingTimer.stop();
     recordingStarted = false;
     ui->cbStop->setEnabled(false);
+}
+
+void TSView::showCalibrateionDialog(TSCalibrateDialogModel *model)
+{
+    if(!calibrateDialogUi)
+    {
+        calibrateDialog = new QDialog(this);
+        calibrateDialogUi = new Ui::TSCalibrateDialog;
+        calibrateDialogUi->setupUi(calibrateDialog);
+        connect(calibrateDialogUi->calibrateVolume,SIGNAL(clicked()),control,SLOT(startVolumeCalibrationRequested()));
+        calibrateDialog->show();
+    }
+    else
+    {
+        calibrateDialogUi->volumeEdit->setText(QString::number(model->colibrateVolume));
+        calibrateDialog->show();
+    }
+}
+
+void TSView::showModelMessage(QString mess)
+{
+    message.setStandardButtons(QMessageBox::NoButton);
+    message.setText(mess);
+    message.setWindowTitle(tr("Сообщение"));
+    message.show();
+}
+
+void TSView::closeModelMessage()
+{
+    message.hide();
 }

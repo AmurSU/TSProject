@@ -16,11 +16,12 @@ class TSUsb3000Reader : public QObject
     Q_OBJECT
 public:
     explicit TSUsb3000Reader(QObject *parent = 0);
+    int calibtateVolume();
     bool readData();
     bool initDevice(TSCurveBuffer *_bf);
     QString getLastError();
     void TerminateApplication(char *ErrorString, bool TerminationFlag = false);
-
+    bool closeReader();
 private:
     void setLastError(QString last_error);
     QString LastError;

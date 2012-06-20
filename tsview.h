@@ -8,10 +8,12 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QTimer>
+#include <QMessageBox>
 
 namespace Ui {
     class TSView;
     class TSPatientProfile;
+    class TSCalibrateDialog;
 }
 
 class TSView : public QMainWindow,public TSIView
@@ -26,6 +28,9 @@ public:
     void showResearchwindow(TSCurveBuffer *model);
     void startRecording();
     void stopRecording();
+    void showCalibrateionDialog(TSCalibrateDialogModel *model);
+    void showModelMessage(QString mess);
+    void closeModelMessage();
     void setController(TSController *c);
 protected:
     void initPatientProfileUi();
@@ -36,6 +41,9 @@ private:
     Ui::TSView *ui;
     Ui::TSPatientProfile *patientProfileUi;
     TSController *control;
+    Ui::TSCalibrateDialog *calibrateDialogUi;
+    QDialog *calibrateDialog;
+    QMessageBox message;
     // Все для рисования
     TSCurveBuffer* curveBuffer;
     QTimer plotingTimer;
@@ -53,6 +61,7 @@ private:
     int W;
     int H;
     bool recordingStarted;
+
 };
 
 #endif // TSVIEW_H

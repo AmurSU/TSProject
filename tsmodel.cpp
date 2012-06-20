@@ -15,3 +15,8 @@ TSPatientProfileModel* TSModel::newResearchModel()
 {
     return &ts_patientProfileModel;
 }
+
+TSCalibrateDialogModel* TSModel::calibrateModel()
+{
+    return &ts_calibrateModel;
+}
