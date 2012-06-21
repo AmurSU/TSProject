@@ -96,3 +96,8 @@ void TSCurveBuffer::setStartIndex(int s)
 {
     ts_startIndex = s;
 }
+
+void TSCurveBuffer::setEnd(int e)
+{
+    ts_end = e;
+}

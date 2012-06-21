@@ -15,7 +15,9 @@ TSView::TSView(QWidget *parent) :
     calibrateDialogUi = 0;
     ui->cbStart->setVisible(false);
     ui->cbStop->setVisible(false);
+    ui->timeLabel->setVisible(false);
     recordingStarted = false;
+    time=0;
 }
 
 TSView::~TSView()
@@ -50,12 +52,11 @@ void TSView::plotNow()
     int endIndex = curveBuffer->end();
     int h = ui->gVolume->height()/2;
     int h1 = ui->gVolume->height()-5;
-    if(endIndex == 17999)plotingTimer.stop();
-    /*if(endIndex+35>=screenLimit)
+    if(endIndex >= 17999)
     {
-        screenLimit+=10;
-        startIndex+=10;
-    }*/
+        plotingTimer.stop();
+        return;
+    }
     startIndex = curveBuffer->startIndex();
     int step = h/10;
     if(h%10>=5)
@@ -65,7 +66,16 @@ void TSView::plotNow()
     pVolume.fillRect(0,0,W,H,Qt::white);
     pTempIn.fillRect(0,0,W,H,Qt::white);
     pTempOut.fillRect(0,0,W,H,Qt::white);
-    int i;
+    pHorLine.fillRect(0,0,W,15,QColor(239,235,222));
+    int i,j=0;
+    for(i=-startIndex;i<W;i+=100)
+    {
+        if(i>0)
+        {
+            pHorLine.drawText(i,13,QString::number(j));
+        }
+        j++;
+    }
     pVolume.setPen(QColor(225,225,225));
     pTempIn.setPen(QColor(225,225,225));
     pTempOut.setPen(QColor(225,225,225));
@@ -99,10 +109,32 @@ void TSView::plotNow()
         pVolume.drawLine(i,h-k1*volume[i+startIndex],i+1,h-k1*volume[i+startIndex+1]);
         pTempIn.drawLine(i,h-k*tempIn[i+startIndex],i+1,h-k*tempIn[i+startIndex+1]);
         pTempOut.drawLine(i,h-k*tempOut[i+startIndex],i+1,h-k*tempOut[i+startIndex+1]);
+        time = i+startIndex+1;
     }
+
+    int min,sec,msec,lsec;
+    QString t;
+    time=time/10;
+    lsec = time/10;
+    min = lsec/60;
+    sec= lsec - min*60;
+    msec = time-sec*10-min*600;
+    t.append("0"+QString::number(min)+":");
+    if(sec<10)
+    {
+        t.append("0"+QString::number(sec)+":");
+    }
+    else
+    {
+        t.append(QString::number(sec)+":");
+    }
+    t.append(QString::number(msec));
+    ui->timeLabel->setText(t);
+
     ui->gVolume->setPixmap(bVolume);
     ui->gTempIn->setPixmap(bTempIn);
     ui->gTempOut->setPixmap(bTempOut);
+    ui->horisontLine->setPixmap(bHorLine);
     if(recordingStarted)
     {
         ui->horizontalScrollBar->setEnabled(false);
@@ -113,8 +145,14 @@ void TSView::plotNow()
 
 void TSView::scrollValueChanged(int val)
 {
-    startIndex = val*10;
+    curveBuffer->setStartIndex(val*10);
+    curveBuffer->setEnd(val*10+W);
     plotNow();
+}
+
+void TSView::f1()
+{
+    curveBuffer->append(0,1000,-1000);
 }
 
 void TSView::showNewResearchDialog(TSPatientProfileModel *model)
@@ -169,21 +207,27 @@ void TSView::showResearchwindow(TSCurveBuffer *model)
     bVolume = QPixmap(W,H);
     bTempIn = QPixmap(W,H);
     bTempOut = QPixmap(W,H);
+    bHorLine = QPixmap(W,15);
     pVolume.begin(&bVolume);
     pTempIn.begin(&bTempIn);
     pTempOut.begin(&bTempOut);
+    pHorLine.begin(&bHorLine);
     screenLimit = W;
     curveBuffer->setScreenLimit(W);
     startIndex = 0;
     ui->cbStart->setVisible(true);
     ui->cbStop->setVisible(true);
+    ui->timeLabel->setVisible(true);
     connect(ui->cbStart,SIGNAL(clicked()),control,SLOT(startRecordingRequested()));
     connect(ui->cbStop,SIGNAL(clicked()),control,SLOT(stopRecoringRequested()));
     connect(&plotingTimer,SIGNAL(timeout()),this,SLOT(plotNow()));
+    connect(&timer1,SIGNAL(timeout()),this,SLOT(f1()));
+    time=0;
 }
 
 void TSView::startRecording()
 {
+    timer1.start(10);
     plotingTimer.start(100);
     recordingStarted = true;
     ui->cbStart->setEnabled(false);

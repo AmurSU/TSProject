@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     tsusb3000reader.cpp \
     tsreaderthread.cpp \
     inputs/tslineedit.cpp \
-    inputs/tscombobox.cpp
+    inputs/tscombobox.cpp \
+    inputs/tslabel.cpp
 
 HEADERS  += tsview.h \
     tscontroller.h \
@@ -28,7 +29,8 @@ HEADERS  += tsview.h \
     tsreaderthread.h \
     inputs/tslineedit.h \
     inputs/tscombobox.h \
-    ts_types.h
+    ts_types.h \
+    inputs/tslabel.h
 LIBS += -L"dll/*.dll"
 FORMS    += \
     tsview.ui \
@@ -38,3 +40,5 @@ FORMS    += \
 RESOURCES += \
     iconResourse.qrc \
     iconResourse.qrc
+
+

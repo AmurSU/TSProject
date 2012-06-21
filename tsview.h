@@ -37,6 +37,7 @@ protected:
 private slots:
     void plotNow();
     void scrollValueChanged(int val);
+    void f1();
 private:
     Ui::TSView *ui;
     Ui::TSPatientProfile *patientProfileUi;
@@ -44,18 +45,22 @@ private:
     Ui::TSCalibrateDialog *calibrateDialogUi;
     QDialog *calibrateDialog;
     QMessageBox message;
+    QTimer timer1;
     // Все для рисования
     TSCurveBuffer* curveBuffer;
     QTimer plotingTimer;
     QPixmap bVolume;
     QPixmap bTempIn;
     QPixmap bTempOut;
+    QPixmap bHorLine;
     QPainter pVolume;
     QPainter pTempIn;
     QPainter pTempOut;
+    QPainter pHorLine;
     int* volume;
     int* tempIn;
     int* tempOut;
+    int time;
     int screenLimit;
     int startIndex;
     int W;

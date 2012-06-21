@@ -34,7 +34,7 @@ void TSController::newResearchAccepted()
 
 void TSController::startRecordingRequested()
 {
-    trd->startRead();
+    //trd->startRead();
     //trd->stopRead();
     view->startRecording();
 }

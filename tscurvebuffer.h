@@ -26,6 +26,7 @@ public:
     void setScreenLimit(int sl);
     int startIndex();
     void setStartIndex(int s);
+    void setEnd(int e);
 signals:
     void changed(CurvesSegnments s);
     void overflowed();
