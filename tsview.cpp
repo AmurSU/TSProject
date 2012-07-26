@@ -86,7 +86,7 @@ void TSView::plotNow()
     }
     pVolume.setPen(QColor(0,0,0));
     pTempIn.setPen(QColor(0,0,0));
-    pTempOut.setPen(QColor(0,0,0));
+    pTempOut.setPen(curveBuffer->toutColor);
     pVolume.drawLine(0,h,W,h);
     pTempIn.drawLine(0,h,W,h);
     pTempOut.drawLine(0,h,W,h);
@@ -113,7 +113,7 @@ void TSView::plotNow()
 
 void TSView::scrollValueChanged(int val)
 {
-    startIndex = val*10;
+    curveBuffer->setStartIndex(val*10);
     plotNow();
 }
 
@@ -227,4 +227,12 @@ void TSView::showModelMessage(QString mess)
 void TSView::closeModelMessage()
 {
     message.hide();
+}
+
+void TSView::updateAverageData(int avgTempIn, int avgTempOut, int avgDo, int ChD){
+    qDebug()<<"fuck";
+    ui->lAvgTempIn->setText((QString)avgTempIn);
+    ui->lAvgTempOut->setText((QString)avgTempOut);
+    ui->lChD->setText((QString)avgDo);
+    ui->lDO->setText((QString)ChD);
 }

@@ -24,6 +24,7 @@ public slots:
     void calibrateDialogRequested();
     void calibrateDialogAccepted();
     void startVolumeCalibrationRequested();
+
 private:
     TSIView *view;
     TSModel *model;

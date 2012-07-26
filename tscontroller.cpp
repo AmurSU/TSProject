@@ -69,3 +69,4 @@ void TSController::startVolumeCalibrationRequested()
     reader->closeReader();
     delete reader;
 }
+

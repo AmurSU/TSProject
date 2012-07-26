@@ -32,11 +32,14 @@ public:
     void showModelMessage(QString mess);
     void closeModelMessage();
     void setController(TSController *c);
+public slots:
+    void updateAverageData(int avgTempIn, int avgTempOut, int avgDo, int ChD);
 protected:
     void initPatientProfileUi();
 private slots:
     void plotNow();
     void scrollValueChanged(int val);
+
 private:
     Ui::TSView *ui;
     Ui::TSPatientProfile *patientProfileUi;
