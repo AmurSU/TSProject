@@ -38,3 +38,6 @@ FORMS    += \
 RESOURCES += \
     iconResourse.qrc \
     iconResourse.qrc
+
+OTHER_FILES += \
+    db_structure.sql
