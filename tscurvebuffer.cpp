@@ -26,6 +26,9 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     ts_down_TempIn_sum=0;
     ts_up_TempOut_sum=0;
     ts_down_TempOut_sum=0;
+
+    ts_vm_up_lvl=ts_volumeColibration+10;
+    ts_vm_max=-100000;
 }
 
 int TSCurveBuffer::end()
@@ -82,89 +85,78 @@ void TSCurveBuffer::append(int v, int tI, int tO)
         ts_integral[ts_end] = 0;
     }
     ts_volume[ts_end] = segs.curV = v;
-    //qDebug()<<ts_volume[ts_end];
     ts_tempIn[ts_end] = segs.curTin = tI;
     ts_tempOut[ts_end] = segs.curTout = tO;
 
-    //if (ts_end%100==0)
-    //fprintf(out_file,"%d %d %d\n",ts_volume[ts_end],ts_tempIn[ts_end],ts_tempOut[ts_end]);
-    //find levels
-
     findLevels();
-
-    if(ts_end>410){
-        /*if(ts_tempIn[ts_end]>ts_low_max_lev[1]){
-            if (ts_tempIn[ts_end]>ts_up_sqc_max)
-                ts_up_sqc_max=ts_tempIn[ts_end];
-            ts_up_sqc_cnt++;
-        }
-        if(ts_up_sqc_cnt>0 && ts_tempIn[ts_end]<ts_height_min_lev[1]){
-
-            ts_num_up_extr_TempIn++;
-            ts_up_TempIn_sum+=ts_up_sqc_max;
-            ts_up_sqc_cnt=0;
-            ts_up_sqc_max=-100000;
-        }
-        if(ts_end%500==0){
-            int avgti=ts_up_TempIn_sum/ts_num_up_extr_TempIn;
-            //qDebug()<<"fuck off";
-            emit updateAverageData(avgti,10,20,30);
-            qDebug()<<"avgti="<<avgti<<"; ts_num_up_extr_TempIn="<<ts_num_up_extr_TempIn;
-            //fprintf(out_file,"%d %d\n",avgti,ts_num_up_extr_TempIn);
-            avgti=0;
-            ts_up_TempIn_sum=0;
-            ts_num_up_extr_TempIn=0;
-
-        }*/
+    const int time_to_start_count_avgs=510, period_for_count_avgs=500;
+    if( ts_end > time_to_start_count_avgs ){
+        //Count maxinmums of tempOut
         if(ts_tempOut[ts_end]>ts_low_max_lev[2]){
             if (ts_tempOut[ts_end]>ts_up_sqc_max)
                 ts_up_sqc_max=ts_tempOut[ts_end];
             ts_up_sqc_cnt++;
         }
         if(ts_up_sqc_cnt>0 && ts_tempOut[ts_end]<ts_height_min_lev[2]){
-
             ts_num_up_extr_TempOut++;
             ts_up_TempOut_sum+=ts_up_sqc_max;
             ts_up_sqc_cnt=0;
             ts_up_sqc_max=-100000;
         }
-        if(ts_end%500==0){
-            int avgto=ts_up_TempOut_sum/ts_num_up_extr_TempOut;
-            //qDebug()<<"fuck off";
-            emit updateAverageData(avgto,10,20,30);
-            qDebug()<<"avgto="<<avgto<<"; ts_num_up_extr_TempOut="<<ts_num_up_extr_TempOut;
-            //fprintf(out_file,"%d %d\n",avgti,ts_num_up_extr_TempIn);
-            avgto=0;
-            ts_up_TempOut_sum=0;
-            ts_num_up_extr_TempOut=0;
 
-        }
-
-
-
+        //Count minimums of tempIn
         if(ts_tempIn[ts_end]<ts_height_min_lev[1]){
             if (ts_tempIn[ts_end]<ts_down_sqc_min)
                 ts_down_sqc_min=ts_tempIn[ts_end];
             ts_down_sqc_cnt++;
         }
         if(ts_down_sqc_cnt>0 && ts_tempIn[ts_end]>ts_height_min_lev[1]){
-
             ts_num_down_extr_TempIn++;
             ts_down_TempIn_sum+=ts_down_sqc_min;
             ts_down_sqc_cnt=0;
             ts_down_sqc_min=100000;
         }
-        if(ts_end%500==0){
-            int avgti=ts_down_TempIn_sum/ts_num_down_extr_TempIn;
-            //qDebug()<<"fuck off";
-            emit updateAverageData(avgti,10,20,30);
-            qDebug()<<"avgti="<<avgti<<"; ts_num_up_extr_TempIn="<<ts_num_down_extr_TempIn;
-            //fprintf(out_file,"%d %d\n",avgti,ts_num_up_extr_TempIn);
-            avgti=0;
+        //find volume paraneters
+        if( ts_integral[ts_end] > ts_vm_up_lvl && ts_vm_up_cnt>=0){
+            if( ts_integral[ts_end]>ts_vm_max ){
+                ts_vm_max=ts_integral[ts_end];
+            }
+            ts_vm_up_cnt++;
+        }
+        if( ts_volume[ts_end] < ts_volumeColibration){
+            ts_vm_up_cnt=0;
+            ts_vm_max_avg+=ts_vm_max-ts_volumeColibration;
+            ts_sniff_period_cntr++;
+            ts_sniff_cntr++;
+            ts_vm_max=-100000;
+        }
+
+
+
+        if(ts_end%period_for_count_avgs==0 ){
+
+            if( ts_num_up_extr_TempOut>0 && ts_num_down_extr_TempIn>0  && ts_sniff_period_cntr>0){
+                ts_avgto=ts_up_TempOut_sum/ts_num_up_extr_TempOut;
+                ts_avgti=ts_down_TempIn_sum/ts_num_down_extr_TempIn;
+                ts_avgDo=ts_vm_max_avg/ts_sniff_period_cntr;
+                emit updateAverageData(ts_avgti,ts_avgto,ts_avgDo,30);
+                qDebug()<<"avgDO"<<ts_avgDo<<"ts_sniff_period_cntr"<<ts_sniff_period_cntr;
+                qDebug()<<"avgto="<<ts_avgto<<"; ts_num_up_extr_TempOut="<<ts_num_up_extr_TempOut;
+                qDebug()<<"avgti="<<ts_avgti<<"; ts_num_up_extr_TempIn="<<ts_num_down_extr_TempIn;
+            }
+            ts_avgti=0;
             ts_down_TempIn_sum=0;
             ts_num_down_extr_TempIn=0;
-
+            ts_avgto=0;
+            ts_up_TempOut_sum=0;
+            ts_num_up_extr_TempOut=0;
+            ts_avgDo=0;
+            ts_vm_max_avg=0;
+            ts_sniff_period_cntr=0;
         }
+
+
+
     }
     emit changed(segs);
 }

@@ -64,6 +64,10 @@ private:
     int ts_num_up_extr_TempOut;
     void findLevels();
     int ts_num_down_extr_TempIn;
+    int ts_avgti,ts_avgto;
+    int ts_vm_up_lvl, ts_vm_max, ts_vm_max_avg,ts_vm_up_cnt;
+    int ts_sniff_cntr, ts_sniff_period_cntr,ts_avgDo;
+
 };
 
 #endif // TSCURVEBUFFER_H
