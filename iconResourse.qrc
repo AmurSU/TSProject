@@ -6,5 +6,7 @@
         <file>images/privateIcon.png</file>
         <file>images/startIcon.png</file>
         <file>images/stopIcon.png</file>
+        <file>images/volume_inside.bmp</file>
+        <file>images/volume_outside.bmp</file>
     </qresource>
 </RCC>

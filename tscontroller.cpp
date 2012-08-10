@@ -1,72 +1,151 @@
 #include "tscontroller.h"
-#include "tscurvebuffer.h"
+#include "ui_tsview.h"
+#include <QtSql/QSqlRecord>
+#include <QMessageBox>
 #include <QTextCodec>
 #include <QDebug>
+#include "tools/tsvalidationtools.h"
 
-TSController::TSController(TSIView *iview, TSModel *mod, QObject *parent) :
-    QObject(parent), view(iview), model(mod)
+TSController::TSController(QWidget *parent) :
+    QMainWindow(parent),ui(new Ui::TSView)
 {
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("Windows-1251"));
-    trd = new TSReaderThread(model->curveModel());
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("CP-1251"));
+    ui->setupUi(this);
+    ui->mainBox->setCurrentIndex(0);
+    currentAction = NoAction;
+    nameRegExp = QRegExp(QString::fromLocal8Bit("[А-Я][а-я]{0,}"));
+    connect(ui->createButton,SIGNAL(clicked()),this,SLOT(editPatientProfile()));
+    connect(ui->saveProfileButton,SIGNAL(clicked()),this,SLOT(savePatientProfile()));
+    connect(ui->ignoreCalibrateButton,SIGNAL(clicked()),this,SLOT(rejectColibration()));
 }
 
-void TSController::handle()
+TSController::~TSController()
 {
-    view->showGUI();
+    delete ui;
 }
 
-void TSController::newResearchRequesdted()
+void TSController::incCurrentIndex()
 {
-    TSPatientProfileModel *m = model->newResearchModel();
-    view->showNewResearchDialog(m);
+    ui->mainBox->setCurrentIndex(ui->mainBox->currentIndex()+1);
 }
 
-void TSController::editPatientProfileRequested()
+void TSController::decCurrentIndex()
 {
-    TSPatientProfileModel *m = model->newResearchModel();
-    view->showEditPatientProfileDialog(m);
+    ui->mainBox->setCurrentIndex(ui->mainBox->currentIndex()-1);
 }
 
-void TSController::newResearchAccepted()
+void TSController::editPatientProfile()
 {
-    view->showResearchwindow(model->curveModel());
+    switch(ui->mainBox->currentIndex())
+    {
+        case 0:
+        {
+            currentAction = CreatePatientProfileAction;
+            ui->fName->clear();
+            ui->sName->clear();
+            ui->fdName->clear();
+            ui->mvl->clear();
+            ui->date->clear();
+            ui->mGenderRadio->setChecked(true);
+            break;
+        }
+        default: break;
+    }
+    ui->mainBox->setCurrentIndex(1);
 }
 
-void TSController::startRecordingRequested()
+void TSController::savePatientProfile()
 {
-    trd->startRead();
-    //trd->stopRead();
-    view->startRecording();
+    QMessageBox *msgBox = new QMessageBox(this);
+    msgBox->setWindowTitle(tr("Ошибка"));
+    msgBox->setText(tr("Неправельный ввод данных."));
+    switch(currentAction)
+    {
+        case CreatePatientProfileAction:
+        {
+            //some insert code
+            QVariant value;
+            QSqlRecord record;
+            QString gender;
+            if((value = TSValidationTools::isNameString(ui->sName->text()))==false)
+            {
+                msgBox->setInformativeText(tr("Поле фамилия не должно содержать ничего кроме букв русского алфавита"));
+                msgBox->exec();
+                return;
+            }
+            else
+            {
+
+            }
+            if((value = TSValidationTools::isNameString(ui->fName->text()))==false)
+            {
+                msgBox->setInformativeText(tr("Поле имя не должно содержать ничего кроме букв русского алфавита"));
+                msgBox->exec();
+                return;
+            }
+            else
+            {
+
+            }
+            if((value = TSValidationTools::isNameString(ui->fdName->text()))==false)
+            {
+                msgBox->setInformativeText(tr("Поле отчество не должна содержать ничего кроме букв русского алфавита"));
+                msgBox->exec();
+                return;
+            }
+            else
+            {
+
+            }
+            if((value = TSValidationTools::isInt(ui->mvl->text()))==false)
+            {
+                msgBox->setInformativeText(tr("Поле МВЛ должно содержать целое число"));
+                msgBox->exec();
+                return;
+            }
+            else
+            {
+
+            }
+            if(ui->mGenderRadio->isChecked())
+            {
+
+            }
+            if(ui->fGenderRadio->isChecked())
+            {
+
+            }
+            ui->mainBox->setCurrentIndex(4);
+            break;
+        }
+
+        case EditPatientProfileAction:
+        {
+            //some update code
+            break;
+        }
+        default: break;
+    }
+    delete msgBox;
 }
 
-void TSController::stopRecoringRequested()
+void TSController::rejectPatientProfile()
 {
-    trd->stopRead();
-    view->stopRecording();
+
 }
 
-void TSController::calibrateDialogRequested()
+void TSController::calibrateVolume()
 {
-    view->showCalibrateionDialog(model->calibrateModel());
+
 }
 
-void TSController::calibrateDialogAccepted()
+void TSController::calibrateTemperature()
 {
-    model->curveModel()->setVolumeColibration(model->calibrateModel()->colibrateVolume);
-    view->showCalibrateionDialog(model->calibrateModel());
+
 }
 
-void TSController::startVolumeCalibrationRequested()
+void TSController::rejectColibration()
 {
-    //view->showModelMessage(tr("Идет калибровка.\nПодождите"));
-    TSUsb3000Reader *reader = new TSUsb3000Reader(this);
-    reader->initDevice(0);
-    int calibrate = reader->calibtateVolume();
-    model->curveModel()->setVolumeColibration(calibrate);
-    model->calibrateModel()->colibrateVolume = calibrate;
-    //view->closeModelMessage();
-    view->showCalibrateionDialog(model->calibrateModel());
-    reader->closeReader();
-    delete reader;
+    ui->mainBox->setCurrentIndex(5);
+    ui->managmentBox->setEnabled(true);
 }
-

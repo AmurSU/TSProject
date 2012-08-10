@@ -1,35 +1,37 @@
-#ifndef TSCONTROLLER_H
-#define TSCONTROLLER_H
+#ifndef TSVIEW_H
+#define TSVIEW_H
 
-#include <QObject>
-#include "tsiview.h"
-#include "tsmodel.h"
-#include "tsreaderthread.h"
-#include <QTimer>
+#include <QMainWindow>
+#include <QRegExp>
 
-class TSController : public QObject
+namespace Ui {
+    class TSView;
+}
+
+enum CurrentAction {NoAction,CreatePatientProfileAction,EditPatientProfileAction};
+
+class TSController : public QMainWindow
 {
     Q_OBJECT
+
 public:
-    explicit TSController(TSIView *iview, TSModel *mod,QObject *parent = 0);
-    void handle();
-signals:
+    explicit TSController(QWidget *parent = 0);
+    ~TSController();
 
 public slots:
-    void newResearchRequesdted();
-    void editPatientProfileRequested();
-    void newResearchAccepted();
-    void startRecordingRequested();
-    void stopRecoringRequested();
-    void calibrateDialogRequested();
-    void calibrateDialogAccepted();
-    void startVolumeCalibrationRequested();
-
+    void incCurrentIndex();
+    void decCurrentIndex();
+    void editPatientProfile();
+    void savePatientProfile();
+    void rejectPatientProfile();
+    void calibrateVolume();
+    void calibrateTemperature();
+    void rejectColibration();
 private:
-    TSIView *view;
-    TSModel *model;
-    QTimer* requestTimer;
-    TSReaderThread  *trd;
+    Ui::TSView *ui;
+    CurrentAction currentAction;
+    QRegExp nameRegExp;
+    QRegExp intRegExp;
 };
 
-#endif // TSCONTROLLER_H
+#endif // TSVIEW_H
