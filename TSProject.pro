@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 
 TARGET = TSProject
 TEMPLATE = app
@@ -17,7 +17,11 @@ SOURCES += main.cpp\
     tsusb3000reader.cpp \
     tsreaderthread.cpp \
     inputs/tslineedit.cpp \
-    inputs/tscombobox.cpp
+    inputs/tscombobox.cpp \
+    CRUDmw.cpp \
+    bdgod.cpp \
+    TSPatients.cpp \
+    TSExaminations.cpp
 
 HEADERS  += tsview.h \
     tscontroller.h \
@@ -28,12 +32,19 @@ HEADERS  += tsview.h \
     tsreaderthread.h \
     inputs/tslineedit.h \
     inputs/tscombobox.h \
-    ts_types.h
+    ts_types.h \
+    CRUDmw.h \
+    bdgod.h \
+    bdgod.h \
+    TSPatients.h \
+    TSExaminations.h
 LIBS += -L"dll/*.dll"
 FORMS    += \
     tsview.ui \
     patientprofile.ui \
-    colibrateDialog.ui
+    colibrateDialog.ui \
+    CRUDmw.ui \
+    dialog.ui
 
 RESOURCES += \
     iconResourse.qrc \

@@ -1,17 +1,17 @@
 #include <QtGui/QApplication>
-#include "tsview.h"
-#include "tsmodel.h"
-#include "tscontroller.h"
+#include <QTextCodec>
+#include "CRUDmw.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    TSView *view = new TSView;
-    TSModel *model = new TSModel;
-    TSController *controller = new TSController(view,model);
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
-    view->setController(controller);
-    controller->handle();
+        QApplication a(argc, argv);
+        MainWindow w;
+        w.show();
 
-    return a.exec();
+        return a.exec();
+
+
 }
