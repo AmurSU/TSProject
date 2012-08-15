@@ -3,6 +3,9 @@
 
 #include <QThread>
 #include "tsusb3000reader.h"
+
+enum TSUsbReadingType {ReadAll,ReadForVol,ReadForTemp};
+
 class TSReaderThread : public QThread
 {
     Q_OBJECT
@@ -12,12 +15,17 @@ public:
     void f1();
     void stopRead();
     void startRead();
+    void setReadingType(TSUsbReadingType type);
+    bool doWork();
 signals:
-    void done(TSUsb3000Reader *reader);
+    void done();
 public slots:
 private:
     TSCurveBuffer *buffer;
     bool ReadingStarted;
+    TSUsbReadingType readingType;
+    bool works;
+    TSUsb3000Reader *reader;
 };
 
 #endif // TSREADERTHREAD_H

@@ -50,6 +50,7 @@ int* TSCurveBuffer::tempOut()
 
 void TSCurveBuffer::append(int v, int tI, int tO)
 {
+    qDebug()<<end();
     if(ts_end == 17999)
     {
         emit overflowed();
@@ -90,9 +91,9 @@ void TSCurveBuffer::append(int v, int tI, int tO)
     //fprintf(out_file,"%d %d %d\n",ts_volume[ts_end],ts_tempIn[ts_end],ts_tempOut[ts_end]);
     //find levels
 
-    findLevels();
+    //findLevels();
 
-    if(ts_end>410){
+    //if(ts_end>410){
         /*if(ts_tempIn[ts_end]>ts_low_max_lev[1]){
             if (ts_tempIn[ts_end]>ts_up_sqc_max)
                 ts_up_sqc_max=ts_tempIn[ts_end];
@@ -116,7 +117,7 @@ void TSCurveBuffer::append(int v, int tI, int tO)
             ts_num_up_extr_TempIn=0;
 
         }*/
-        if(ts_tempOut[ts_end]>ts_low_max_lev[2]){
+        /*if(ts_tempOut[ts_end]>ts_low_max_lev[2]){
             if (ts_tempOut[ts_end]>ts_up_sqc_max)
                 ts_up_sqc_max=ts_tempOut[ts_end];
             ts_up_sqc_cnt++;
@@ -165,7 +166,7 @@ void TSCurveBuffer::append(int v, int tI, int tO)
             ts_num_down_extr_TempIn=0;
 
         }
-    }
+    }*/
     emit changed(segs);
 }
 

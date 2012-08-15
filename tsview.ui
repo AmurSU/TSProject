@@ -50,7 +50,7 @@
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="start">
          <property name="styleSheet">
@@ -733,7 +733,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="startCalibrateButton">
+             <widget class="QPushButton" name="volumeCalibrateButton">
               <property name="font">
                <font>
                 <pointsize>14</pointsize>

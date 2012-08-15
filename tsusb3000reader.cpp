@@ -161,6 +161,7 @@ bool TSUsb3000Reader::readData(){
     }
 }
 bool TSUsb3000Reader::closeReader(){
+    qDebug()<<"close Reader";
     if (pModule->CloseDevice()) {
         return true;
     }
@@ -203,6 +204,10 @@ int TSUsb3000Reader::calibtateVolume()
             return 16000;
         }
     }
-
     return avg/500;
+}
+
+TSUsb3000Reader::~TSUsb3000Reader()
+{
+    qDebug()<<closeReader();
 }

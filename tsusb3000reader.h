@@ -22,6 +22,7 @@ public:
     QString getLastError();
     void TerminateApplication(char *ErrorString, bool TerminationFlag = false);
     bool closeReader();
+    ~TSUsb3000Reader();
 private:
     void setLastError(QString last_error);
     QString LastError;
