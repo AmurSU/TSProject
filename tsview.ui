@@ -79,20 +79,6 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QLabel" name="lAvgTempIn">
-           <property name="text">
-            <string>TextLabel</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lAvgTempOut">
-           <property name="text">
-            <string>TextLabel</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QLabel" name="lDO">
            <property name="text">
             <string>TextLabel</string>
@@ -101,6 +87,20 @@
          </item>
          <item>
           <widget class="QLabel" name="lChD">
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lAvgTempIn">
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lAvgTempOut">
            <property name="text">
             <string>TextLabel</string>
            </property>

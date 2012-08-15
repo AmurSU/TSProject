@@ -189,6 +189,27 @@ void TSUsb3000Reader::TerminateApplication(char *ErrorString, bool TerminationFl
     else return;
 }
 
+int TSUsb3000Reader::getQuietLevels(int *qlevels, int qtime){
+    int avgs[3];
+    for(int i = 0;i<qtime;i++)
+    {
+        if (pModule->READ_KADR(AdcBuffer)) {
+            avgs[0]=AdcBuffer[0];
+            avgs[1]=AdcBuffer[1];
+            avgs[2]=AdcBuffer[2];
+        }
+        else
+        {
+            this->setLastError("Can`t read from device");
+            return 16000;
+        }
+    }
+    qlevels[0]=avgs[0]/qtime;
+    qlevels[1]=avgs[1]/qtime;
+    qlevels[2]=avgs[2]/qtime;
+    return 0;
+}
+
 int TSUsb3000Reader::calibtateVolume()
 {
     int avg=0;
