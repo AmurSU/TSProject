@@ -180,6 +180,7 @@ void TSView::showResearchwindow(TSCurveBuffer *model)
     connect(ui->cbStart,SIGNAL(clicked()),control,SLOT(startRecordingRequested()));
     connect(ui->cbStop,SIGNAL(clicked()),control,SLOT(stopRecoringRequested()));
     connect(&plotingTimer,SIGNAL(timeout()),this,SLOT(plotNow()));
+    connect(model,SIGNAL(updateAverageData(int,int,int,int)),this,SLOT(updateAverageData(int,int,int,int)));
 }
 
 void TSView::startRecording()
@@ -230,9 +231,8 @@ void TSView::closeModelMessage()
 }
 
 void TSView::updateAverageData(int avgTempIn, int avgTempOut, int avgDo, int ChD){
-    qDebug()<<"fuck";
-    ui->lAvgTempIn->setText((QString)avgTempIn);
-    ui->lAvgTempOut->setText((QString)avgTempOut);
-    ui->lChD->setText((QString)avgDo);
-    ui->lDO->setText((QString)ChD);
+    ui->lAvgTempIn->setText(QString::number(avgTempIn));
+    ui->lAvgTempOut->setText(QString::number(avgTempOut));
+    ui->lDO->setText(QString::number(avgDo));
+    ui->lChD->setText(QString::number(ChD));
 }
