@@ -37,9 +37,7 @@ FORMS    += \
     tsview.ui
 
 RESOURCES += \
-    iconResourse.qrc \
     iconResourse.qrc
-
 
 
 

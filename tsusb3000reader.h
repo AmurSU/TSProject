@@ -23,6 +23,8 @@ public:
     void TerminateApplication(char *ErrorString, bool TerminationFlag = false);
     bool closeReader();
     ~TSUsb3000Reader();
+    int getQuietLevels(int *qlevels, int qtime);
+
 private:
     void setLastError(QString last_error);
     QString LastError;
