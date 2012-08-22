@@ -3,7 +3,6 @@
 
 TSReaderThread::TSReaderThread(TSCurveBuffer *b, QObject *parent) :QThread(parent){
     buffer = b;
-    works =false;
     moveToThread(this);
 }
 void TSReaderThread::f1 (){
@@ -22,7 +21,6 @@ void TSReaderThread::stopRead (){
 void TSReaderThread::run(){
     reader = new TSUsb3000Reader(this);
     reader->initDevice(buffer);
-    works = true;
     switch (readingType)
     {
         case ReadAll:
@@ -55,7 +53,6 @@ void TSReaderThread::run(){
     }
     delete reader;
     emit done();
-    works = false;
     exec();
 }
 

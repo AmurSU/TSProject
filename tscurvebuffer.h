@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QColor>
 
+#define VOLTAGE_RATE 0.625
+
 struct CurvesSegnments
 {
     int curV,prevV;
@@ -27,10 +29,11 @@ public:
     int* volume();
     void setVolumeColibration(int c);
     void setValues(int* volume,int* tin,int* tout, int n);
-    void append(int v, int tIn, int tO);
+    void append(int v, int tI, int tO, bool realtime = true);
     void setScreenLimit(int sl);
     int startIndex();
     void setStartIndex(int s);
+    void setEnd(int n);
     FILE* out_file;
     QColor volColor;
     QColor tinColor;

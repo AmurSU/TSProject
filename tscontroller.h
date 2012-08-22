@@ -10,6 +10,8 @@
 #include <tsreaderthread.h>
 #include <tsusb3000reader.h>
 #include <QRegExp>
+#include "models/TSExaminations.h"
+#include "models/TSPatients.h"
 
 namespace Ui {
     class TSView;
@@ -36,12 +38,21 @@ public slots:
     void rejectColibration();
     void threadFinished();
     void startExam();
+    void stopExam();
+    void scrollGraphics(int value);
     void plotNow();
+    void openPatientList();
+    void completePatientName(QString string);
+    void openPatientProfile(QModelIndex ind);
+    void showAverageData(int avgTempIn, int avgTempOut,int avgDO, int avgCHD);
+    void completePatientId();
+    void createNewExam();
+    void openExam(QModelIndex ind);
 protected:
     void initPaintDevices();
 private:
     Ui::TSView *ui;
-    QMessageBox *msgBox;
+    //QMessageBox *msgBox;
     CurrentAction currentAction;
     QRegExp nameRegExp;
     QRegExp intRegExp;
@@ -64,6 +75,11 @@ private:
     bool recordingStarted;
     //Тред для чтения
     TSReaderThread *readerThread;
+    //модели
+    TSPatients *patientsModel;
+    TSExaminations *examinationsModel;
+    QSqlDatabase patientsConnection;
+    QSqlDatabase examinationsConnection;
 
 };
 

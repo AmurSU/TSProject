@@ -52,13 +52,18 @@ int* TSCurveBuffer::tempOut()
     return ts_tempOut;
 }
 
-void TSCurveBuffer::append(int v, int tI, int tO)
+void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
 {
-    qDebug()<<end();
     if(ts_end == 17999)
     {
         emit overflowed();
         return;
+    }
+    if(realtime)
+    {
+        v*= VOLTAGE_RATE;
+        tI*= VOLTAGE_RATE;
+        tO*= VOLTAGE_RATE;
     }
 
     findLevels();
@@ -113,7 +118,7 @@ void TSCurveBuffer::append(int v, int tI, int tO)
                 ts_avgto=ts_up_TempOut_sum/ts_num_up_extr_TempOut;
                 ts_avgti=ts_down_TempIn_sum/ts_num_down_extr_TempIn;
                 ts_avgDo=ts_vm_max_avg/ts_num_up_extr_TempOut;
-                emit updateAverageData(ts_avgti,ts_avgto,ts_avgDo,30);
+                emit updateAverageData(ts_avgti,ts_avgto,ts_avgDo,ts_num_up_extr_TempOut*12);
                 qDebug()<<"avgDO"<<ts_avgDo<<"ts_sniff_period_cntr"<<ts_sniff_period_cntr<<"ts_low_max_lev[0]="<<ts_low_max_lev[0];
                 qDebug()<<"avgto="<<ts_avgto<<"; ts_num_up_extr_TempOut="<<ts_num_up_extr_TempOut;
                 qDebug()<<"avgti="<<ts_avgti<<"; ts_num_up_extr_TempIn="<<ts_num_down_extr_TempIn;
@@ -160,7 +165,6 @@ void TSCurveBuffer::append(int v, int tI, int tO)
     ts_volume[ts_end] = segs.curV = v;
     ts_tempIn[ts_end] = segs.curTin = tI;
     ts_tempOut[ts_end] = segs.curTout = tO;
-
     emit changed(segs);
 }
 
@@ -209,16 +213,16 @@ void TSCurveBuffer::findLevels(){
 
 void TSCurveBuffer::setValues(int *vol, int *tin, int *tout, int n)
 {
-    if(ts_end != 0)return;
+    if(ts_end != -1)return;
     for(int i=0;i<n;i++)
     {
-        append(vol[i],tin[i],tout[i]);
+        append(vol[i],tin[i],tout[i],false);
     }
 }
 
 void TSCurveBuffer::setVolumeColibration(int c)
 {
-    ts_volumeColibration =c;
+    ts_volumeColibration = c * VOLTAGE_RATE;
 }
 
 
@@ -235,4 +239,9 @@ int TSCurveBuffer::startIndex()
 void TSCurveBuffer::setStartIndex(int s)
 {
     ts_startIndex = s;
+}
+
+void TSCurveBuffer::setEnd(int n)
+{
+    ts_end = n;
 }

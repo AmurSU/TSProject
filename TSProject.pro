@@ -3,7 +3,6 @@
 # Project created by QtCreator 2012-06-15T02:30:09
 #
 #-------------------------------------------------
-
 QT       += core gui\
             sql
 
@@ -18,7 +17,11 @@ SOURCES += main.cpp\
     inputs/tslineedit.cpp \
     inputs/tscombobox.cpp \
     tscontroller.cpp \
-    tools/tsvalidationtools.cpp
+    tools/tsvalidationtools.cpp\
+    CRUDmw.cpp \
+    bdgod.cpp \
+    models/TSPatients.cpp \
+    models/TSExaminations.cpp
 
 HEADERS  += \
     tsmodel.h \
@@ -29,18 +32,25 @@ HEADERS  += \
     inputs/tscombobox.h \
     ts_types.h \
     tscontroller.h \
-    tools/tsvalidationtools.h
+    tools/tsvalidationtools.h\
+    CRUDmw.h \
+    bdgod.h \
+    bdgod.h \
+    models/TSPatients.h \
+    models/TSExaminations.h
+
 LIBS += -L"dll/*.dll"
 FORMS    += \
     patientprofile.ui \
     colibrateDialog.ui \
-    tsview.ui
-
+    tsview.ui\
+    CRUDmw.ui \
+    dialog.ui
 RESOURCES += \
     iconResourse.qrc
 
-
-
+OTHER_FILES += \
+    db_structure.sql
 
 
 
