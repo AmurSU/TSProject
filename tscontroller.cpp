@@ -8,6 +8,11 @@
 #include <QSqlDatabase>
 #include <QTranslator>
 #include <QApplication>
+#include <QResizeEvent>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QTime>
+#include <QDate>
 
 TSController::TSController(QWidget *parent) :
     QMainWindow(parent),ui(new Ui::TSView)
@@ -182,7 +187,7 @@ void TSController::savePatientProfile()
                 return;
             }
             QSqlQuery q(examinationsConnection);
-            q.prepare("CREATE TABLE `examinations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT,`date` DATE,`indication` TEXT,`diagnosis` TEXT,`nurse` VARCHAR(50),`doctor` VARCHAR(50),`tempOut` TEXT,`tempIn` TEXT,`volume`  TEXT);");
+            q.prepare("CREATE TABLE `examinations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT,`date` DATE,`time` TIME,`indication` TEXT,`diagnosis` TEXT,`nurse` VARCHAR(50),`doctor` VARCHAR(50),`tempOut` TEXT,`tempIn` TEXT,`volume`  TEXT);");
             if(!q.exec())
             {
                 qDebug()<<q.lastError().text();
@@ -192,7 +197,14 @@ void TSController::savePatientProfile()
                                           +record.value("fname").toString()+" "+record.value("fdname").toString());
             examinationsModel = new TSExaminations(examinationsConnection);
             ui->examsTableView->setModel(examinationsModel);
+            ui->examsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+            ui->examsTableView->setColumnHidden(0,true);
+            for(int i=2;i<9;i++)
+            {
+                ui->examsTableView->setColumnHidden(i,true);
+            }
             ui->mainBox->setCurrentIndex(3);
+            ui->examsTableView->horizontalHeader()->setDefaultSectionSize(ui->examsTableView->width()/2-1);
             currentAction = NoAction;
             break;
         }
@@ -257,7 +269,10 @@ void TSController::calibrateVolume()
     readerThread->stopRead();
     if(msgBox.exec()==QMessageBox::Ok)
     {
+
         ui->mainBox->setCurrentIndex(5);
+        initPaintDevices();
+        plotNow();
         ui->managmentBox->setEnabled(true);
     }
 }
@@ -277,6 +292,9 @@ void TSController::initPaintDevices()
 {
     H = ui->gVolume->height();
     W = ui->gVolume->width();
+    if(pVolume.isActive()) pVolume.end();
+    if(pTempIn.isActive()) pTempIn.end();
+    if(pTempOut.isActive()) pTempOut.end();
     bVolume = QPixmap(W,H);
     bTempIn = QPixmap(W,H);
     bTempOut = QPixmap(W,H);
@@ -299,11 +317,13 @@ void TSController::threadFinished()
 void TSController::plotNow()
 {
     int endIndex = curveBuffer->end();
+    if(endIndex == 17999)plotingTimer.stop();
+    //qDebug()<<endIndex-startIndex;
     int h = ui->gVolume->height()/2;
     int h1 = ui->gVolume->height()-5;
-    if(endIndex == 17999)plotingTimer.stop();
-    startIndex = curveBuffer->startIndex();
     int step = h/10;
+    startIndex = endIndex - (W-35);
+    if(startIndex < 0) startIndex = 0;
     if(h%10>=5)
     {
         h+=step/2;
@@ -339,7 +359,7 @@ void TSController::plotNow()
     pVolume.setPen(QColor(255,0,0));
     float k = (float)h/5000;
     float k1 = (float)h/2000;
-    for(i=0;i<W;i++)
+    for(i=0;i<W-35;i++)
     {
         if(i+startIndex>=endIndex)break;
         pVolume.drawLine(i,h-k1*volume[i+startIndex],i+1,h-k1*volume[i+startIndex+1]);
@@ -362,43 +382,48 @@ void TSController::startExam()
     recordingStarted = true;
     readerThread->setReadingType(ReadAll);
     readerThread->startRead();
-    initPaintDevices();
     plotingTimer.start(100);
     ui->startExam->setEnabled(false);
 }
 
 void TSController::stopExam()
 {
+    if(recordingStarted)
+    {
+        plotingTimer.stop();
+        readerThread->stopRead();
+        QSqlRecord record = examinationsModel->record();
+        int n = curveBuffer->end();
+        QString val;
+        int i;
+        int *mass = curveBuffer->volume();
+        for(i=0;i<n;i++)
+        {
+            val.append(QString::number(mass[i])+";");
+        }
+        record.setValue("volume",val);
+        val.clear();
+        mass = curveBuffer->tempIn();
+        for(i=0;i<n;i++)
+        {
+            val.append(QString::number(mass[i])+";");
+        }
+        record.setValue("tempIn",val);
+        val.clear();
+        mass = curveBuffer->tempOut();
+        for(i=0;i<n;i++)
+        {
+            val.append(QString::number(mass[i])+";");
+        }
+        record.setValue("tempOut",val);
+        record.setValue("date",QDate::currentDate().toString("yyyy-MM-dd"));
+        record.setValue("time",QTime::currentTime().toString("hh:mm"));
+        if(!examinationsModel->insertRecord(-1,record))
+            qDebug()<<"exam insertError";
+        ui->horizontalScrollBar->setEnabled(true);
+    }
+
     recordingStarted = false;
-    plotingTimer.stop();
-    readerThread->stopRead();
-    QSqlRecord record = examinationsModel->record();
-    int n = curveBuffer->end();
-    QString val;
-    int i;
-    int *mass = curveBuffer->volume();
-    for(i=0;i<n;i++)
-    {
-        val.append(QString::number(mass[i])+";");
-    }
-    record.setValue("volume",val);
-    val.clear();
-    mass = curveBuffer->tempIn();
-    for(i=0;i<n;i++)
-    {
-        val.append(QString::number(mass[i])+";");
-    }
-    record.setValue("tempIn",val);
-    val.clear();
-    mass = curveBuffer->tempOut();
-    for(i=0;i<n;i++)
-    {
-        val.append(QString::number(mass[i])+";");
-    }
-    record.setValue("tempOut",val);
-    if(!examinationsModel->insertRecord(-1,record))
-        qDebug()<<"exam insertError";
-    ui->horizontalScrollBar->setEnabled(true);
 }
 
 void TSController::openPatientList()
@@ -425,7 +450,16 @@ void TSController::completePatientName(QString string)
 
 void TSController::openPatientProfile(QModelIndex ind)
 {
-    QSqlRecord record = patientsModel->record(ind.row());
+
+    QSqlRecord record;
+    if(ind.row()==-1&&ind.column()==-1)
+    {
+        record = patientsModel->record(ind.row());
+    }
+    else
+    {
+        record = patientsModel->record(patientsModel->rowCount()-1);
+    }
     patientsModel->setFilter("id="+record.value("id").toString());
     ui->patientPageLabel->setText(tr("Пациент: ")+record.value("sname").toString()+" "+record.value("fname").toString()+
                                   " "+record.value("fdname").toString());
@@ -436,7 +470,14 @@ void TSController::openPatientProfile(QModelIndex ind)
         qDebug()<<"can`t open ExamConnection";
     examinationsModel = new TSExaminations(examinationsConnection);
     ui->examsTableView->setModel(examinationsModel);
+    ui->examsTableView->setColumnHidden(0,true);
+    for(int i=3;i<10;i++)
+    {
+        ui->examsTableView->setColumnHidden(i,true);
+    }
+    ui->examsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->mainBox->setCurrentIndex(3);
+    ui->examsTableView->horizontalHeader()->setDefaultSectionSize((ui->examsTableView->width()-2)/3);
 }
 
 
@@ -494,13 +535,19 @@ void TSController::openExam(QModelIndex ind)
         //qDebug()<<tempout[i];
     }
     curveBuffer->setValues(volume,tempin,tempout,list.count());
-    //qDebug()<<curveBuffer->end();
     curveBuffer->setStartIndex(0);
     ui->mainBox->setCurrentIndex(5);
-    ui->horizontalScrollBar->setMaximum(list.count()/10-ui->gVolume->width()/10-3);
-    //qDebug()<<ui->horizontalScrollBar->maximum();
+    ui->horizontalScrollBar->setMaximum((list.count()-ui->gVolume->width())/10-3);
     ui->horizontalScrollBar->setValue(0);
     ui->horizontalScrollBar->setEnabled(true);
     initPaintDevices();
     plotNow();
+}
+
+void TSController::resizeEvent(QResizeEvent *evt)
+{
+    //qDebug()<<ui->gVolume->width();
+    initPaintDevices();
+    plotNow();
+    //qDebug()<<"resize";
 }

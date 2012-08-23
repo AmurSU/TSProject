@@ -1,9 +1,10 @@
 #ifndef CRUDMW_H
 #define CRUDMW_H
 
-#include <QtCore>
-#include <QtGui>
-#include <QtSql>
+//#include <QtCore>
+#include <QMainWindow>
+#include <QSqlDatabase>
+#include <QSqlTableModel>
 #include <QDebug>
 
 #include <QMainWindow>

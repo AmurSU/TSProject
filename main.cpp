@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     TSController* controller = new TSController;
-    controller->show();
+    controller->showMaximized();
 
     return a.exec();
 }

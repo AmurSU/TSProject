@@ -7,7 +7,6 @@ class TSPatients : public QSqlTableModel
 {
 public:
     explicit TSPatients(QSqlDatabase connection);
-    QSqlTableModel *patientsModel;
 signals:
     
 public slots:

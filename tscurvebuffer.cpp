@@ -149,10 +149,11 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         ts_integral[0] = 0;
     }
     ts_end++;
-    if(ts_end+35>=ts_screenLimit)
+    if(ts_end>ts_screenLimit)
     {
-        ts_startIndex+=10;
-        ts_screenLimit+=10;
+        int dif = ts_end - ts_screenLimit;
+        ts_startIndex += dif;
+        ts_screenLimit += dif;
     }
     if(ts_end>0&&abs(v)>=8)
     {
@@ -244,4 +245,8 @@ void TSCurveBuffer::setStartIndex(int s)
 void TSCurveBuffer::setEnd(int n)
 {
     ts_end = n;
+}
+int TSCurveBuffer::screenLimit()
+{
+    return ts_screenLimit;
 }

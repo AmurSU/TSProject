@@ -1,7 +1,7 @@
 #ifndef TSEXAMINATIONS_H
 #define TSEXAMINATIONS_H
 
-#include <QtSql>
+#include <QSqlTableModel>
 
 class TSExaminations : public QSqlTableModel
 {

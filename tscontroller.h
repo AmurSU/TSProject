@@ -50,6 +50,7 @@ public slots:
     void openExam(QModelIndex ind);
 protected:
     void initPaintDevices();
+    void resizeEvent(QResizeEvent *evt);
 private:
     Ui::TSView *ui;
     //QMessageBox *msgBox;

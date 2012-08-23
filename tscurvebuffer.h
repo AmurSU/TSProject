@@ -34,6 +34,7 @@ public:
     int startIndex();
     void setStartIndex(int s);
     void setEnd(int n);
+    int screenLimit();
     FILE* out_file;
     QColor volColor;
     QColor tinColor;
