@@ -1,8 +1,10 @@
 #include "tscontroller.h"
 #include "tscurvebuffer.h"
+#include "tsanalitics.h"
 #include <QTextCodec>
 #include <QDebug>
-
+#include <QVector>
+#include <qmath.h>
 TSController::TSController(TSIView *iview, TSModel *mod, QObject *parent) :
     QObject(parent), view(iview), model(mod)
 {
@@ -12,6 +14,18 @@ TSController::TSController(TSIView *iview, TSModel *mod, QObject *parent) :
 
 void TSController::handle()
 {
+    tsanalitics *ga = new tsanalitics();
+    QVector<int> kv;
+    int i=0;
+    for(i=0;i<1000;i++){
+        kv.push_back(qRound(sin(i*180/3.141593)*1000));
+    }
+    ga->setupData(&kv);
+    ga->findExtremums();
+    QVector<int> ma = ga->getMovingAverages(5);
+    /*ga->deleteBadExtremums();*/
+    qDebug()<<ma;
+
     view->showGUI();
 }
 

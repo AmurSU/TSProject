@@ -118,7 +118,7 @@ void TSCurveBuffer::append(int v, int tI, int tO)
                 ts_avgto=ts_up_TempOut_sum/ts_num_up_extr_TempOut;
                 ts_avgti=ts_down_TempIn_sum/ts_num_down_extr_TempIn;
                 ts_avgDo=ts_vm_max_avg/ts_num_up_extr_TempOut;
-                emit updateAverageData(ts_avgti,ts_avgto,ts_avgDo,30);
+                emit updateAverageData(ts_avgti,ts_avgto,ts_avgDo,ts_num_up_extr_TempOut*12);
                 qDebug()<<"avgDO"<<ts_avgDo<<"ts_sniff_period_cntr"<<ts_sniff_period_cntr<<"ts_low_max_lev[0]="<<ts_low_max_lev[0];
                 qDebug()<<"avgto="<<ts_avgto<<"; ts_num_up_extr_TempOut="<<ts_num_up_extr_TempOut;
                 qDebug()<<"avgti="<<ts_avgti<<"; ts_num_up_extr_TempIn="<<ts_num_down_extr_TempIn;
