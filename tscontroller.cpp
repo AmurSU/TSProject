@@ -15,17 +15,23 @@ TSController::TSController(TSIView *iview, TSModel *mod, QObject *parent) :
 void TSController::handle()
 {
     tsanalitics *ga = new tsanalitics();
-    QVector<int> kv;
     int i=0;
-    for(i=0;i<1000;i++){
-        kv.push_back(qRound(sin(i*180/3.141593)*1000));
+    FILE *in;
+    in=fopen("inp.txt","r");
+    int n=0,t=0,t1,t2;
+    fscanf(in,"%d",&n);
+    for(i=0;i<n;i++){
+       fscanf(in,"%d %d %d",&t1,&t2,&t);
+       ga->append(t);
     }
-    ga->setupData(&kv);
+    fclose(in);
     ga->findExtremums();
-    QVector<int> ma = ga->getMovingAverages(5);
-    /*ga->deleteBadExtremums();*/
-    qDebug()<<ma;
-
+    for(i=0;i<1;i++){
+    ga->deleteBadExtremums();
+    qDebug()<<"-------------------------------";
+    }
+    qDebug()<<ga->getAvgExpiratory();
+    qDebug()<<ga->getAvgInspiratory();
     view->showGUI();
 }
 

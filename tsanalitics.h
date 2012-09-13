@@ -14,20 +14,25 @@ public:
     explicit tsanalitics(QObject *parent = 0);
     QVector<int> getMovingAverages(int Period);
     float getMaxAvgs();
-    float getdMinAvgs();
+    float getMinAvgs();
     float getFrequency();
+    float getAvgExpirationFlowRate();
     int getMaxsCount();
     int getMinsCount();
     int getMinMaxAvgTime();
     int getMaxMinAvgTime();
     int getTime();
+    int getAvgInspiratory();
+    int getAvgExpiratory();
     int getPeriodTime();
     int setupData(QVector<int> *row_d);
     int findExtremums();
     int deleteBadExtremums();
+    void append(int n);
 private:
     int getMax();
     int getMin();
+    int fabs(int a);
     QVector<extremum> *ts_extremums;
     QVector<int> *ts_row_data;
 signals:

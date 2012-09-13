@@ -3,6 +3,8 @@
 tsanalitics::tsanalitics(QObject *parent) :QObject(parent){
     QVector<extremum> *extrem = new QVector<extremum>;
     ts_extremums=extrem;
+    QVector<int> *row_d = new QVector<int>;
+    ts_row_data = row_d;
 }
 
 QVector<int> tsanalitics::getMovingAverages(int Period){
@@ -18,9 +20,6 @@ QVector<int> tsanalitics::getMovingAverages(int Period){
         movavgs->push_back(sum/Period);
         sum=0;
     }
-
-    qDebug()<<*ts_row_data;
-    qDebug()<<"--------------";
     return *movavgs;
 }
 
@@ -38,7 +37,7 @@ float tsanalitics::getMaxAvgs(){
         return float(sum/cntr);
 }
 
-float tsanalitics::getdMinAvgs(){
+float tsanalitics::getMinAvgs(){
     int i=0, sum = 0, cntr=0;
     for(i=0; i<ts_extremums->size();i++){
         if( ts_extremums->at(i).type == -1 ){
@@ -107,60 +106,156 @@ int tsanalitics::getTime(){
     return ts_row_data->size();
 }
 
+int tsanalitics::getAvgInspiratory(){
+    int sum=0,cntr=0,i=0;
+    for(i=0;i<ts_extremums->size()-1;i++){
+        if(ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1){
+            sum+=ts_extremums->at(i+1).x-ts_extremums->at(i).x;
+            cntr++;
+        }
+    }
+    if(cntr!=0)
+        return sum/cntr;
+    else
+        return 0;
+}
+
+int tsanalitics::getAvgExpiratory(){
+    int sum=0,cntr=0,i=0;
+    for(i=0;i<ts_extremums->size()-1;i++){
+        if(ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1){
+            sum+=ts_extremums->at(i+1).x-ts_extremums->at(i).x;
+            cntr++;
+        }
+    }
+    if(cntr!=0)
+        return sum/cntr;
+    else
+        return 0;
+}
+
 
 int tsanalitics::setupData(QVector<int> *row_d){
     ts_row_data=row_d;
 }
 
 int tsanalitics::findExtremums(){
-    int i=0;
+
+
     qDebug()<<ts_row_data->size();
     for (int i = 1; i < ts_row_data->size()-1; ++i) {
-        ts_row_data->at(i);
         if( (ts_row_data->at(i-1)<=ts_row_data->at(i) && ts_row_data->at(i)>=ts_row_data->at(i+1) ) ||
-                (ts_row_data->at(i-1)>=ts_row_data->at(i) && ts_row_data->at(i)<=ts_row_data->at(i+1) ) ){
-            qDebug()<<"extremum exist"<<ts_row_data->at(i);
+                (ts_row_data->at(i-1)>=ts_row_data->at(i) && ts_row_data->at(i)<=ts_row_data->at(i+1) ) ||
+                (ts_row_data->at(i-1)==ts_row_data->at(i) ) || ( ts_row_data->at(i)==ts_row_data->at(i+1) )
+                ){
+            //qDebug()<<"extremum exist"<<ts_row_data->at(i);
             extremum *extr = new extremum;
             extr->y = ts_row_data->at(i);
+
             extr->x = i;
             if (ts_row_data->at(i-1)<ts_row_data->at(i) && ts_row_data->at(i)>ts_row_data->at(i+1)){
                 extr->type=1;
-                qDebug()<<"max="<<ts_row_data->at(i);
+                //qDebug()<<"max="<<ts_row_data->at(i);
             }
             else{
                 extr->type=-1;
-                qDebug()<<"min="<<ts_row_data->at(i);
+                //qDebug()<<"min="<<ts_row_data->at(i);
             }
             ts_extremums->push_back(*extr);
         }
     }
-    qDebug()<<"all max="<<getMax();
-    qDebug()<<"all min="<<getMin();
+    //qDebug()<<"all max="<<getMax();
+    //qDebug()<<"all min="<<getMin();
 }
 
 int tsanalitics::deleteBadExtremums(){
-    int i=0, max_index;
-    int middle = getMax()/2+getMin()/2;
-    for (i=0;i<ts_extremums->size();i++){
-        if( ts_extremums->at(i).x-ts_extremums->at(i-3).x < 50 )
-            if ( ( ts_extremums->at(i).type==-1 && ts_extremums->at(i-1).type==1 && ts_extremums->at(i-2).type==-1 && ts_extremums->at(i-3).type==1 )
-                 && (ts_extremums->at(i).y < ts_extremums->at(i-1).y && ts_extremums->at(i).y < ts_extremums->at(i-2).y  && ts_extremums->at(i).y < ts_extremums->at(i-3).y )
-                 && (ts_extremums->at(i-3).y > ts_extremums->at(i-2).y && ts_extremums->at(i-3).y > ts_extremums->at(i-1).y && ts_extremums->at(i-3).y > ts_extremums->at(i).y)
-                 && (ts_extremums->at(i-1).y > ts_extremums->at(i).y && ts_extremums->at(i-1).y > ts_extremums->at(i-2).y && ts_extremums->at(i-1).y < ts_extremums->at(i-3).y)
-                 && (ts_extremums->at(i-2).y > ts_extremums->at(i).y && ts_extremums->at(i-2).y < ts_extremums->at(i-1).y && ts_extremums->at(i-2).y < ts_extremums->at(i-3).y)
-                 ){
+    int i=0;
+    for(i=0;i<ts_extremums->size()-1;i++){
+        if( ts_extremums->at(i).y == ts_extremums->at(i+1).y ){
+            ts_extremums->remove(i);
+        }
+    }
+    for (i=3;i<ts_extremums->size();i++){
+        if( ts_extremums->at(i).x-ts_extremums->at(i-3).x < 110 )
+            //( ts_extremums->at(i).type==-1 && ts_extremums->at(i-1).type==1 && ts_extremums->at(i-2).type==-1 && ts_extremums->at(i-3).type==1 )
+            //&&
+            if (  (ts_extremums->at(i).y < ts_extremums->at(i-1).y && ts_extremums->at(i).y < ts_extremums->at(i-2).y  && ts_extremums->at(i).y < ts_extremums->at(i-3).y )
+                  && (ts_extremums->at(i-3).y > ts_extremums->at(i-2).y && ts_extremums->at(i-3).y > ts_extremums->at(i-1).y && ts_extremums->at(i-3).y > ts_extremums->at(i).y)
+                  && (ts_extremums->at(i-1).y > ts_extremums->at(i).y && ts_extremums->at(i-1).y > ts_extremums->at(i-2).y && ts_extremums->at(i-1).y < ts_extremums->at(i-3).y)
+                  && (ts_extremums->at(i-2).y > ts_extremums->at(i).y && ts_extremums->at(i-2).y < ts_extremums->at(i-1).y && ts_extremums->at(i-2).y < ts_extremums->at(i-3).y)
+                  ){
                 ts_extremums->remove(i-2,2);
-                qDebug()<<"Need remove middle ";
-            }else if ( (ts_extremums->at(i).type==1 && ts_extremums->at(i-1).type==-1 && ts_extremums->at(i-2).type==1 && ts_extremums->at(i-3).type==-1 )
-                       && (ts_extremums->at(i).y > ts_extremums->at(i-1).y && ts_extremums->at(i).y > ts_extremums->at(i-2).y  && ts_extremums->at(i).y > ts_extremums->at(i-3).y )
-                       && (ts_extremums->at(i-3).y < ts_extremums->at(i-2).y && ts_extremums->at(i-3).y < ts_extremums->at(i-1).y && ts_extremums->at(i-3).y < ts_extremums->at(i).y)
-                       && (ts_extremums->at(i-1).y < ts_extremums->at(i).y && ts_extremums->at(i-1).y < ts_extremums->at(i-2).y && ts_extremums->at(i-1).y > ts_extremums->at(i-3).y)
-                       && (ts_extremums->at(i-2).y < ts_extremums->at(i).y && ts_extremums->at(i-2).y > ts_extremums->at(i-1).y && ts_extremums->at(i-2).y > ts_extremums->at(i-3).y)
-                       ){
+                i--;
+                qDebug()<<"Need remove middle first figure ";
+                //(ts_extremums->at(i).type==1 && ts_extremums->at(i-1).type==-1 && ts_extremums->at(i-2).type==1 && ts_extremums->at(i-3).type==-1 )
+                //&&
+            }else if (  (ts_extremums->at(i).y > ts_extremums->at(i-1).y && ts_extremums->at(i).y > ts_extremums->at(i-2).y  && ts_extremums->at(i).y > ts_extremums->at(i-3).y )
+                        && (ts_extremums->at(i-3).y < ts_extremums->at(i-2).y && ts_extremums->at(i-3).y < ts_extremums->at(i-1).y && ts_extremums->at(i-3).y < ts_extremums->at(i).y)
+                        && (ts_extremums->at(i-1).y < ts_extremums->at(i).y && ts_extremums->at(i-1).y < ts_extremums->at(i-2).y && ts_extremums->at(i-1).y > ts_extremums->at(i-3).y)
+                        && (ts_extremums->at(i-2).y < ts_extremums->at(i).y && ts_extremums->at(i-2).y > ts_extremums->at(i-1).y && ts_extremums->at(i-2).y > ts_extremums->at(i-3).y)
+                        ){
                 ts_extremums->remove(i-2,2);
-                qDebug()<<"Need remove middle ";
+                i--;
+                qDebug()<<"Need remove middle second figure ";
             }
     }
+    int middle = (getMaxAvgs()-getMinAvgs())/2+getMinAvgs();
+    for (i=0;i<ts_extremums->size()-1;i++){
+        if(ts_extremums->at(i+1).x-ts_extremums->at(i).x <50 && fabs(ts_extremums->at(i+1).y-ts_extremums->at(i).y)<600 ){
+            if(ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==1){
+                if(ts_extremums->at(i).y > ts_extremums->at(i+1).y)
+                    ts_extremums->remove(i+1,1);
+                else
+                    ts_extremums->remove(i,1);
+                qDebug()<<"Need remove second method 1 ";
+                i--;
+            }else{
+                if(ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==-1){
+                    if(ts_extremums->at(i).y < ts_extremums->at(i+1).y)
+                        ts_extremums->remove(i+1,1);
+                    else
+                        ts_extremums->remove(i,1);
+                    qDebug()<<"Need remove second method 2 ";
+                    i--;
+                }
+            }
+        }
+    }
+    for (i=0;i<ts_extremums->size()-1;i++){
+        if(ts_extremums->at(i+1).x-ts_extremums->at(i).x <50 && fabs(ts_extremums->at(i+1).y-ts_extremums->at(i).y)<600 ){
+            if ( fabs(fabs(getMax())-fabs(ts_extremums->at(i).y)) < fabs(fabs(ts_extremums->at(i).y)-fabs(getMin())) &&
+                 fabs(fabs(getMax())-fabs(ts_extremums->at(i+1).y)) < fabs(fabs(ts_extremums->at(i+1).y)-fabs(getMin()))
+                 ){
+                if(ts_extremums->at(i).y <= ts_extremums->at(i+1).y)
+                    ts_extremums->remove(i,1);
+                else
+                    ts_extremums->remove(i+1,1);
+                i--;
+            }else if ( fabs(fabs(getMax())-fabs(ts_extremums->at(i).y)) > fabs(fabs(ts_extremums->at(i).y)-fabs(getMin())) &&
+                       fabs(fabs(getMax())-fabs(ts_extremums->at(i+1).y)) > fabs(fabs(ts_extremums->at(i+1).y)-fabs(getMin()))
+                       ){
+                if(ts_extremums->at(i).y >= ts_extremums->at(i+1).y)
+                    ts_extremums->remove(i,1);
+                else
+                    ts_extremums->remove(i+1,1);
+                i--;
+            }
+        }
+    }
+    FILE *out;
+    out = fopen("out.csv","w");
+    for(i=0;i<ts_extremums->size();i++){
+        fprintf(out,"%d\n",ts_extremums->at(i).y);
+    }
+    fclose(out);
+    qDebug()<<ts_extremums->size();
+    for (i=0;i<ts_extremums->size();i++){
+        qDebug()<<"x="<<ts_extremums->at(i).x<<"y="<<ts_extremums->at(i).y<<"type="<<ts_extremums->at(i).type;
+    }
+}
+
+void tsanalitics::append(int n){
+    ts_row_data->push_back(n);
 }
 
 int tsanalitics::getMax(){
@@ -179,4 +274,11 @@ int tsanalitics::getMin(){
             min_index = i;
     }
     return ts_row_data->at(min_index);
+}
+
+int tsanalitics::fabs(int a){
+    if( a<0 )
+        return -a;
+    else
+        return a;
 }
