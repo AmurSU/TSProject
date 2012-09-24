@@ -25,6 +25,8 @@ TSController::TSController(QWidget *parent) :
     curveBuffer = new TSCurveBuffer();
     readerThread = new TSReaderThread(curveBuffer);
     recordingStarted = false;
+    tempInInterval = new int[2];
+    tempInInterval[0]=-5000;tempInInterval[0]=5000;
     scaleScroll[0]=1;scaleScroll[1]=3;scaleScroll[2]=5;scaleScroll[3]=7;scaleScroll[4]=9;
     ui->managmentBox->setVisible(false);
     patientsConnection = QSqlDatabase::addDatabase("QSQLITE","Patients");
@@ -368,14 +370,18 @@ void TSController::plotNow()
     pTempIn.drawLine(0,h+tempInZerPos*h,W,h+tempInZerPos*h);
     pTempOut.drawLine(0,h,W,h);
     pVolume.setPen(QColor(255,0,0));
-    float tempInK = tempInScaleRate*h, tempInZ = h + tempInZerPos*h;
+    int* tinInt = curveBuffer->getTempInInterval();
+    float tempInK = tempInScaleRate*h;//*abs(tempInInterval[0]-tempInInterval[1])/abs(tinInt[1]-tinInt[0]);
+    float tempInZ = h + tempInZerPos*h;//-(tinInt[1]-tinInt[0])/2;
+    delete tempInInterval;
+    tempInInterval = tinInt;
     float tempOutK = tempOutScaleRate*h;
     float volumeK = volumeScaleRate*h;
     int j = 0, k = 1/horizontalStep;
     i=0;
     for(j=0;j<W-35;j++)
     {
-        //if(i+startIndex>=k*endIndex)break;
+        if(i+startIndex>=k*endIndex)break;
         pVolume.drawLine(j,h-volumeK*volume[i+startIndex],j+1,h-volumeK*volume[i+startIndex+k]);
         pTempIn.drawLine(j,tempInZ-tempInK*tempIn[i+startIndex],j+1,tempInZ-tempInK*tempIn[i+startIndex+k]);
         pTempOut.drawLine(j,h-tempOutK*tempOut[i+startIndex],j+1,h-tempOutK*tempOut[i+startIndex+k]);
@@ -401,6 +407,7 @@ void TSController::startExam()
     tempOutScaleRate = 1.0/5000;
     volumeScaleRate = 4.0/5000;
     horizontalStep = 1.0;
+    initPaintDevices();
     plotingTimer.start(100);
     ui->startExam->setEnabled(false);
 }

@@ -40,6 +40,7 @@ public:
     void setStartIndex(int s);
     void setEnd(int n);
     int screenLimit();
+    int* getTempInInterval();
     FILE* out_file;
     QColor volColor;
     QColor tinColor;
@@ -77,6 +78,8 @@ private:
     int ts_vm_up_lvl, ts_vm_max, ts_vm_max_avg,ts_vm_up_cnt;
     int ts_sniff_cntr, ts_sniff_period_cntr,ts_avgDo;
     int ts_period_for_count_avgs;
+    int ts_minTempIn;
+    int ts_maxTempIn;
 
 };
 

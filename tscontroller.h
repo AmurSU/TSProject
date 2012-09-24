@@ -89,6 +89,7 @@ private:
     int tempInZerPos;
     int tempOutZerPos;
     int scaleScroll[5];
+    int* tempInInterval;
     //Тред для чтения
     TSReaderThread *readerThread;
     //модели

@@ -64,13 +64,24 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     tt = TAN_1*(tI-REF_VOLTAGE_1)+REF_TEMP;
     ttt = TAN_2*(tO-REF_VOLTAGE_1)+REF_TEMP;
 
-    qDebug()<<tt<<" "<<ttt;
+    //qDebug()<<tt<<" "<<ttt;
 
     if(realtime)
     {
         v*= VOLTAGE_RATE;
         tI*= VOLTAGE_RATE;
         tO*= VOLTAGE_RATE;
+    }
+
+    if(ts_end == 0)
+    {
+        ts_minTempIn = tI;
+        ts_maxTempIn = tI;
+    }
+    else
+    {
+        if(tI<ts_minTempIn) ts_minTempIn=tI;
+        if(tI>ts_maxTempIn) ts_maxTempIn=tI;
     }
 
     findLevels();
@@ -159,8 +170,8 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     if(ts_end>ts_screenLimit)
     {
         int dif = ts_end - ts_screenLimit;
-        ts_startIndex += dif;
-        ts_screenLimit += dif;
+        //ts_startIndex += dif;
+        //ts_screenLimit += dif;
     }
     if(ts_end>0&&abs(v)>=8)
     {
@@ -256,4 +267,21 @@ void TSCurveBuffer::setEnd(int n)
 int TSCurveBuffer::screenLimit()
 {
     return ts_screenLimit;
+}
+
+
+int* TSCurveBuffer::getTempInInterval()
+{
+    int *interval = new int[2];
+    if(abs(ts_maxTempIn-ts_minTempIn)<500)
+    {
+        interval[0]=-5000;
+        interval[1]=5000;
+    }
+    else
+    {
+        interval[0]=ts_minTempIn-50;
+        interval[1]=ts_maxTempIn+50;
+    }
+    return interval;
 }
