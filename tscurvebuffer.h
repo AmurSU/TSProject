@@ -4,7 +4,12 @@
 #include <QObject>
 #include <QColor>
 
-#define VOLTAGE_RATE 0.625
+#define VOLTAGE_RATE    0.625
+#define REF_VOLTAGE_1   -4778
+#define REF_VOLTAGE_2   -5615
+#define TAN_1           0.0056
+#define TAN_2           0.0048
+#define REF_TEMP        -9
 
 struct CurvesSegnments
 {

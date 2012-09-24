@@ -48,9 +48,17 @@ public slots:
     void completePatientId();
     void createNewExam();
     void openExam(QModelIndex ind);
+    void scaleTempIn(int value);
+    void scaleTempOut(int value);
+    void scaleVolume(int value);
+    void scaleForHorizontal(int value);
+    void changeScrollBarAfterScaling(int before,int after);
+    void changeTempInScrollValue(int value);
+    void changeTempOutScrollValue(int value);
 protected:
     void initPaintDevices();
     void resizeEvent(QResizeEvent *evt);
+    bool eventFilter(QObject *obj, QEvent *e);
 private:
     Ui::TSView *ui;
     //QMessageBox *msgBox;
@@ -74,6 +82,13 @@ private:
     int W;
     int H;
     bool recordingStarted;
+    float volumeScaleRate;
+    float tempInScaleRate;
+    float tempOutScaleRate;
+    float horizontalStep;
+    int tempInZerPos;
+    int tempOutZerPos;
+    int scaleScroll[5];
     //Тред для чтения
     TSReaderThread *readerThread;
     //модели

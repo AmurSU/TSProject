@@ -59,6 +59,13 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         emit overflowed();
         return;
     }
+
+    float tt,ttt;
+    tt = TAN_1*(tI-REF_VOLTAGE_1)+REF_TEMP;
+    ttt = TAN_2*(tO-REF_VOLTAGE_1)+REF_TEMP;
+
+    qDebug()<<tt<<" "<<ttt;
+
     if(realtime)
     {
         v*= VOLTAGE_RATE;

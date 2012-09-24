@@ -13,6 +13,7 @@
 #include <QSqlQuery>
 #include <QTime>
 #include <QDate>
+#include <math.h>
 
 TSController::TSController(QWidget *parent) :
     QMainWindow(parent),ui(new Ui::TSView)
@@ -24,6 +25,8 @@ TSController::TSController(QWidget *parent) :
     curveBuffer = new TSCurveBuffer();
     readerThread = new TSReaderThread(curveBuffer);
     recordingStarted = false;
+    scaleScroll[0]=1;scaleScroll[1]=3;scaleScroll[2]=5;scaleScroll[3]=7;scaleScroll[4]=9;
+    ui->managmentBox->setVisible(false);
     patientsConnection = QSqlDatabase::addDatabase("QSQLITE","Patients");
     patientsConnection.setDatabaseName("commondb\\common.db");
     if(!patientsConnection.open())
@@ -55,6 +58,15 @@ TSController::TSController(QWidget *parent) :
     connect(ui->newExamButton,SIGNAL(clicked()),this,SLOT(createNewExam()));
     connect(ui->stopExam,SIGNAL(clicked()),this,SLOT(stopExam()));
     connect(ui->examsTableView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(openExam(QModelIndex)));
+    connect(ui->tempInScaleSlider,SIGNAL(valueChanged(int)),this,SLOT(scaleTempIn(int)));
+    connect(ui->tempOutScaleSlider,SIGNAL(valueChanged(int)),this,SLOT(scaleTempOut(int)));
+    connect(ui->volumeScaleSlider,SIGNAL(valueChanged(int)),this,SLOT(scaleVolume(int)));
+    connect(ui->horScaleSlider,SIGNAL(valueChanged(int)),this,SLOT(scaleForHorizontal(int)));
+    connect(ui->horScaleSlider,SIGNAL(rangeChanged(int,int)),this,SLOT(changeScrollBarAfterScaling(int,int)));
+    connect(ui->tempInScroll,SIGNAL(valueChanged(int)),this,SLOT(changeTempInScrollValue(int)));
+
+    ui->backPatientProfileButton->installEventFilter(this);
+    ui->backPatientListButton->installEventFilter(this);
 }
 
 TSController::~TSController()
@@ -205,7 +217,7 @@ void TSController::savePatientProfile()
             }
             ui->mainBox->setCurrentIndex(3);
             ui->examsTableView->horizontalHeader()->setDefaultSectionSize(ui->examsTableView->width()/2-1);
-            currentAction = NoAction;
+            //currentAction = NoAction;
             break;
         }
         case EditPatientProfileAction:
@@ -269,10 +281,10 @@ void TSController::calibrateVolume()
     readerThread->stopRead();
     if(msgBox.exec()==QMessageBox::Ok)
     {
-
         ui->mainBox->setCurrentIndex(5);
         initPaintDevices();
         plotNow();
+        ui->managmentBox->setVisible(true);
         ui->managmentBox->setEnabled(true);
     }
 }
@@ -318,7 +330,6 @@ void TSController::plotNow()
 {
     int endIndex = curveBuffer->end();
     if(endIndex == 17999)plotingTimer.stop();
-    //qDebug()<<endIndex-startIndex;
     int h = ui->gVolume->height()/2;
     int h1 = ui->gVolume->height()-5;
     int step = h/10;
@@ -354,17 +365,21 @@ void TSController::plotNow()
     pTempIn.setPen(QColor(0,0,0));
     pTempOut.setPen(curveBuffer->toutColor);
     pVolume.drawLine(0,h,W,h);
-    pTempIn.drawLine(0,h,W,h);
+    pTempIn.drawLine(0,h+tempInZerPos*h,W,h+tempInZerPos*h);
     pTempOut.drawLine(0,h,W,h);
     pVolume.setPen(QColor(255,0,0));
-    float k = (float)h/5000;
-    float k1 = (float)h/2000;
-    for(i=0;i<W-35;i++)
+    float tempInK = tempInScaleRate*h, tempInZ = h + tempInZerPos*h;
+    float tempOutK = tempOutScaleRate*h;
+    float volumeK = volumeScaleRate*h;
+    int j = 0, k = 1/horizontalStep;
+    i=0;
+    for(j=0;j<W-35;j++)
     {
-        if(i+startIndex>=endIndex)break;
-        pVolume.drawLine(i,h-k1*volume[i+startIndex],i+1,h-k1*volume[i+startIndex+1]);
-        pTempIn.drawLine(i,h-k*tempIn[i+startIndex],i+1,h-k*tempIn[i+startIndex+1]);
-        pTempOut.drawLine(i,h-k*tempOut[i+startIndex],i+1,h-k*tempOut[i+startIndex+1]);
+        //if(i+startIndex>=k*endIndex)break;
+        pVolume.drawLine(j,h-volumeK*volume[i+startIndex],j+1,h-volumeK*volume[i+startIndex+k]);
+        pTempIn.drawLine(j,tempInZ-tempInK*tempIn[i+startIndex],j+1,tempInZ-tempInK*tempIn[i+startIndex+k]);
+        pTempOut.drawLine(j,h-tempOutK*tempOut[i+startIndex],j+1,h-tempOutK*tempOut[i+startIndex+k]);
+        i+=k;
     }
     ui->gVolume->setPixmap(bVolume);
     ui->gTempIn->setPixmap(bTempIn);
@@ -382,6 +397,10 @@ void TSController::startExam()
     recordingStarted = true;
     readerThread->setReadingType(ReadAll);
     readerThread->startRead();
+    tempInScaleRate = 1.0/5000;
+    tempOutScaleRate = 1.0/5000;
+    volumeScaleRate = 4.0/5000;
+    horizontalStep = 1.0;
     plotingTimer.start(100);
     ui->startExam->setEnabled(false);
 }
@@ -428,6 +447,8 @@ void TSController::stopExam()
 
 void TSController::openPatientList()
 {
+    patientsModel->setFilter("");
+    patientsModel->select();
     ui->patientsTableView->setModel(patientsModel);
     ui->patientsTableView->setColumnHidden(0,true);
     ui->patientsTableView->setColumnHidden(5,true);
@@ -454,11 +475,11 @@ void TSController::openPatientProfile(QModelIndex ind)
     QSqlRecord record;
     if(ind.row()==-1&&ind.column()==-1)
     {
-        record = patientsModel->record(ind.row());
+        record = patientsModel->record(patientsModel->rowCount()-1);
     }
     else
     {
-        record = patientsModel->record(patientsModel->rowCount()-1);
+        record = patientsModel->record(ind.row());
     }
     patientsModel->setFilter("id="+record.value("id").toString());
     ui->patientPageLabel->setText(tr("Пациент: ")+record.value("sname").toString()+" "+record.value("fname").toString()+
@@ -504,7 +525,7 @@ void TSController::completePatientId()
 
 void TSController::scrollGraphics(int value)
 {
-    curveBuffer->setStartIndex(value*10);
+    curveBuffer->setEnd(W-35+value*horizontalStep*10);
     plotNow();
 }
 
@@ -535,19 +556,166 @@ void TSController::openExam(QModelIndex ind)
         //qDebug()<<tempout[i];
     }
     curveBuffer->setValues(volume,tempin,tempout,list.count());
-    curveBuffer->setStartIndex(0);
+    //curveBuffer->setStartIndex(0);
     ui->mainBox->setCurrentIndex(5);
-    ui->horizontalScrollBar->setMaximum((list.count()-ui->gVolume->width())/10-3);
+    ui->horizontalScrollBar->setMaximum((list.count()-ui->gVolume->width())/10);
     ui->horizontalScrollBar->setValue(0);
     ui->horizontalScrollBar->setEnabled(true);
     initPaintDevices();
+    curveBuffer->setEnd(W-35);
+    tempInScaleRate = 1.0/5000;
+    tempOutScaleRate = 1.0/5000;
+    volumeScaleRate = 4.0/5000;
+    horizontalStep = 1.0;
+    ui->managmentBox->setVisible(true);
+    ui->managmentBox->setEnabled(true);
     plotNow();
 }
 
 void TSController::resizeEvent(QResizeEvent *evt)
 {
-    //qDebug()<<ui->gVolume->width();
     initPaintDevices();
     plotNow();
-    //qDebug()<<"resize";
 }
+
+void TSController::scaleTempIn(int value)
+{
+    if(value>0)
+    {
+        ui->tempInScroll->setMinimum((-1)*scaleScroll[value-1]);
+        ui->tempInScroll->setMaximum(scaleScroll[value-1]);
+        ui->tempInScroll->setValue(0);
+    }
+    else
+    {
+        ui->tempInScroll->setMinimum(0);
+        ui->tempInScroll->setMaximum(0);
+        ui->tempInScroll->setValue(0);
+    }
+    value*=2;
+    if(value<0)
+    {
+            tempInScaleRate = (-1.0)/value/5000;
+    }
+    if(value == 0)
+    {
+            tempInScaleRate = 1.0/5000;
+    }
+    if(value>0)
+    {
+            tempInScaleRate = (float)value/5000;
+    }
+    plotNow();
+}
+
+void TSController::scaleTempOut(int value)
+{
+    if(value>0)
+    {
+        ui->tempOutScroll->setMinimum((-1)*scaleScroll[value-1]);
+        ui->tempOutScroll->setMaximum(scaleScroll[value-1]);
+        ui->tempOutScroll->setValue(0);
+    }
+    else
+    {
+        ui->tempOutScroll->setMinimum(0);
+        ui->tempOutScroll->setMaximum(0);
+        ui->tempOutScroll->setValue(0);
+    }
+    value*=2;
+    if(value<0)
+    {
+            tempOutScaleRate = (-1.0)/value/5000;
+    }
+    if(value == 0)
+    {
+            tempOutScaleRate = 1.0/5000;
+    }
+    if(value>0)
+    {
+            tempOutScaleRate = (float)value/5000;
+    }
+    plotNow();
+}
+
+void TSController::scaleVolume(int value)
+{
+    value*=2;
+    if(value<0)
+    {
+            volumeScaleRate = (-4.0)/value/5000;
+    }
+    if(value == 0)
+    {
+            volumeScaleRate = 4.0/5000;
+    }
+    if(value>0)
+    {
+            volumeScaleRate = (float)value*4/5000;
+    }
+    plotNow();
+}
+
+void TSController::scaleForHorizontal(int value)
+{
+    value*=2;
+    if(value!=0)
+    {
+        horizontalStep = (-1.0)/value;
+        //curveBuffer->setEnd((-1)*value*W-35);
+        curveBuffer->setEnd(W-35);
+    }
+    else
+    {
+        horizontalStep = 1.0;
+        curveBuffer->setEnd(W-35);
+    }
+    plotNow();
+}
+
+void TSController::changeScrollBarAfterScaling(int before, int after)
+{
+    if(after%2)return;
+    int val = ui->horizontalScrollBar->value();
+    if(before>after)
+    {
+        ui->horizontalScrollBar->setMaximum(ui->horizontalScrollBar->maximum()/2);
+        ui->horizontalScrollBar->setValue(val/2);
+    }
+    else
+    {
+        ui->horizontalScrollBar->setMaximum(ui->horizontalScrollBar->maximum()*2);
+        ui->horizontalScrollBar->setValue(val*2);
+    }
+}
+
+void TSController::changeTempInScrollValue(int value)
+{
+    tempInZerPos = (-1)*value;
+    plotNow();
+}
+
+void TSController::changeTempOutScrollValue(int value)
+{
+    tempOutZerPos = (-1)*value;
+    plotNow();
+}
+
+bool TSController::eventFilter(QObject *obj, QEvent *e)
+{
+    QMouseEvent *evt;
+    if(e->type() == QEvent::MouseButtonPress) evt = static_cast<QMouseEvent*>(e);
+    if(obj == ui->backPatientProfileButton && evt->button()==Qt::LeftButton)
+    {
+        if(currentAction == CreatePatientProfileAction)
+            ui->mainBox->setCurrentIndex(0);
+        if(currentAction == NoAction)
+            ui->mainBox->setCurrentIndex(2);
+    }
+    if(obj == ui->backPatientListButton && evt->button()==Qt::LeftButton)
+    {
+        ui->mainBox->setCurrentIndex(0);
+    }
+    return QObject::eventFilter(obj,e);
+}
+

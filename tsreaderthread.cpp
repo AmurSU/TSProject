@@ -35,11 +35,11 @@ void TSReaderThread::run(){
                     tempOut = buffer->tempOut();
                     end = buffer->end();*/
                     //qDebug()<<volume[end]<<tempIn[end]<<tempOut[end];
-                    sleep(0.01);
+                    sleep(0.1);
                 }
                 else{
                     qDebug()<<"Get crashe";
-                    sleep(0.01);
+                    sleep(0.1);
                 }
             }
             break;
