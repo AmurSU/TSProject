@@ -37,3 +37,4 @@ desktop.ini
 
 # Editors temporary files 
 *~
+*.db

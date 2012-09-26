@@ -77,11 +77,15 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     {
         ts_minTempIn = tI;
         ts_maxTempIn = tI;
+        ts_minTempOut = tO;
+        ts_maxTempOut = tO;
     }
     else
     {
-        if(tI<ts_minTempIn) ts_minTempIn=tI;
+        if(tI<=ts_minTempIn) ts_minTempIn=tI;
         if(tI>ts_maxTempIn) ts_maxTempIn=tI;
+        if(tO<=ts_minTempOut) ts_minTempOut=tO;
+        if(tO>ts_maxTempOut) ts_maxTempOut=tO;
     }
 
     findLevels();
@@ -161,10 +165,16 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         segs.prevV = ts_volume[ts_end];
         segs.prevTin = ts_tempIn[ts_end];
         segs.prevTout = ts_tempOut[ts_end];
+        if(abs(v)>=8)ts_integral[ts_end] = 0.01*v + ts_integral[ts_end-1];
+        else ts_integral[ts_end]=0;
+        if(ts_integral[ts_end]>ts_maxVolume)ts_maxVolume=ts_integral[ts_end];
+        if(ts_integral[ts_end]<ts_minVolume)ts_minVolume=ts_integral[ts_end];
     }
     else
     {
         ts_integral[0] = 0;
+        ts_minVolume = ts_integral[0];
+        ts_minVolume = ts_integral[0];
     }
     ts_end++;
     if(ts_end>ts_screenLimit)
@@ -173,14 +183,8 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         //ts_startIndex += dif;
         //ts_screenLimit += dif;
     }
-    if(ts_end>0&&abs(v)>=8)
-    {
-        ts_integral[ts_end] = 0.01*v + ts_integral[ts_end-1];
-    }
-    else
-    {
-        ts_integral[ts_end] = 0;
-    }
+
+
     ts_volume[ts_end] = segs.curV = v;
     ts_tempIn[ts_end] = segs.curTin = tI;
     ts_tempOut[ts_end] = segs.curTout = tO;
@@ -280,8 +284,40 @@ int* TSCurveBuffer::getTempInInterval()
     }
     else
     {
-        interval[0]=ts_minTempIn-50;
-        interval[1]=ts_maxTempIn+50;
+        interval[0]=ts_minTempIn-100;
+        interval[1]=ts_maxTempIn+100;
+    }
+    return interval;
+}
+
+int* TSCurveBuffer::getTempOutInterval()
+{
+    int *interval = new int[2];
+    if(abs(ts_maxTempOut-ts_minTempOut)<500)
+    {
+        interval[0]=-5000;
+        interval[1]=5000;
+    }
+    else
+    {
+        interval[0]=ts_minTempOut-100;
+        interval[1]=ts_maxTempOut+100;
+    }
+    return interval;
+}
+
+int* TSCurveBuffer::getVolumeInterval()
+{
+    int *interval = new int[2];
+    if(abs(ts_maxVolume-ts_minVolume)<500)
+    {
+        interval[0]=-5000;
+        interval[1]=5000;
+    }
+    else
+    {
+        interval[0]=ts_minVolume-100;
+        interval[1]=ts_maxVolume+100;
     }
     return interval;
 }

@@ -61,7 +61,6 @@ protected:
     bool eventFilter(QObject *obj, QEvent *e);
 private:
     Ui::TSView *ui;
-    //QMessageBox *msgBox;
     CurrentAction currentAction;
     QRegExp nameRegExp;
     QRegExp intRegExp;
@@ -90,6 +89,10 @@ private:
     int tempOutZerPos;
     int scaleScroll[5];
     int* tempInInterval;
+    float tempInAdaptive;
+    int* tempOutInterval;
+    float tempOutAdaptive;
+    float volumeAdaptive;
     //Тред для чтения
     TSReaderThread *readerThread;
     //модели

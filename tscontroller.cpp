@@ -25,10 +25,17 @@ TSController::TSController(QWidget *parent) :
     curveBuffer = new TSCurveBuffer();
     readerThread = new TSReaderThread(curveBuffer);
     recordingStarted = false;
-    tempInInterval = new int[2];
-    tempInInterval[0]=-5000;tempInInterval[0]=5000;
+    tempInInterval = curveBuffer->getTempInInterval();
+    tempInAdaptive = 1.0;
+    tempOutInterval = curveBuffer->getTempOutInterval();
+    tempOutAdaptive = 1.0;
     scaleScroll[0]=1;scaleScroll[1]=3;scaleScroll[2]=5;scaleScroll[3]=7;scaleScroll[4]=9;
     ui->managmentBox->setVisible(false);
+    ui->vertLabel->setVisible(false);
+    ui->horLabel->setVisible(false);
+    ui->tempInScaleSlider->setVisible(false);
+    ui->tempOutScaleSlider->setVisible(false);
+    ui->volumeScaleSlider->setVisible(false);
     patientsConnection = QSqlDatabase::addDatabase("QSQLITE","Patients");
     patientsConnection.setDatabaseName("commondb\\common.db");
     if(!patientsConnection.open())
@@ -371,20 +378,48 @@ void TSController::plotNow()
     pTempOut.drawLine(0,h,W,h);
     pVolume.setPen(QColor(255,0,0));
     int* tinInt = curveBuffer->getTempInInterval();
+    int* toutInt = curveBuffer->getTempOutInterval();
+    int* volInt = curveBuffer->getVolumeInterval();
+    //qDebug()<<tinInt[0]<<" "<<tinInt[1];
     float tempInK = tempInScaleRate*h;//*abs(tempInInterval[0]-tempInInterval[1])/abs(tinInt[1]-tinInt[0]);
-    float tempInZ = h + tempInZerPos*h;//-(tinInt[1]-tinInt[0])/2;
-    delete tempInInterval;
-    tempInInterval = tinInt;
     float tempOutK = tempOutScaleRate*h;
+
+    /* TODO  решить проблему с увеличением адаптивного коэфициента  */
+
+    /*if(tempInInterval[0]!=tinInt[0]||tempInInterval[1]!=tinInt[1])
+    {
+        float x = (float)(tempInInterval[1]-tempInInterval[0])/
+                    (tinInt[1]-tinInt[0]);
+        if(x>=2)
+        {
+            tempInAdaptive *= x/2;
+        }
+    }*/
+    float tempInZ = h;// + tempInZerPos*h;
+    float tempOutZ = h;// + tempInZerPos*h;
+    tempInAdaptive = (float)10000/
+            (tinInt[1]-tinInt[0]);
+    tempOutAdaptive = (float)10000/
+            (toutInt[1]-toutInt[0]);
+    volumeAdaptive = (float)10000/(volInt[1]-volInt[0]);
+    tempInZ = h + ceil((float)(tinInt[1]+tinInt[0])*tempInAdaptive*tempInK/2);
+    tempOutZ = h + ceil((float)(toutInt[1]+toutInt[0])*tempOutAdaptive*tempOutK/2);
+//    delete tempInInterval;
+//    tempInInterval = tinInt;
+//    delete tempOutInterval;
+//    tempOutInterval = toutInt;
     float volumeK = volumeScaleRate*h;
     int j = 0, k = 1/horizontalStep;
     i=0;
     for(j=0;j<W-35;j++)
     {
         if(i+startIndex>=k*endIndex)break;
-        pVolume.drawLine(j,h-volumeK*volume[i+startIndex],j+1,h-volumeK*volume[i+startIndex+k]);
-        pTempIn.drawLine(j,tempInZ-tempInK*tempIn[i+startIndex],j+1,tempInZ-tempInK*tempIn[i+startIndex+k]);
-        pTempOut.drawLine(j,h-tempOutK*tempOut[i+startIndex],j+1,h-tempOutK*tempOut[i+startIndex+k]);
+        pVolume.drawLine(j,h-volumeK*volumeAdaptive*volume[i+startIndex]
+                         ,j+1,h-volumeK*volumeAdaptive*volume[i+startIndex+k]);
+        pTempIn.drawLine(j,tempInZ-tempInK*tempInAdaptive*tempIn[i+startIndex]
+                         ,j+1,tempInZ-tempInK*tempInAdaptive*tempIn[i+startIndex+k]);
+        pTempOut.drawLine(j,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex]
+                          ,j+1,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex+k]);
         i+=k;
     }
     ui->gVolume->setPixmap(bVolume);
@@ -405,7 +440,7 @@ void TSController::startExam()
     readerThread->startRead();
     tempInScaleRate = 1.0/5000;
     tempOutScaleRate = 1.0/5000;
-    volumeScaleRate = 4.0/5000;
+    volumeScaleRate = 1.0/5000;
     horizontalStep = 1.0;
     initPaintDevices();
     plotingTimer.start(100);

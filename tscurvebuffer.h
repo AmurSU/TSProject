@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QColor>
 
-#define VOLTAGE_RATE    0.625
+#define VOLTAGE_RATE    0.61
 #define REF_VOLTAGE_1   -4778
 #define REF_VOLTAGE_2   -5615
 #define TAN_1           0.0056
@@ -41,6 +41,8 @@ public:
     void setEnd(int n);
     int screenLimit();
     int* getTempInInterval();
+    int* getTempOutInterval();
+    int* getVolumeInterval();
     FILE* out_file;
     QColor volColor;
     QColor tinColor;
@@ -80,6 +82,10 @@ private:
     int ts_period_for_count_avgs;
     int ts_minTempIn;
     int ts_maxTempIn;
+    int ts_minTempOut;
+    int ts_maxTempOut;
+    int ts_minVolume;
+    int ts_maxVolume;
 
 };
 
