@@ -55,10 +55,12 @@ public slots:
     void changeScrollBarAfterScaling(int before,int after);
     void changeTempInScrollValue(int value);
     void changeTempOutScrollValue(int value);
+    void breakExam();
 protected:
     void initPaintDevices();
     void resizeEvent(QResizeEvent *evt);
     bool eventFilter(QObject *obj, QEvent *e);
+    void openPrivateDB(QSqlRecord record);
 private:
     Ui::TSView *ui;
     CurrentAction currentAction;

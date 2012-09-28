@@ -149,15 +149,15 @@ bool TSUsb3000Reader::initDevice(TSCurveBuffer *_bf){
 void TSUsb3000Reader::setLastError(QString last_error){
     this->LastError=last_error;
 }
-bool TSUsb3000Reader::readData(){
+SHORT* TSUsb3000Reader::readData(){
     if (pModule->READ_KADR(AdcBuffer)) {
-        buffer->append(AdcBuffer[0],AdcBuffer[1],AdcBuffer[2]);
-        return true;
+        //buffer->append(AdcBuffer[0],AdcBuffer[1],AdcBuffer[2]);
+        return AdcBuffer;
     }
     else
     {
         this->setLastError("Can`t read from device");
-        return false;
+        return 0;
     }
 }
 bool TSUsb3000Reader::closeReader(){

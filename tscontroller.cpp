@@ -14,6 +14,7 @@
 #include <QTime>
 #include <QDate>
 #include <math.h>
+#include <QDir>
 
 TSController::TSController(QWidget *parent) :
     QMainWindow(parent),ui(new Ui::TSView)
@@ -73,9 +74,12 @@ TSController::TSController(QWidget *parent) :
     connect(ui->horScaleSlider,SIGNAL(valueChanged(int)),this,SLOT(scaleForHorizontal(int)));
     connect(ui->horScaleSlider,SIGNAL(rangeChanged(int,int)),this,SLOT(changeScrollBarAfterScaling(int,int)));
     connect(ui->tempInScroll,SIGNAL(valueChanged(int)),this,SLOT(changeTempInScrollValue(int)));
+    connect(ui->breakExamButton,SIGNAL(clicked()),this,SLOT(breakExam()));
 
     ui->backPatientProfileButton->installEventFilter(this);
     ui->backPatientListButton->installEventFilter(this);
+    ui->backCallibrateButton->installEventFilter(this);
+    ui->backExamButton->installEventFilter(this);
 }
 
 TSController::~TSController()
@@ -138,6 +142,20 @@ void TSController::savePatientProfile()
     msgBox.setText(tr("Неправельный ввод данных."));
     QSqlRecord record;
     record = patientsModel->record();
+    record.setValue("sname",ui->sName->text().toUpper());
+    record.setValue("fname",ui->fName->text().toUpper());
+    record.setValue("fdname", ui->fdName->text().toUpper());
+    record.setValue("code",ui->idEdit->text().toUpper());
+    record.setValue("mvl",ui->mvl->text().toUpper());
+    switch(ui->mGenderRadio->isChecked())
+    {
+        case 0: {record.setValue("genger",tr("ж")); break;}
+        case 1: {record.setValue("genger",tr("ж")); break;}
+    }
+    QStringList d = ui->date->text().split("-");
+    QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
+    record.setValue("birth_date",date);
+    /*
     QString string;
     string = ui->sName->text().toUpper();
     if(TSValidationTools::isNameString(string)==false)
@@ -183,6 +201,8 @@ void TSController::savePatientProfile()
     QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
     record.setValue("birth_date",date);
     record.setValue("code",ui->idEdit->text());
+    */
+
     switch(currentAction)
     {
         case CreatePatientProfileAction:
@@ -193,6 +213,9 @@ void TSController::savePatientProfile()
                 return;
             }
             record = patientsModel->record(patientsModel->rowCount()-1);
+
+            /* TODO вынести создание базы в отдельный метод */
+            /*
             examinationsConnection = QSqlDatabase::addDatabase("QSQLITE","ExamConnection");
             examinationsConnection.setDatabaseName("privatedb\\"+record.value("id").toString()+"_"+
                                                    record.value("code").toString()+".db");
@@ -207,6 +230,15 @@ void TSController::savePatientProfile()
                 ui->mainBox->setCurrentIndex(0);
                 return;
             }
+            QSqlQuery q(examinationsConnection);
+            q.prepare("CREATE TABLE `examinations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT,`date` DATE,`time` TIME,`indication` TEXT,`diagnosis` TEXT,`nurse` VARCHAR(50),`doctor` VARCHAR(50),`tempOut` TEXT,`tempIn` TEXT,`volume`  TEXT);");
+            if(!q.exec())
+            {
+                qDebug()<<q.lastError().text();
+            }
+            */
+            /* TODO */
+            openPrivateDB(record);
             QSqlQuery q(examinationsConnection);
             q.prepare("CREATE TABLE `examinations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT,`date` DATE,`time` TIME,`indication` TEXT,`diagnosis` TEXT,`nurse` VARCHAR(50),`doctor` VARCHAR(50),`tempOut` TEXT,`tempIn` TEXT,`volume`  TEXT);");
             if(!q.exec())
@@ -269,7 +301,7 @@ void TSController::rejectPatientProfile()
 
 void TSController::calibrateVolume()
 {
-    readerThread->setReadingType(ReadForVol);
+    readerThread->setReadingType(ReadForVolZer);
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("Предупреждение"));
     msgBox.setText(tr("Идет подготовка.\nПожалуйста подождите около 5 секунд..."));
@@ -523,14 +555,26 @@ void TSController::openPatientProfile(QModelIndex ind)
     {
         record = patientsModel->record(ind.row());
     }
-    patientsModel->setFilter("id="+record.value("id").toString());
+
     ui->patientPageLabel->setText(tr("Пациент: ")+record.value("sname").toString()+" "+record.value("fname").toString()+
                                   " "+record.value("fdname").toString());
+    openPrivateDB(record);
+    /*
     examinationsConnection = QSqlDatabase::addDatabase("QSQLITE","ExamConnection");
+    QDir d("privatedb");
     examinationsConnection.setDatabaseName("privatedb\\"+record.value("id").toString()
                                            +"_"+record.value("code").toString()+".db");
-    if(!examinationsConnection.open())
-        qDebug()<<"can`t open ExamConnection";
+    if(!examinationsConnection.open()||!d.exists())
+    {
+        QMessageBox msg(this);
+        msg.setWindowTitle(tr("Ошибка"));
+        msg.setText(tr("Произошла потеря данных.\nВыполните восстановление."));
+        msg.exec();
+        ui->mainBox->setCurrentIndex(0);
+        return;
+    }
+    */
+    patientsModel->setFilter("id="+record.value("id").toString());
     examinationsModel = new TSExaminations(examinationsConnection);
     ui->examsTableView->setModel(examinationsModel);
     ui->examsTableView->setColumnHidden(0,true);
@@ -757,7 +801,47 @@ bool TSController::eventFilter(QObject *obj, QEvent *e)
     if(obj == ui->backPatientListButton && evt->button()==Qt::LeftButton)
     {
         ui->mainBox->setCurrentIndex(0);
+        patientsModel->setFilter("");
+    }
+    if(obj == ui->backCallibrateButton && evt->button()==Qt::LeftButton)
+    {
+        ui->mainBox->setCurrentIndex(3);
+    }
+    if(obj == ui->backExamButton && evt->button()==Qt::LeftButton)
+    {
+        ui->mainBox->setCurrentIndex(4);
+        ui->managmentBox->setVisible(false);
+        curveBuffer->setEnd(0);
     }
     return QObject::eventFilter(obj,e);
 }
 
+void TSController::openPrivateDB(QSqlRecord record)
+{
+    examinationsConnection = QSqlDatabase::addDatabase("QSQLITE","ExamConnection");
+    QDir d;
+    if(!d.cd("pravatedb"))
+    {
+        d.mkpath("privatedb");
+    }
+    d.setPath(d.path()+"\\privatedb");
+    examinationsConnection.setDatabaseName(d.path()+"\\"+record.value("id").toString()+"_"+
+                                           record.value("code").toString()+".db");
+    if(!examinationsConnection.open())
+    {
+        qDebug()<<examinationsConnection.lastError().text();
+        //patientsModel->removeRow(patientsModel->rowCount()-1);
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(tr("Ошибка"));
+        msgBox.setText(tr("Произошла ошибка. Обратитесь к разработчикам. Код: 00002"));
+        msgBox.exec();
+        ui->mainBox->setCurrentIndex(0);
+        return;
+    }
+}
+
+void TSController::breakExam()
+{
+    plotingTimer.stop();
+    readerThread->stopRead();
+}

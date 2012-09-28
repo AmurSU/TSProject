@@ -30,6 +30,7 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     ts_vm_up_lvl=ts_volumeColibration+2;
     ts_vm_max=-100000;
     ts_period_for_count_avgs=500;
+    volfile.open("volume.csv");
 }
 
 int TSCurveBuffer::end()
@@ -165,8 +166,13 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         segs.prevV = ts_volume[ts_end];
         segs.prevTin = ts_tempIn[ts_end];
         segs.prevTout = ts_tempOut[ts_end];
-        if(abs(v)>=8)ts_integral[ts_end] = 0.01*v + ts_integral[ts_end-1];
+        if(abs(v)>=8)
+        {
+            qDebug()<<(float)ts_integral[ts_end-1]/3200;
+            ts_integral[ts_end] = 0.1*v + ts_integral[ts_end-1];
+        }
         else ts_integral[ts_end]=0;
+        //volfile<<ts_integral[ts_end]<<endl;
         if(ts_integral[ts_end]>ts_maxVolume)ts_maxVolume=ts_integral[ts_end];
         if(ts_integral[ts_end]<ts_minVolume)ts_minVolume=ts_integral[ts_end];
     }
@@ -309,15 +315,23 @@ int* TSCurveBuffer::getTempOutInterval()
 int* TSCurveBuffer::getVolumeInterval()
 {
     int *interval = new int[2];
-    if(abs(ts_maxVolume-ts_minVolume)<500)
+    if(abs(ts_maxVolume-ts_minVolume)<250)
     {
         interval[0]=-5000;
         interval[1]=5000;
     }
     else
     {
-        interval[0]=ts_minVolume-100;
-        interval[1]=ts_maxVolume+100;
+        if(abs(ts_minVolume)>ts_maxVolume)
+        {
+            interval[0]=ts_minVolume-120;
+            interval[1]=(-ts_minVolume)+100;
+        }
+        else
+        {
+            interval[0]=-ts_maxVolume-120;
+            interval[1]=ts_maxVolume+100;
+        }
     }
     return interval;
 }

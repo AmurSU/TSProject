@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QColor>
+#include <fstream>
+using namespace std;
 
 #define VOLTAGE_RATE    0.61
 #define REF_VOLTAGE_1   -4778
@@ -86,6 +88,7 @@ private:
     int ts_maxTempOut;
     int ts_minVolume;
     int ts_maxVolume;
+    ofstream volfile;
 
 };
 

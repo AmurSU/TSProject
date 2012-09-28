@@ -27,27 +27,43 @@ void TSReaderThread::run(){
         {
             while(this->ReadingStarted)
             {
-                /*Debug()<<"It works";*/
-                if (reader->readData()){
+                SHORT* adc;
+                if ((adc=reader->readData())!=0){
                     /*qDebug()<<"It works";*/
                     /*volume= buffer->volume();
                     tempIn = buffer->tempIn();
                     tempOut = buffer->tempOut();
                     end = buffer->end();*/
                     //qDebug()<<volume[end]<<tempIn[end]<<tempOut[end];
+                    buffer->append(adc[0],adc[1],adc[2]);
                     sleep(0.1);
                 }
                 else{
                     qDebug()<<"Get crashe";
                     sleep(0.1);
                 }
+                delete adc;
             }
             break;
         }
-        case ReadForVol:
+        case ReadForVolZer:
         {
-            int vol = reader->calibtateVolume();
-            buffer->setVolumeColibration(vol);
+            int avg=0;
+            for(int i=0;i<300;i++)
+            {
+                SHORT* adc;
+                if ((adc=reader->readData())!=0){
+                    avg+=adc[0];
+                    sleep(0.1);
+                }
+                else{
+                    qDebug()<<"Get crashe";
+                    sleep(0.1);
+                }
+                delete adc;
+            }
+            avg/=300;
+            buffer->setVolumeColibration(avg);
             break;
         }
     }

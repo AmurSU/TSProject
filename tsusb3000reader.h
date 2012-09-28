@@ -17,7 +17,7 @@ class TSUsb3000Reader : public QObject
 public:
     explicit TSUsb3000Reader(QObject *parent = 0);
     int calibtateVolume();
-    bool readData();
+    SHORT* readData();
     bool initDevice(TSCurveBuffer *_bf);
     QString getLastError();
     void TerminateApplication(char *ErrorString, bool TerminationFlag = false);
