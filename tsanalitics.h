@@ -28,11 +28,19 @@ public:
     int setupData(QVector<int> *row_d);
     int findExtremums();
     int deleteBadExtremums();
+    int getBreathingVolume();
+    int getAvgInspiratorySpeed();
+    int getAvgExpiratorySpeed();
+    int getMaxInspiratorySpeed();
+    int getMaxExpiratorySpeed();
     void append(int n);
 private:
     int getMax();
     int getMin();
     int fabs(int a);
+    void deleteEqualSignExtremums();
+    void deleteSimilarInMeaningExtremums();
+    void deletePatternLightningExtremums();
     QVector<extremum> *ts_extremums;
     QVector<int> *ts_row_data;
 signals:

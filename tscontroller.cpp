@@ -22,14 +22,18 @@ void TSController::handle()
     fscanf(in,"%d",&n);
     for(i=0;i<n;i++){
        fscanf(in,"%d %d %d",&t1,&t2,&t);
-       ga->append(t);
+       ga->append(t2);
     }
+
     fclose(in);
     ga->findExtremums();
-    for(i=0;i<1;i++){
-    ga->deleteBadExtremums();
-    qDebug()<<"-------------------------------";
+    while(ga->deleteBadExtremums()==-1){
+        qDebug()<<"Dalshe";
     }
+    qDebug()<<"Dihatelniy objom"<<ga->getBreathingVolume();
+    qDebug()<<"Sredniaya Skorost vdoha"<<ga->getAvgInspiratorySpeed();
+    qDebug()<<"Max Skorost vdoha"<<ga->getMaxInspiratorySpeed();
+    qDebug()<<"Max Skorost vidoha"<<ga->getMaxExpiratorySpeed();
     qDebug()<<ga->getAvgExpiratory();
     qDebug()<<ga->getAvgInspiratory();
     view->showGUI();
@@ -55,7 +59,6 @@ void TSController::newResearchAccepted()
 void TSController::startRecordingRequested()
 {
     trd->startRead();
-    //trd->stopRead();
     view->startRecording();
 }
 
