@@ -15,6 +15,7 @@
 
 namespace Ui {
     class TSView;
+    class TSProgressDialog;
 }
 
 enum CurrentAction {NoAction,CreatePatientProfileAction,EditPatientProfileAction,GetingVolZero};
@@ -66,6 +67,7 @@ private:
     CurrentAction currentAction;
     QRegExp nameRegExp;
     QRegExp intRegExp;
+    bool openUser;
     //Все для рисования
     TSCurveBuffer* curveBuffer;
     QTimer plotingTimer;
@@ -102,6 +104,7 @@ private:
     TSExaminations *examinationsModel;
     QSqlDatabase patientsConnection;
     QSqlDatabase examinationsConnection;
+
 
 };
 

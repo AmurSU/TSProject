@@ -1,5 +1,6 @@
 #include "tscontroller.h"
 #include "ui_tsview.h"
+#include "ui_tsprogressdialog.h"
 #include <QtSql/QSqlRecord>
 #include <QMessageBox>
 #include <QTextCodec>
@@ -15,14 +16,21 @@
 #include <QDate>
 #include <math.h>
 #include <QDir>
+#include <fstream>
+#include <QDialog>
+#include <tsanalitics.h>
+#include <QSettings>
+using namespace std;
 
 TSController::TSController(QWidget *parent) :
     QMainWindow(parent),ui(new Ui::TSView)
 {
     QTextCodec::setCodecForTr(QTextCodec::codecForName("CP-1251"));
+    QSettings s("settings.ini",QSettings::IniFormat);
     ui->setupUi(this);
     ui->mainBox->setCurrentIndex(0);
     currentAction = NoAction;
+    openUser = false;
     curveBuffer = new TSCurveBuffer();
     readerThread = new TSReaderThread(curveBuffer);
     recordingStarted = false;
@@ -133,6 +141,7 @@ void TSController::editPatientProfile()
         default: break;
     }
     ui->mainBox->setCurrentIndex(1);
+    openUser = 0;
 }
 
 void TSController::savePatientProfile()
@@ -301,32 +310,68 @@ void TSController::rejectPatientProfile()
 
 void TSController::calibrateVolume()
 {
+    ofstream f("test.csv");
+
+    QDialog d(this);
+    Ui::TSProgressDialog dui;
+    dui.setupUi(&d);
+    d.setWindowTitle(tr("Предупреждение"));
     readerThread->setReadingType(ReadForVolZer);
-    QMessageBox msgBox(this);
+    /*QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("Предупреждение"));
     msgBox.setText(tr("Идет подготовка.\nПожалуйста подождите около 5 секунд..."));
     msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setFont(QFont("MS Shell Dlg 2",12,12));*/
     readerThread->startRead();
-    connect(readerThread,SIGNAL(done()),&msgBox,SLOT(accept()));
-    switch(msgBox.exec())
+    dui.information->setText(tr("Идет подготовка..."));
+    connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
+    connect(readerThread,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
+    switch(d.exec())
     {
         case 1:
         {
-            msgBox.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
-            msgBox.setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
+            //msgBox.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
+            dui.information->setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
+            dui.progressBar->setVisible(false);
             break;
         }
         default: break;
     }
-    disconnect(&msgBox,SLOT(accept()));
+    disconnect(&d,SLOT(accept()));
     readerThread->stopRead();
-    if(msgBox.exec()==QMessageBox::Ok)
+    if(d.exec()==1)
+    {
+        readerThread->setReadingType(ReadForVolVal);
+        readerThread->startRead();
+        connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
+        dui.progressBar->setVisible(true);
+        dui.information->setText(tr("Идет калибровка. Подождите..."));
+    }
+
+    if(d.exec()==1)
+    {
+        int *vol = curveBuffer->volume();
+        tsanalitics ta;
+        for(int i=0;i<curveBuffer->end();i++)
+        {
+            ta.append(vol[i]);
+            f<<vol[i]<<endl;
+        }
+        ta.findExtremums();
+        ta.deleteBadExtremums();
+        curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
+        readerThread->stopRead();
+        curveBuffer->setEnd(0);
+        dui.progressBar->setVisible(false);
+        dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
+    }
+    if(d.exec()==1)
     {
         ui->mainBox->setCurrentIndex(5);
-        initPaintDevices();
-        plotNow();
         ui->managmentBox->setVisible(true);
         ui->managmentBox->setEnabled(true);
+        initPaintDevices();
+        plotNow();
     }
 }
 
@@ -415,18 +460,6 @@ void TSController::plotNow()
     //qDebug()<<tinInt[0]<<" "<<tinInt[1];
     float tempInK = tempInScaleRate*h;//*abs(tempInInterval[0]-tempInInterval[1])/abs(tinInt[1]-tinInt[0]);
     float tempOutK = tempOutScaleRate*h;
-
-    /* TODO  решить проблему с увеличением адаптивного коэфициента  */
-
-    /*if(tempInInterval[0]!=tinInt[0]||tempInInterval[1]!=tinInt[1])
-    {
-        float x = (float)(tempInInterval[1]-tempInInterval[0])/
-                    (tinInt[1]-tinInt[0]);
-        if(x>=2)
-        {
-            tempInAdaptive *= x/2;
-        }
-    }*/
     float tempInZ = h;// + tempInZerPos*h;
     float tempOutZ = h;// + tempInZerPos*h;
     tempInAdaptive = (float)10000/
@@ -436,10 +469,6 @@ void TSController::plotNow()
     volumeAdaptive = (float)10000/(volInt[1]-volInt[0]);
     tempInZ = h + ceil((float)(tinInt[1]+tinInt[0])*tempInAdaptive*tempInK/2);
     tempOutZ = h + ceil((float)(toutInt[1]+toutInt[0])*tempOutAdaptive*tempOutK/2);
-//    delete tempInInterval;
-//    tempInInterval = tinInt;
-//    delete tempOutInterval;
-//    tempOutInterval = toutInt;
     float volumeK = volumeScaleRate*h;
     int j = 0, k = 1/horizontalStep;
     i=0;
@@ -463,6 +492,7 @@ void TSController::plotNow()
         ui->horizontalScrollBar->setMaximum(startIndex/10);
         ui->horizontalScrollBar->setValue(startIndex/10);
     }
+    //if(endIndex%30)
 }
 
 void TSController::startExam()
@@ -534,6 +564,7 @@ void TSController::openPatientList()
     ui->patientsTableView->horizontalHeader()->setDefaultSectionSize((ui->patientsTableView->width()-2)/5);
     ui->patientsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->patientsTableView->setEditTriggers(QTableView::NoEditTriggers);
+    openUser = true;
 }
 
 void TSController::completePatientName(QString string)
@@ -809,9 +840,17 @@ bool TSController::eventFilter(QObject *obj, QEvent *e)
     }
     if(obj == ui->backExamButton && evt->button()==Qt::LeftButton)
     {
-        ui->mainBox->setCurrentIndex(4);
-        ui->managmentBox->setVisible(false);
-        curveBuffer->setEnd(0);
+        if(!openUser){
+            ui->mainBox->setCurrentIndex(4);
+            ui->managmentBox->setVisible(false);
+            curveBuffer->setEnd(0);
+        }
+        else{
+            qDebug()<<examinationsModel->filter();
+            ui->mainBox->setCurrentIndex(3);
+            ui->managmentBox->setVisible(false);
+            curveBuffer->setEnd(0);
+        }
     }
     return QObject::eventFilter(obj,e);
 }
