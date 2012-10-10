@@ -51,11 +51,14 @@ float tsanalitics::getMinAvgs(){
         return float(sum/cntr);
 }
 
-float tsanalitics::getFrequency(){
+int tsanalitics::getFrequency(){
     int maxc = getMaxsCount();
     int minc = getMinsCount();
     int time = getTime();
-    return ((float)maxc+(float)minc)/2/time*60;
+    if (time == 0 )
+        return -1;
+    else
+        return (maxc+minc)/2/time*60;
 }
 
 int tsanalitics::getMaxsCount(){
@@ -106,7 +109,7 @@ int tsanalitics::getTime(){
     return ts_row_data->size();
 }
 
-int tsanalitics::getAvgInspiratory(){
+int tsanalitics::getAvgInspiratoryTime(){
     int sum=0,cntr=0,i=0;
     for(i=0;i<ts_extremums->size()-1;i++){
         if(ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1){
@@ -120,7 +123,7 @@ int tsanalitics::getAvgInspiratory(){
         return 0;
 }
 
-int tsanalitics::getAvgExpiratory(){
+int tsanalitics::getAvgExpiratoryTime(){
     int sum=0,cntr=0,i=0;
     for(i=0;i<ts_extremums->size()-1;i++){
         if(ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1){
@@ -215,17 +218,17 @@ int tsanalitics::deleteBadExtremums(){
 }
 
 int tsanalitics::getBreathingVolume(){
-    int i=0, sum=0,count=0;
+    int i=0, sum_mx=0,sum_mn=0;
     for( i=0;i<ts_extremums->size()-1;i++){
-        if( ts_extremums->at(i).y > ts_extremums->at(i+1).y){
-            sum+=fabs(ts_extremums->at(i).y-ts_extremums->at(i+1).y);
-        }else{
-            sum+=fabs(ts_extremums->at(i+1).y-ts_extremums->at(i).y);
+        if(ts_extremums->at(i).type==1){
+            sum_mx+=ts_extremums->at(i).y;
         }
-        count++;
+        else{
+            sum_mx+=ts_extremums->at(i).y;
+        }
     }
-    if(count)
-        return sum/count;
+    if(i>0)
+        return (sum_mx+sum_mn)/i/2;
     else
         return -1;
 }
@@ -234,7 +237,7 @@ int tsanalitics::getAvgInspiratorySpeed(){
     int i=0,sum=0,count=0;
     for(i=0;i<ts_extremums->size()-1;i++){
         if( ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1 ){
-            sum+=(fabs(ts_extremums->at(i+1).y-ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
+            sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
             count++;
         }
     }
@@ -248,7 +251,7 @@ int tsanalitics::getAvgExpiratorySpeed(){
     int i=0,sum=0,count=0;
     for(i=0;i<ts_extremums->size()-1;i++){
         if( ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1 ){
-            sum+=(fabs(ts_extremums->at(i).y-ts_extremums->at(i+1).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
+            sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
             count++;
         }
     }
@@ -286,6 +289,10 @@ int tsanalitics::getMaxExpiratorySpeed(){
 
 void tsanalitics::append(int n){
     ts_row_data->push_back(n);
+}
+
+void tsanalitics::clear(){
+    ts_extremums->clear();
 }
 
 int tsanalitics::getMax(){

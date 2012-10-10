@@ -15,15 +15,15 @@ public:
     QVector<int> getMovingAverages(int Period);
     float getMaxAvgs();
     float getMinAvgs();
-    float getFrequency();
+    int getFrequency();
     float getAvgExpirationFlowRate();
     int getMaxsCount();
     int getMinsCount();
     int getMinMaxAvgTime();
     int getMaxMinAvgTime();
     int getTime();
-    int getAvgInspiratory();
-    int getAvgExpiratory();
+    int getAvgInspiratoryTime();
+    int getAvgExpiratoryTime();
     int getPeriodTime();
     int setupData(QVector<int> *row_d);
     int findExtremums();
@@ -34,6 +34,7 @@ public:
     int getMaxInspiratorySpeed();
     int getMaxExpiratorySpeed();
     void append(int n);
+    void clear();
 private:
     int getMax();
     int getMin();

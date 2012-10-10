@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     CRUDmw.cpp \
     bdgod.cpp \
     models/TSPatients.cpp \
-    models/TSExaminations.cpp
+    models/TSExaminations.cpp \
+    tsanalitics.cpp
 
 HEADERS  += \
     tsmodel.h \
@@ -37,7 +38,8 @@ HEADERS  += \
     bdgod.h \
     bdgod.h \
     models/TSPatients.h \
-    models/TSExaminations.h
+    models/TSExaminations.h \
+    tsanalitics.h
 
 LIBS += -L"dll/*.dll"
 FORMS    += \
@@ -45,7 +47,8 @@ FORMS    += \
     colibrateDialog.ui \
     tsview.ui\
     CRUDmw.ui \
-    dialog.ui
+    dialog.ui \
+    tsresultsview.ui
 RESOURCES += \
     iconResourse.qrc
 

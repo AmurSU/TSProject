@@ -1,5 +1,6 @@
 #include "tscontroller.h"
 #include "ui_tsview.h"
+#include "ui_analizeResults.h"
 #include <QtSql/QSqlRecord>
 #include <QMessageBox>
 #include <QTextCodec>
@@ -15,11 +16,19 @@
 #include <QDate>
 #include <math.h>
 #include <QDir>
+#include <tsanalitics.h>
+#include <QTableWidget>
 
 TSController::TSController(QWidget *parent) :
     QMainWindow(parent),ui(new Ui::TSView)
 {
     QTextCodec::setCodecForTr(QTextCodec::codecForName("CP-1251"));
+    QMainWindow *m = new QMainWindow();
+
+    /* w = new Ui::MainWindow();
+    w->setupUi(m);
+
+    m->show();*/
     ui->setupUi(this);
     ui->mainBox->setCurrentIndex(0);
     currentAction = NoAction;
@@ -75,11 +84,13 @@ TSController::TSController(QWidget *parent) :
     connect(ui->horScaleSlider,SIGNAL(rangeChanged(int,int)),this,SLOT(changeScrollBarAfterScaling(int,int)));
     connect(ui->tempInScroll,SIGNAL(valueChanged(int)),this,SLOT(changeTempInScrollValue(int)));
     connect(ui->breakExamButton,SIGNAL(clicked()),this,SLOT(breakExam()));
-
+    connect(ui->resultsButton,SIGNAL(clicked()),this,SLOT(processDataParams()));
+    ui->resultsButton->setEnabled(true);
     ui->backPatientProfileButton->installEventFilter(this);
     ui->backPatientListButton->installEventFilter(this);
     ui->backCallibrateButton->installEventFilter(this);
     ui->backExamButton->installEventFilter(this);
+    this->processDataParams();
 }
 
 TSController::~TSController()
@@ -101,36 +112,36 @@ void TSController::editPatientProfile()
 {
     switch(ui->mainBox->currentIndex())
     {
-        case 0:
-        {
-            currentAction = CreatePatientProfileAction;
-            ui->fName->clear();
-            ui->sName->clear();
-            ui->fdName->clear();
-            ui->mvl->clear();
-            ui->date->clear();
-            ui->idEdit->clear();
+    case 0:
+    {
+        currentAction = CreatePatientProfileAction;
+        ui->fName->clear();
+        ui->sName->clear();
+        ui->fdName->clear();
+        ui->mvl->clear();
+        ui->date->clear();
+        ui->idEdit->clear();
+        ui->mGenderRadio->setChecked(true);
+        break;
+    }
+    case 3:
+    {
+        currentAction = EditPatientProfileAction;
+        QSqlRecord record = patientsModel->record(0);
+        ui->fName->setText(record.value("fname").toString());
+        ui->sName->setText(record.value("sname").toString());
+        ui->fdName->setText(record.value("fdname").toString());
+        ui->mvl->setText(record.value("mvl").toString());
+        QStringList d = record.value("birth_date").toString().split("-");
+        QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
+        ui->date->setText(date);
+        if(record.value("gender").toString()==tr("м"))
             ui->mGenderRadio->setChecked(true);
-            break;
-        }
-        case 3:
-        {
-            currentAction = EditPatientProfileAction;
-            QSqlRecord record = patientsModel->record(0);
-            ui->fName->setText(record.value("fname").toString());
-            ui->sName->setText(record.value("sname").toString());
-            ui->fdName->setText(record.value("fdname").toString());
-            ui->mvl->setText(record.value("mvl").toString());
-            QStringList d = record.value("birth_date").toString().split("-");
-            QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
-            ui->date->setText(date);
-            if(record.value("gender").toString()==tr("м"))
-                ui->mGenderRadio->setChecked(true);
-            else
-                ui->fGenderRadio->setChecked(true);
-            break;
-        }
-        default: break;
+        else
+            ui->fGenderRadio->setChecked(true);
+        break;
+    }
+    default: break;
     }
     ui->mainBox->setCurrentIndex(1);
 }
@@ -149,8 +160,8 @@ void TSController::savePatientProfile()
     record.setValue("mvl",ui->mvl->text().toUpper());
     switch(ui->mGenderRadio->isChecked())
     {
-        case 0: {record.setValue("genger",tr("ж")); break;}
-        case 1: {record.setValue("genger",tr("ж")); break;}
+    case 0: {record.setValue("genger",tr("ж")); break;}
+    case 1: {record.setValue("genger",tr("ж")); break;}
     }
     QStringList d = ui->date->text().split("-");
     QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
@@ -205,17 +216,17 @@ void TSController::savePatientProfile()
 
     switch(currentAction)
     {
-        case CreatePatientProfileAction:
+    case CreatePatientProfileAction:
+    {
+        if(!patientsModel->insertRecord(-1,record))
         {
-            if(!patientsModel->insertRecord(-1,record))
-            {
-                qDebug()<<patientsModel->lastError().text();
-                return;
-            }
-            record = patientsModel->record(patientsModel->rowCount()-1);
+            qDebug()<<patientsModel->lastError().text();
+            return;
+        }
+        record = patientsModel->record(patientsModel->rowCount()-1);
 
-            /* TODO вынести создание базы в отдельный метод */
-            /*
+        /* TODO вынести создание базы в отдельный метод */
+        /*
             examinationsConnection = QSqlDatabase::addDatabase("QSQLITE","ExamConnection");
             examinationsConnection.setDatabaseName("privatedb\\"+record.value("id").toString()+"_"+
                                                    record.value("code").toString()+".db");
@@ -237,45 +248,45 @@ void TSController::savePatientProfile()
                 qDebug()<<q.lastError().text();
             }
             */
-            /* TODO */
-            openPrivateDB(record);
-            QSqlQuery q(examinationsConnection);
-            q.prepare("CREATE TABLE `examinations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT,`date` DATE,`time` TIME,`indication` TEXT,`diagnosis` TEXT,`nurse` VARCHAR(50),`doctor` VARCHAR(50),`tempOut` TEXT,`tempIn` TEXT,`volume`  TEXT);");
-            if(!q.exec())
-            {
-                qDebug()<<q.lastError().text();
-            }
-            patientsModel->setFilter("id="+record.value("id").toString());
-            ui->patientPageLabel->setText(tr("Пациент: ")+record.value("sname").toString()+" "
-                                          +record.value("fname").toString()+" "+record.value("fdname").toString());
-            examinationsModel = new TSExaminations(examinationsConnection);
-            ui->examsTableView->setModel(examinationsModel);
-            ui->examsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-            ui->examsTableView->setColumnHidden(0,true);
-            for(int i=2;i<9;i++)
-            {
-                ui->examsTableView->setColumnHidden(i,true);
-            }
-            ui->mainBox->setCurrentIndex(3);
-            ui->examsTableView->horizontalHeader()->setDefaultSectionSize(ui->examsTableView->width()/2-1);
-            //currentAction = NoAction;
-            break;
-        }
-        case EditPatientProfileAction:
+        /* TODO */
+        openPrivateDB(record);
+        QSqlQuery q(examinationsConnection);
+        q.prepare("CREATE TABLE `examinations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT,`date` DATE,`time` TIME,`indication` TEXT,`diagnosis` TEXT,`nurse` VARCHAR(50),`doctor` VARCHAR(50),`tempOut` TEXT,`tempIn` TEXT,`volume`  TEXT);");
+        if(!q.exec())
         {
-
-            if(!patientsModel->setRecord(0,record))
-            {
-                qDebug()<<patientsModel->lastError().text();
-                return;
-            }
-            patientsModel->submitAll();
-            patientsModel->select();
-            ui->mainBox->setCurrentIndex(2);
-            currentAction = NoAction;
-            break;
+            qDebug()<<q.lastError().text();
         }
-        default: break;
+        patientsModel->setFilter("id="+record.value("id").toString());
+        ui->patientPageLabel->setText(tr("Пациент: ")+record.value("sname").toString()+" "
+                                      +record.value("fname").toString()+" "+record.value("fdname").toString());
+        examinationsModel = new TSExaminations(examinationsConnection);
+        ui->examsTableView->setModel(examinationsModel);
+        ui->examsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+        ui->examsTableView->setColumnHidden(0,true);
+        for(int i=2;i<9;i++)
+        {
+            ui->examsTableView->setColumnHidden(i,true);
+        }
+        ui->mainBox->setCurrentIndex(3);
+        ui->examsTableView->horizontalHeader()->setDefaultSectionSize(ui->examsTableView->width()/2-1);
+        //currentAction = NoAction;
+        break;
+    }
+    case EditPatientProfileAction:
+    {
+
+        if(!patientsModel->setRecord(0,record))
+        {
+            qDebug()<<patientsModel->lastError().text();
+            return;
+        }
+        patientsModel->submitAll();
+        patientsModel->select();
+        ui->mainBox->setCurrentIndex(2);
+        currentAction = NoAction;
+        break;
+    }
+    default: break;
     }
 }
 
@@ -283,19 +294,19 @@ void TSController::rejectPatientProfile()
 {
     switch(currentAction)
     {
-        case CreatePatientProfileAction:
-        {
-            currentAction = NoAction;
-            ui->mainBox->setCurrentIndex(0);
-            break;
-        }
-        case EditPatientProfileAction:
-        {
-            currentAction = NoAction;
-            ui->mainBox->setCurrentIndex(3);
-            break;
-        }
-        default: break;
+    case CreatePatientProfileAction:
+    {
+        currentAction = NoAction;
+        ui->mainBox->setCurrentIndex(0);
+        break;
+    }
+    case EditPatientProfileAction:
+    {
+        currentAction = NoAction;
+        ui->mainBox->setCurrentIndex(3);
+        break;
+    }
+    default: break;
     }
 }
 
@@ -310,13 +321,13 @@ void TSController::calibrateVolume()
     connect(readerThread,SIGNAL(done()),&msgBox,SLOT(accept()));
     switch(msgBox.exec())
     {
-        case 1:
-        {
-            msgBox.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
-            msgBox.setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
-            break;
-        }
-        default: break;
+    case 1:
+    {
+        msgBox.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
+        msgBox.setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
+        break;
+    }
+    default: break;
     }
     disconnect(&msgBox,SLOT(accept()));
     readerThread->stopRead();
@@ -436,14 +447,14 @@ void TSController::plotNow()
     volumeAdaptive = (float)10000/(volInt[1]-volInt[0]);
     tempInZ = h + ceil((float)(tinInt[1]+tinInt[0])*tempInAdaptive*tempInK/2);
     tempOutZ = h + ceil((float)(toutInt[1]+toutInt[0])*tempOutAdaptive*tempOutK/2);
-//    delete tempInInterval;
-//    tempInInterval = tinInt;
-//    delete tempOutInterval;
-//    tempOutInterval = toutInt;
+    //    delete tempInInterval;
+    //    tempInInterval = tinInt;
+    //    delete tempOutInterval;
+    //    tempOutInterval = toutInt;
     float volumeK = volumeScaleRate*h;
     int j = 0, k = 1/horizontalStep;
     i=0;
-    for(j=0;j<W-35;j++)
+    for(j=0;j<W-35;j+=10)
     {
         if(i+startIndex>=k*endIndex)break;
         pVolume.drawLine(j,h-volumeK*volumeAdaptive*volume[i+startIndex]
@@ -452,7 +463,7 @@ void TSController::plotNow()
                          ,j+1,tempInZ-tempInK*tempInAdaptive*tempIn[i+startIndex+k]);
         pTempOut.drawLine(j,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex]
                           ,j+1,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex+k]);
-        i+=k;
+        i+=k*10;
     }
     ui->gVolume->setPixmap(bVolume);
     ui->gTempIn->setPixmap(bTempIn);
@@ -681,15 +692,15 @@ void TSController::scaleTempIn(int value)
     value*=2;
     if(value<0)
     {
-            tempInScaleRate = (-1.0)/value/5000;
+        tempInScaleRate = (-1.0)/value/5000;
     }
     if(value == 0)
     {
-            tempInScaleRate = 1.0/5000;
+        tempInScaleRate = 1.0/5000;
     }
     if(value>0)
     {
-            tempInScaleRate = (float)value/5000;
+        tempInScaleRate = (float)value/5000;
     }
     plotNow();
 }
@@ -711,15 +722,15 @@ void TSController::scaleTempOut(int value)
     value*=2;
     if(value<0)
     {
-            tempOutScaleRate = (-1.0)/value/5000;
+        tempOutScaleRate = (-1.0)/value/5000;
     }
     if(value == 0)
     {
-            tempOutScaleRate = 1.0/5000;
+        tempOutScaleRate = 1.0/5000;
     }
     if(value>0)
     {
-            tempOutScaleRate = (float)value/5000;
+        tempOutScaleRate = (float)value/5000;
     }
     plotNow();
 }
@@ -729,15 +740,15 @@ void TSController::scaleVolume(int value)
     value*=2;
     if(value<0)
     {
-            volumeScaleRate = (-4.0)/value/5000;
+        volumeScaleRate = (-4.0)/value/5000;
     }
     if(value == 0)
     {
-            volumeScaleRate = 4.0/5000;
+        volumeScaleRate = 4.0/5000;
     }
     if(value>0)
     {
-            volumeScaleRate = (float)value*4/5000;
+        volumeScaleRate = (float)value*4/5000;
     }
     plotNow();
 }
@@ -840,8 +851,101 @@ void TSController::openPrivateDB(QSqlRecord record)
     }
 }
 
+QTableWidgetItem* TSController::getQTableWidgetItem(QVariant text){
+    QTableWidgetItem *item = new QTableWidgetItem();
+    item->setData(0,text);
+    item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+
+    return item;
+}
+
 void TSController::breakExam()
 {
     plotingTimer.stop();
     readerThread->stopRead();
+}
+
+void TSController::processDataParams(){
+
+    qDebug()<<"this is result button !";
+    QTableWidget *qtw = ui->resultsTable;
+    qtw->setColumnCount(2);
+    qtw->setRowCount(12);
+    //qtw->resize(250,480);
+    qtw->verticalHeader()->setVisible(false);
+    qtw->setHorizontalHeaderLabels(QString(tr("Параметр; Значение")).split(";"));
+    qtw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    tsanalitics* ga = new tsanalitics();
+    int AvgExpirationSpeed=0, AvgInspirationSpeed=0, MaxExpirationSpeed=0, MaxInspirationSpeed=0, AvgExpirationTime=0, AvgInspirationTime=0,
+            AvgRoundTime=0, AvgTempIn=0, AvgTempOut=0, AvgTempInMinusAvgTempOut=0, InspirationFrequency=0, MinuteInspirationVolume=0;
+    int i=0;
+    int *vo = curveBuffer->volume();
+    for(i=0;i<curveBuffer->end();i++){
+        ga->append(vo[i]);
+    }
+    ga->findExtremums();
+    ga->deleteBadExtremums();
+    AvgExpirationSpeed = ga->getAvgExpiratorySpeed();
+    qtw->setItem(1,0,getQTableWidgetItem(tr("Средняя скорость выдоха")));
+    qtw->setItem(1,1,getQTableWidgetItem(AvgExpirationSpeed));
+
+    AvgInspirationSpeed = ga->getAvgInspiratorySpeed();
+    qtw->setItem(2,0,getQTableWidgetItem(tr("Средняя скорость вдоха")));
+    qtw->setItem(2,1,getQTableWidgetItem(AvgInspirationSpeed));
+
+    MaxExpirationSpeed = ga->getMaxExpiratorySpeed();
+    qtw->setItem(3,0,getQTableWidgetItem(tr("Максимальная скорость выдоха")));
+    qtw->setItem(3,1,getQTableWidgetItem(MaxExpirationSpeed));
+
+    MaxInspirationSpeed = ga->getMaxInspiratorySpeed();
+    qtw->setItem(4,0,getQTableWidgetItem(tr("Максимальная скорость вдоха")));
+    qtw->setItem(4,1,getQTableWidgetItem(MaxInspirationSpeed));
+
+    AvgExpirationTime = ga->getAvgExpiratoryTime();
+    qtw->setItem(5,0,getQTableWidgetItem(tr("Среднее время выдоха")));
+    qtw->setItem(5,1,getQTableWidgetItem(AvgExpirationTime));
+
+    AvgInspirationTime = ga->getAvgInspiratoryTime();
+    qtw->setItem(6,0,getQTableWidgetItem(tr("Среднее время вдоха")));
+    qtw->setItem(6,1,getQTableWidgetItem(AvgInspirationTime));
+
+    AvgRoundTime = AvgExpirationTime+AvgInspirationTime;
+    qtw->setItem(7,0,getQTableWidgetItem(tr("Средняя время цикла")));
+    qtw->setItem(7,1,getQTableWidgetItem(AvgRoundTime));
+
+    InspirationFrequency = ga->getFrequency();
+    qtw->setItem(8,0,getQTableWidgetItem(tr("Частота дыхания")));
+    qtw->setItem(8,1,getQTableWidgetItem(InspirationFrequency));
+
+    MinuteInspirationVolume = ga->getBreathingVolume();
+    qtw->setItem(9,0,getQTableWidgetItem(tr("Минутный объем дыхания")));
+    qtw->setItem(9,1,getQTableWidgetItem(MinuteInspirationVolume));
+
+    ga->clear();
+    int *ti = curveBuffer->tempIn();
+    for(i=0;i<curveBuffer->end();i++){
+        ga->append(ti[i]);
+    }
+    ga->findExtremums();
+    ga->deleteBadExtremums();
+    AvgTempIn = ga->getMinAvgs();
+    qtw->setItem(10,0,getQTableWidgetItem(tr("Средняя температура вдоха")));
+    qtw->setItem(10,1,getQTableWidgetItem(AvgTempIn));
+
+    ga->clear();
+    int *to = curveBuffer->tempOut();
+    for(i=0;i<curveBuffer->end();i++){
+        ga->append(to[i]);
+    }
+    ga->findExtremums();
+    ga->deleteBadExtremums();
+    AvgTempOut = ga->getMaxAvgs();
+    qtw->setItem(11,0,getQTableWidgetItem(tr("Средняя температура выдоха")));
+    qtw->setItem(11,1,getQTableWidgetItem(AvgTempOut));
+
+    AvgTempInMinusAvgTempOut = AvgTempOut-AvgTempIn;
+    qtw->setItem(12,0,getQTableWidgetItem(tr("Средняя Твдоха-Средняя Твыдоха")));
+    qtw->setItem(12,1,getQTableWidgetItem(AvgTempInMinusAvgTempOut));
+    qtw->removeRow(0);
+    qtw->show();
 }

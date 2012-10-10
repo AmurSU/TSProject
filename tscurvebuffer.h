@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QColor>
 #include <fstream>
+#include <tsanalitics.h>
 using namespace std;
 
 #define VOLTAGE_RATE    0.61
@@ -89,6 +90,8 @@ private:
     int ts_minVolume;
     int ts_maxVolume;
     ofstream volfile;
+    int AvgTempIn,AvgTempOut,InspirationFrequency,BreathingVolume;
+    tsanalitics *ga_it, *ga_ot, *ga_vo;
 
 };
 

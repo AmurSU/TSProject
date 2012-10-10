@@ -12,9 +12,10 @@
 #include <QRegExp>
 #include "models/TSExaminations.h"
 #include "models/TSPatients.h"
-
+#include <QTableWidget>
 namespace Ui {
     class TSView;
+    class MainWindow;
 }
 
 enum CurrentAction {NoAction,CreatePatientProfileAction,EditPatientProfileAction,GetingVolZero};
@@ -56,13 +57,16 @@ public slots:
     void changeTempInScrollValue(int value);
     void changeTempOutScrollValue(int value);
     void breakExam();
+    void processDataParams();
 protected:
     void initPaintDevices();
     void resizeEvent(QResizeEvent *evt);
     bool eventFilter(QObject *obj, QEvent *e);
     void openPrivateDB(QSqlRecord record);
 private:
+    QTableWidgetItem* getQTableWidgetItem(QVariant text);
     Ui::TSView *ui;
+    Ui::MainWindow *w;
     CurrentAction currentAction;
     QRegExp nameRegExp;
     QRegExp intRegExp;
