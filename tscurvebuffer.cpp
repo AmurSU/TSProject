@@ -96,7 +96,7 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     ga_it->append(ts_tempIn[ts_end]);
     ga_ot->append(ts_tempOut[ts_end]);
     ga_vo->append(ts_volume[ts_end]);
-    int num=50;
+    int num=500;
     if(ts_end%num==0){
         ga_it->findExtremums();
         ga_it->deleteBadExtremums();
@@ -112,12 +112,21 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
 
         ga_vo->findExtremums();
         ga_vo->deleteBadExtremums();
-        InspirationFrequency = ga_vo->getFrequency();
+        bv = ga_vo->getMinsSum();
+        bvo += bv;
+        if(ts_end==500){
+            dbv=bv;
+        }
+        if(ts_end%6000==0){
+            bvo=0;
+            bv=0;
+        }
         BreathingVolume = ga_vo->getBreathingVolume();
-        ga_vo->clear();
-        qDebug()<<"InspirationFrequency="<<InspirationFrequency;
-        qDebug()<<"BreathingVolume="<<BreathingVolume;
+        InspirationFrequency = ga_vo->getFrequency();
+        qDebug()<<"BreathingVolume"<<BreathingVolume;
+        qDebug()<<"InspirationFrequency"<<InspirationFrequency;
 
+        ga_vo->clear();
         emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);
     }
 

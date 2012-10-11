@@ -35,6 +35,8 @@ public:
     int getMaxExpiratorySpeed();
     void append(int n);
     void clear();
+    int getMaxsSum();
+    int getMinsSum();
 private:
     int getMax();
     int getMin();

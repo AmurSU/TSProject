@@ -52,13 +52,30 @@ float tsanalitics::getMinAvgs(){
 }
 
 int tsanalitics::getFrequency(){
-    int maxc = getMaxsCount();
+    int i=0,fst=0,lst=0;
     int minc = getMinsCount();
-    int time = getTime();
-    if (time == 0 )
-        return -1;
+
+
+    for(i=0;i<ts_extremums->size();i++){
+        if(ts_extremums->at(i).type==-1){
+            fst =ts_extremums->at(i).x;
+            break;
+        }
+    }
+    qDebug()<<"fst="<<fst;
+    for(i=ts_extremums->size()-1;i>0;i--){
+        if(ts_extremums->at(i).type==-1){
+            lst = ts_extremums->at(i).x;
+            break;
+        }
+    }
+    qDebug()<<"lst="<<lst;
+    //lst=ts_extremums->last().x;
+    if(lst!=0 && fst!=0)
+        return minc*6000/(lst-fst);
     else
-        return (maxc+minc)/2/time*60;
+        return -1;
+
 }
 
 int tsanalitics::getMaxsCount(){
@@ -224,11 +241,11 @@ int tsanalitics::getBreathingVolume(){
             sum_mx+=ts_extremums->at(i).y;
         }
         else{
-            sum_mx+=ts_extremums->at(i).y;
+            sum_mn+=ts_extremums->at(i).y;
         }
     }
     if(i>0)
-        return (sum_mx+sum_mn)/i/2;
+        return sum_mn/i;
     else
         return -1;
 }
@@ -293,6 +310,24 @@ void tsanalitics::append(int n){
 
 void tsanalitics::clear(){
     ts_extremums->clear();
+}
+
+int tsanalitics::getMaxsSum(){
+    int sum=0, i=0;
+    for(i=0;i<ts_extremums->size();i++){
+        if(ts_extremums->at(i).type==1)
+            sum+=ts_extremums->at(i).y;
+    }
+    return sum;
+}
+
+int tsanalitics::getMinsSum(){
+    int sum=0, i=0;
+    for(i=0;i<ts_extremums->size();i++){
+        if(ts_extremums->at(i).type==-1)
+            sum+=ts_extremums->at(i).y;
+    }
+    return sum;
 }
 
 int tsanalitics::getMax(){
