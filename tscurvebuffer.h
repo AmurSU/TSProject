@@ -93,6 +93,7 @@ private:
     int AvgTempIn,AvgTempOut,InspirationFrequency,BreathingVolume;
     tsanalitics *ga_it, *ga_ot, *ga_vo;
     int bv,bvo,dbv;
+    QVector<int> BreathVolumes;
 
 };
 

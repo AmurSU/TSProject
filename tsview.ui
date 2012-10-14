@@ -27,7 +27,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="workArea" stretch="5,2">
+     <layout class="QHBoxLayout" name="workArea" stretch="5,3">
       <property name="spacing">
        <number>10</number>
       </property>
@@ -1210,7 +1210,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

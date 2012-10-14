@@ -98,6 +98,7 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     ga_vo->append(ts_volume[ts_end]);
     int num=500;
     if(ts_end%num==0){
+        int sum=0,i=0;
         ga_it->findExtremums();
         ga_it->deleteBadExtremums();
         AvgTempIn = ga_it->getMinAvgs();
@@ -112,16 +113,14 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
 
         ga_vo->findExtremums();
         ga_vo->deleteBadExtremums();
-        bv = ga_vo->getMinsSum();
-        bvo += bv;
-        if(ts_end==500){
-            dbv=bv;
-        }
-        if(ts_end%6000==0){
-            bvo=0;
-            bv=0;
-        }
         BreathingVolume = ga_vo->getBreathingVolume();
+        BreathVolumes.append(BreathingVolume);
+
+        for(i=0;i<BreathVolumes.size();i++){
+            sum+=BreathVolumes.at(i);
+        }
+        BreathingVolume = (sum+BreathingVolume)/(i+1);
+
         InspirationFrequency = ga_vo->getFrequency();
         qDebug()<<"BreathingVolume"<<BreathingVolume;
         qDebug()<<"InspirationFrequency"<<InspirationFrequency;
@@ -129,76 +128,6 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         ga_vo->clear();
         emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);
     }
-
-    /*findLevels();
-    const int time_to_start_count_avgs=30, ts_period_for_count_avgs=50;
-    //qDebug()<<ts_volume[ts_end];
-    if( ts_end > time_to_start_count_avgs ){
-        //Count maxinmums of tempOut
-        if(ts_tempOut[ts_end]>ts_low_max_lev[2]){
-            if (ts_tempOut[ts_end]>ts_up_sqc_max)
-                ts_up_sqc_max=ts_tempOut[ts_end];
-            ts_up_sqc_cnt++;
-        }
-        if(ts_up_sqc_cnt>0 && ts_tempOut[ts_end]<ts_height_min_lev[2]){
-            ts_num_up_extr_TempOut++;
-            ts_up_TempOut_sum+=ts_up_sqc_max;
-            ts_up_sqc_cnt=0;
-            ts_up_sqc_max=-100000;
-        }
-
-        //Count minimums of tempIn
-        if(ts_tempIn[ts_end]<ts_height_min_lev[1]){
-            if (ts_tempIn[ts_end]<ts_down_sqc_min)
-                ts_down_sqc_min=ts_tempIn[ts_end];
-            ts_down_sqc_cnt++;
-        }
-        if(ts_down_sqc_cnt>0 && ts_tempIn[ts_end]>ts_height_min_lev[1]){
-            ts_num_down_extr_TempIn++;
-            ts_down_TempIn_sum+=ts_down_sqc_min;
-            ts_down_sqc_cnt=0;
-            ts_down_sqc_min=100000;
-        }
-        //find volume parameters
-
-        //ts_vm_up_lvl
-        if( ts_integral[ts_end] > ts_low_max_lev[0] && ts_vm_up_cnt>=0){
-            if( ts_integral[ts_end]>ts_vm_max ){
-                ts_vm_max=ts_integral[ts_end];
-            }
-            ts_vm_up_cnt++;
-        }
-        if( ts_volume[ts_end] < ts_low_max_lev[0] && ts_vm_up_cnt>0){
-            ts_vm_up_cnt=0;
-            ts_vm_max_avg+=ts_vm_max;
-            ts_sniff_period_cntr++;
-            ts_sniff_cntr++;
-            ts_vm_max=-100000;
-        }
-
-        if(ts_end%ts_period_for_count_avgs==0 ){
-
-            if( ts_num_up_extr_TempOut>0 && ts_num_down_extr_TempIn>0  && ts_sniff_period_cntr>0){
-                ts_avgto=ts_up_TempOut_sum/ts_num_up_extr_TempOut;
-                ts_avgti=ts_down_TempIn_sum/ts_num_down_extr_TempIn;
-                ts_avgDo=ts_vm_max_avg/ts_num_up_extr_TempOut;
-                emit updateAverageData(ts_avgti,ts_avgto,ts_avgDo,ts_num_up_extr_TempOut*12);
-                qDebug()<<"avgDO"<<ts_avgDo<<"ts_sniff_period_cntr"<<ts_sniff_period_cntr<<"ts_low_max_lev[0]="<<ts_low_max_lev[0];
-                qDebug()<<"avgto="<<ts_avgto<<"; ts_num_up_extr_TempOut="<<ts_num_up_extr_TempOut;
-                qDebug()<<"avgti="<<ts_avgti<<"; ts_num_up_extr_TempIn="<<ts_num_down_extr_TempIn;
-            }
-            ts_avgti=0;
-            ts_down_TempIn_sum=0;
-            ts_num_down_extr_TempIn=0;
-            ts_avgto=0;
-            ts_up_TempOut_sum=0;
-            ts_num_up_extr_TempOut=0;
-            ts_avgDo=0;
-            ts_vm_max_avg=0;
-            ts_sniff_period_cntr=0;
-        }
-    }
-*/
 
     v -= ts_volumeColibration;
     CurvesSegnments segs;
@@ -209,8 +138,10 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         segs.prevTout = ts_tempOut[ts_end];
         if(abs(v)>=8)
         {
-            qDebug()<<(float)ts_integral[ts_end-1]/3200;
-            ts_integral[ts_end] = 0.1*v + ts_integral[ts_end-1];
+            if(realtime)
+                ts_integral[ts_end] = 0.1*v + ts_integral[ts_end-1];
+            else
+                ts_integral[ts_end] = v;
         }
         else ts_integral[ts_end]=0;
         //volfile<<ts_integral[ts_end]<<endl;

@@ -13,8 +13,8 @@ class tsanalitics : public QObject
 public:
     explicit tsanalitics(QObject *parent = 0);
     QVector<int> getMovingAverages(int Period);
-    float getMaxAvgs();
-    float getMinAvgs();
+    int getMaxAvgs();
+    int getMinAvgs();
     int getFrequency();
     float getAvgExpirationFlowRate();
     int getMaxsCount();
@@ -37,6 +37,8 @@ public:
     void clear();
     int getMaxsSum();
     int getMinsSum();
+    int getMVL();
+    void printVec(int k);
 private:
     int getMax();
     int getMin();
