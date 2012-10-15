@@ -4,7 +4,7 @@
 #include <QThread>
 #include "tsusb3000reader.h"
 
-enum TSUsbReadingType {ReadAll,ReadForVolZer,ReadForTemp};
+enum TSUsbReadingType {ReadAll,ReadForVolZer,ReadForVolVal,ReadForTemp};
 
 class TSReaderThread : public QThread
 {
@@ -19,6 +19,7 @@ public:
     bool doWork();
 signals:
     void done();
+    void changeProgress(int value);
 public slots:
 private:
     TSCurveBuffer *buffer;

@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 QT       += core gui\
-            sql
+            sql\
+            xml
 
 TARGET = TSProject
 TEMPLATE = app
@@ -21,7 +22,9 @@ SOURCES += main.cpp\
     CRUDmw.cpp \
     bdgod.cpp \
     models/TSPatients.cpp \
-    models/TSExaminations.cpp
+    models/TSExaminations.cpp \
+    tsanalitics.cpp \
+    models/tsconfig.cpp
 
 HEADERS  += \
     tsmodel.h \
@@ -37,7 +40,9 @@ HEADERS  += \
     bdgod.h \
     bdgod.h \
     models/TSPatients.h \
-    models/TSExaminations.h
+    models/TSExaminations.h \
+    tsanalitics.h \
+    models/tsconfig.h
 
 LIBS += -L"dll/*.dll"
 FORMS    += \
@@ -45,12 +50,20 @@ FORMS    += \
     colibrateDialog.ui \
     tsview.ui\
     CRUDmw.ui \
-    dialog.ui
+    dialog.ui \
+    tsprogressdialog.ui \
+    tsvolsignalwidget.ui
 RESOURCES += \
     iconResourse.qrc
 
 OTHER_FILES += \
     db_structure.sql
+
+
+
+
+
+
 
 
 

@@ -21,10 +21,12 @@ void TSReaderThread::stopRead (){
 void TSReaderThread::run(){
     reader = new TSUsb3000Reader(this);
     reader->initDevice(buffer);
+
     switch (readingType)
     {
         case ReadAll:
         {
+        qDebug()<<"read all "<<this->ReadingStarted;
             while(this->ReadingStarted)
             {
                 SHORT* adc;
@@ -36,11 +38,11 @@ void TSReaderThread::run(){
                     end = buffer->end();*/
                     //qDebug()<<volume[end]<<tempIn[end]<<tempOut[end];
                     buffer->append(adc[0],adc[1],adc[2]);
-                    sleep(0.1);
+                    msleep(10);
                 }
                 else{
                     qDebug()<<"Get crashe";
-                    sleep(0.1);
+                    msleep(10);
                 }
                 delete adc;
             }
@@ -54,16 +56,39 @@ void TSReaderThread::run(){
                 SHORT* adc;
                 if ((adc=reader->readData())!=0){
                     avg+=adc[0];
-                    sleep(0.1);
+                    if(i%10)
+                        emit changeProgress(i/3);
+                    msleep(10);
                 }
                 else{
                     qDebug()<<"Get crashe";
-                    sleep(0.1);
+                    msleep(10);
                 }
                 delete adc;
             }
             avg/=300;
             buffer->setVolumeColibration(avg);
+            break;
+        }
+        case ReadForVolVal:
+        {
+            buffer->setEnd(0);
+            for(int i=0;i<1200;i++)
+            {
+                SHORT* adc;
+                if ((adc=reader->readData())!=0){
+                    buffer->append(adc[0],0,0);
+                    if(i%24)
+                        emit changeProgress(i/12);
+                    msleep(10);
+                }
+                else{
+                    qDebug()<<"Get crashe";
+                    msleep(10);
+                }
+                delete adc;
+            }
+
             break;
         }
     }

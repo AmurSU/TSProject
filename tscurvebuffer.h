@@ -4,14 +4,17 @@
 #include <QObject>
 #include <QColor>
 #include <fstream>
+#include <QSettings>
+#include <tsanalitics.h>
+#include <QVector>
 using namespace std;
 
 #define VOLTAGE_RATE    0.61
-#define REF_VOLTAGE_1   -4778
-#define REF_VOLTAGE_2   -5615
-#define TAN_1           0.0056
-#define TAN_2           0.0048
-#define REF_TEMP        -9
+#define REF_VOLTAGE_1   ts_tempInVolt
+#define REF_VOLTAGE_2   ts_tempOutVolt
+#define TAN_1           ts_tanTempIn
+#define TAN_2           ts_tanTempOut
+#define REF_TEMP        ts_refTemp
 
 struct CurvesSegnments
 {
@@ -45,6 +48,12 @@ public:
     int* getTempInInterval();
     int* getTempOutInterval();
     int* getVolumeInterval();
+    int volumeColibration();
+    void setVolumeConverts(int pos,int neg);
+    float volToLtr(int vol);
+    int setReference(QSettings set);
+    float tempInToDeg(int temp);
+    float tempOutToDeg(int temp);
     FILE* out_file;
     QColor volColor;
     QColor tinColor;
@@ -88,8 +97,18 @@ private:
     int ts_maxTempOut;
     int ts_minVolume;
     int ts_maxVolume;
+    int ts_volumePosConvert;
+    int ts_volumeNegConvert;
+    float ts_tanTempIn;
+    float ts_tanTempOut;
+    int ts_tempInVolt;
+    int ts_tempOutVolt;
+    int ts_refTemp;
     ofstream volfile;
-
+    int AvgTempIn,AvgTempOut,InspirationFrequency,BreathingVolume;
+        tsanalitics *ga_it, *ga_ot, *ga_vo;
+    int bv,bvo,dbv;
+    QVector<int> BreathVolumes;
 };
 
 #endif // TSCURVEBUFFER_H

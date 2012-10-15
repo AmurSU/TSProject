@@ -450,26 +450,25 @@ void TSController::plotNow()
     pVolume.setPen(QColor(0,0,0));
     pTempIn.setPen(QColor(0,0,0));
     pTempOut.setPen(curveBuffer->toutColor);
-    pVolume.drawLine(0,h,W,h);
-    pTempIn.drawLine(0,h+tempInZerPos*h,W,h+tempInZerPos*h);
-    pTempOut.drawLine(0,h,W,h);
+    //pVolume.drawLine(0,h,W,h);
+    //pTempIn.drawLine(0,h+tempInZerPos*h,W,h+tempInZerPos*h);
+    //pTempOut.drawLine(0,h,W,h);
     pVolume.setPen(QColor(255,0,0));
     int* tinInt = curveBuffer->getTempInInterval();
     int* toutInt = curveBuffer->getTempOutInterval();
     int* volInt = curveBuffer->getVolumeInterval();
-    //qDebug()<<tinInt[0]<<" "<<tinInt[1];
-    float tempInK = tempInScaleRate*h;//*abs(tempInInterval[0]-tempInInterval[1])/abs(tinInt[1]-tinInt[0]);
-    float tempOutK = tempOutScaleRate*h;
+    float tempInK = 1;//tempInScaleRate*h;//*abs(tempInInterval[0]-tempInInterval[1])/abs(tinInt[1]-tinInt[0]);
+    float tempOutK = 1;//tempOutScaleRate*h;
     float tempInZ = h;// + tempInZerPos*h;
     float tempOutZ = h;// + tempInZerPos*h;
-    tempInAdaptive = (float)10000/
+    tempInAdaptive = (float)H/
             (tinInt[1]-tinInt[0]);
-    tempOutAdaptive = (float)10000/
+    tempOutAdaptive = (float)H/
             (toutInt[1]-toutInt[0]);
-    volumeAdaptive = (float)10000/(volInt[1]-volInt[0]);
+    volumeAdaptive = (float)H/(volInt[1]-volInt[0]);
     tempInZ = h + ceil((float)(tinInt[1]+tinInt[0])*tempInAdaptive*tempInK/2);
     tempOutZ = h + ceil((float)(toutInt[1]+toutInt[0])*tempOutAdaptive*tempOutK/2);
-    float volumeK = volumeScaleRate*h;
+    float volumeK =1;// volumeScaleRate*h;
     int j = 0, k = 1/horizontalStep;
     i=0;
     for(j=0;j<W-35;j++)
@@ -492,7 +491,6 @@ void TSController::plotNow()
         ui->horizontalScrollBar->setMaximum(startIndex/10);
         ui->horizontalScrollBar->setValue(startIndex/10);
     }
-    //if(endIndex%30)
 }
 
 void TSController::startExam()
@@ -779,7 +777,6 @@ void TSController::scaleForHorizontal(int value)
     if(value!=0)
     {
         horizontalStep = (-1.0)/value;
-        //curveBuffer->setEnd((-1)*value*W-35);
         curveBuffer->setEnd(W-35);
     }
     else
@@ -869,7 +866,6 @@ void TSController::openPrivateDB(QSqlRecord record)
     if(!examinationsConnection.open())
     {
         qDebug()<<examinationsConnection.lastError().text();
-        //patientsModel->removeRow(patientsModel->rowCount()-1);
         QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("Ошибка"));
         msgBox.setText(tr("Произошла ошибка. Обратитесь к разработчикам. Код: 00002"));
