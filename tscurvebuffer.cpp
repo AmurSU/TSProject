@@ -320,27 +320,27 @@ float TSCurveBuffer::volToLtr(int vol)
 
 float TSCurveBuffer::tempInToDeg(int temp)
 {
-    return (float)TAN_1*(REF_VOLTAGE_1-temp)+(float)REF_TEMP;
+    return TAN_1*(REF_VOLTAGE_1-temp);//+(float)REF_TEMP;
 }
 
 float TSCurveBuffer::tempOutToDeg(int temp)
 {
-    return (float)TAN_2*(REF_VOLTAGE_2-temp)+(float)REF_TEMP;
+    return TAN_2*(REF_VOLTAGE_2-temp);//+(float)REF_TEMP;
 }
 
-int TSCurveBuffer::setReference(QSettings set)
+int TSCurveBuffer::setReference(QSettings *set)
 {
-    if(!set.contains("RefTemp")||!set.contains("tempInVolt")||
-            !set.contains("tanTempIn")||!set.contains("tempOutVolt")||
-            !set.contains("tanTempOut"))
-    {
-        qDebug()<<"Reference settings error";
+    if(!set->contains("RefTemp")||!set->contains("tempInVolt")||
+            !set->contains("tanTempIn")||!set->contains("tempOutVolt")||
+            !set->contains("tanTempOut")){
+        qDebug()<<"settings.ini error";
         return 1;
     }
-    else
-    {
-        ts_tempInVolt = set.value("tempInVolt").toInt();
-        ts_tempOutVolt = set.value("tempOutVolt").toInt();
-        ts_tanTempIn = set.value("tanTempIn").toInt();
+    else{
+        ts_refTemp = set->value("RefTemp").toInt();
+        ts_tempInVolt = set->value("tempInVolt").toInt();
+        ts_tempOutVolt = set->value("tempOutVolt").toInt();
+        ts_tanTempIn = set->value("tanTempIn").toDouble();
+        ts_tanTempOut = set->value("tanTempOut").toDouble();
     }
 }

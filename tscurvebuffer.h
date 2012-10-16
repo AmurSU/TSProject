@@ -52,7 +52,7 @@ public:
     int volumeColibration();
     void setVolumeConverts(int pos,int neg);
     float volToLtr(int vol);
-    int setReference(QSettings set);
+    int setReference(QSettings *set);
     float tempInToDeg(int temp);
     float tempOutToDeg(int temp);
     FILE* out_file;

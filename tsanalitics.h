@@ -39,9 +39,9 @@ public:
     int getMinsSum();
     int getMVL();
     void printVec(int k);
-private:
     int getMax();
     int getMin();
+private:
     int fabs(int a);
     void deleteEqualSignExtremums();
     void deleteSimilarInMeaningExtremums();

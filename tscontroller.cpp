@@ -30,11 +30,13 @@ TSController::TSController(QWidget *parent) :
 {
     QTextCodec::setCodecForTr(QTextCodec::codecForName("CP-1251"));
     QSettings s("settings.ini",QSettings::IniFormat);
+    qDebug()<<"settings.ini->"<<s.value("RefTemp").toInt();
     ui->setupUi(this);
     ui->mainBox->setCurrentIndex(0);
     currentAction = NoAction;
     openUser = false;
     curveBuffer = new TSCurveBuffer();
+    curveBuffer->setReference(&s);
     readerThread = new TSReaderThread(curveBuffer);
     recordingStarted = false;
     tempInInterval = curveBuffer->getTempInInterval();
@@ -624,9 +626,13 @@ void TSController::openPatientProfile(QModelIndex ind)
 
 void TSController::showAverageData(int avgTempIn, int avgTempOut, int avgDO, int avgCHD)
 {
-    ui->volumeInfoLabel->setText(tr("дн=")+QString::number(avgDO)+tr("\nвд=")+QString::number(avgCHD));
-    ui->tinInfoLabel->setText("Tin="+QString::number(avgTempIn));
-    ui->toutInfolabel->setText("Tout="+QString::number(avgTempOut));
+    ui->volumeInfoLabel->setText(tr("дн=")+QString::number(
+                                     curveBuffer->volToLtr(avgDO),'g',2)
+                                 +tr(" к\nвд=")+QString::number(avgCHD));
+    ui->tinInfoLabel->setText("Tin="+QString::number(
+                                  curveBuffer->tempInToDeg(avgTempIn),'g',2)+" 'C");
+    ui->toutInfolabel->setText("Tout="+QString::number(
+                                   curveBuffer->tempInToDeg(avgTempOut),'g',2)+" 'C");
 }
 
 
