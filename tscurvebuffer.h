@@ -7,6 +7,7 @@
 #include <QSettings>
 #include <tsanalitics.h>
 #include <QVector>
+#include <tsanalitics.h>
 using namespace std;
 
 #define VOLTAGE_RATE    0.61
@@ -106,9 +107,10 @@ private:
     int ts_refTemp;
     ofstream volfile;
     int AvgTempIn,AvgTempOut,InspirationFrequency,BreathingVolume;
-        tsanalitics *ga_it, *ga_ot, *ga_vo;
+    tsanalitics *ga_it, *ga_ot, *ga_vo;
     int bv,bvo,dbv;
     QVector<int> BreathVolumes;
+
 };
 
 #endif // TSCURVEBUFFER_H

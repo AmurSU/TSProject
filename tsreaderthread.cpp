@@ -31,12 +31,6 @@ void TSReaderThread::run(){
             {
                 SHORT* adc;
                 if ((adc=reader->readData())!=0){
-                    /*qDebug()<<"It works";*/
-                    /*volume= buffer->volume();
-                    tempIn = buffer->tempIn();
-                    tempOut = buffer->tempOut();
-                    end = buffer->end();*/
-                    //qDebug()<<volume[end]<<tempIn[end]<<tempOut[end];
                     buffer->append(adc[0],adc[1],adc[2]);
                     msleep(10);
                 }

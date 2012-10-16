@@ -89,11 +89,9 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         if(tO<=ts_minTempOut) ts_minTempOut=tO;
         if(tO>ts_maxTempOut) ts_maxTempOut=tO;
     }
-
-
-    ga_it->append(ts_tempIn[ts_end]);
-    ga_ot->append(ts_tempOut[ts_end]);
-    ga_vo->append(ts_volume[ts_end]);
+    ga_it->append(ts_tempIn[ts_end-1]);
+    ga_ot->append(ts_tempOut[ts_end-1]);
+    ga_vo->append(ts_integral[ts_end-1]);
     int num=500;
     if(ts_end%num==0){
         int sum=0,i=0;
@@ -102,7 +100,7 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         AvgTempIn = ga_it->getMinAvgs();
         ga_it->clear();
         qDebug()<<"AvgTempIn="<<AvgTempIn;
-
+        //qDebug()<<"vfdvdfvdfvdfvbdfv";
         ga_ot->findExtremums();
         ga_ot->deleteBadExtremums();
         AvgTempOut = ga_ot->getMaxAvgs();
@@ -126,7 +124,6 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         ga_vo->clear();
         emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);
     }
-
     v -= ts_volumeColibration;
     CurvesSegnments segs;
     if(ts_end>0)
