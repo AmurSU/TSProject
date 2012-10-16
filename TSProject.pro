@@ -48,9 +48,11 @@ FORMS    += \
     tsview.ui\
     CRUDmw.ui \
     dialog.ui \
-    tsresultsview.ui
+    tsresultsview.ui \
+    tsvolsignalwidget.ui
 RESOURCES += \
     iconResourse.qrc
 
 OTHER_FILES += \
     db_structure.sql
+

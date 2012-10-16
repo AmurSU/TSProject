@@ -17,6 +17,7 @@ namespace Ui {
     class TSView;
     class TSProgressDialog;
     class MainWindow;
+    class TSVolSignalWidget;
 }
 
 enum CurrentAction {NoAction,CreatePatientProfileAction,EditPatientProfileAction,GetingVolZero};
@@ -68,6 +69,7 @@ private:
     QTableWidgetItem* getQTableWidgetItem(QVariant text);
     Ui::TSView *ui;
     Ui::MainWindow *w;
+    Ui::TSVolSignalWidget *volWidget;
     CurrentAction currentAction;
     QRegExp nameRegExp;
     QRegExp intRegExp;

@@ -1,6 +1,7 @@
 #include "tscontroller.h"
 #include "ui_tsview.h"
 #include "ui_tsprogressdialog.h"
+#include "ui_tsvolsignalwidget.h"
 #include <QtSql/QSqlRecord>
 #include <QMessageBox>
 #include <QTextCodec>
@@ -511,6 +512,12 @@ void TSController::startExam()
     horizontalStep = 1.0;
     initPaintDevices();
     plotingTimer.start(100);
+    QDialog *d = new QDialog(this);
+    volWidget = new Ui::TSVolSignalWidget();
+    volWidget->setupUi(d);
+    volWidget->MVL->setText("50%");
+    d->setModal(false);
+    d->show();
     ui->startExam->setEnabled(false);
 }
 
@@ -633,6 +640,10 @@ void TSController::showAverageData(int avgTempIn, int avgTempOut, int avgDO, int
                                   curveBuffer->tempInToDeg(avgTempIn),'g',2)+" 'C");
     ui->toutInfolabel->setText("Tout="+QString::number(
                                    curveBuffer->tempInToDeg(avgTempOut),'g',2)+" 'C");
+    int mvl = patientsModel->record(0).value("mvl").toDouble()*100/
+            (curveBuffer->volToLtr(avgDO)*avgCHD);
+    if(recordingStarted&&curveBuffer->end()>500)
+        volWidget->MVL->setText(QString::number(mvl)+"%");
 }
 
 
