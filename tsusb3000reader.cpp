@@ -26,15 +26,14 @@ bool TSUsb3000Reader::initDevice(TSCurveBuffer *_bf){
     CreateInstance RtCreateInstance = (CreateInstance) myLib.resolve("RtCreateInstance");
     if (RtCreateInstance) {
         pModule = static_cast<IRTUSB3000 *> (RtCreateInstance("usb3000"));
-        qDebug() << "Create usb3000 instance";
+        if(pModule == NULL){
+            qDebug() << "Can`t create usb3000 instance";
+            return false;
+        }else{
+            qDebug() << "Create usb3000 instance";
 
+        }
     }
-    else{
-        qDebug() << "Can`t create usb3000 instance";
-        this->setLastError("Can`t create usb3000 instance");
-        return false;
-    }
-
     WORD i;
     // проверим версию используемой библиотеки Rtusbapi.dll
     if ((DllVersion = RtGetDllVersion()) != CURRENT_VERSION_RTUSBAPI) {
@@ -157,7 +156,7 @@ SHORT* TSUsb3000Reader::readData(){
     else
     {
         this->setLastError("Can`t read from device");
-        return 0;
+        return NULL;
     }
 }
 bool TSUsb3000Reader::closeReader(){

@@ -49,7 +49,8 @@ FORMS    += \
     CRUDmw.ui \
     dialog.ui \
     tsresultsview.ui \
-    tsvolsignalwidget.ui
+    tsvolsignalwidget.ui \
+    tsprogressdialog.ui
 RESOURCES += \
     iconResourse.qrc
 
