@@ -10,10 +10,15 @@ void TSReaderThread::f1 (){
 }
 void TSReaderThread::startRead (){
     ReadingStarted = true;
+
     this->start();
 }
 void TSReaderThread::stopRead (){
     ReadingStarted=false;
+    if(reader!=0){
+        delete reader;
+        reader = 0;
+    }
     this->terminate();
 }
 
@@ -61,7 +66,7 @@ void TSReaderThread::run(){
                 delete adc;
             }
             avg/=300;
-            buffer->setVolumeColibration(avg);
+            buffer->setVolumeColibration(avg,true);
             break;
         }
         case ReadForVolVal:
@@ -87,6 +92,7 @@ void TSReaderThread::run(){
         }
     }
     delete reader;
+    reader = 0;
     emit done();
     exec();
 }

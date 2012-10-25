@@ -30,14 +30,17 @@ TSController::TSController(QWidget *parent) :
     QMainWindow(parent),ui(new Ui::TSView)
 {
     QTextCodec::setCodecForTr(QTextCodec::codecForName("CP-1251"));
-    QSettings s("settings.ini",QSettings::IniFormat);
-    qDebug()<<"settings.ini->"<<s.value("RefTemp").toInt();
+    QSettings settings("settings.ini",QSettings::IniFormat);
+
     ui->setupUi(this);
     ui->mainBox->setCurrentIndex(0);
     currentAction = NoAction;
     openUser = false;
     curveBuffer = new TSCurveBuffer();
-    curveBuffer->setReference(&s);
+    volume = curveBuffer->volume();
+    tempIn = curveBuffer->tempIn();
+    tempOut = curveBuffer->tempOut();
+    curveBuffer->setReference(&settings);
     readerThread = new TSReaderThread(curveBuffer);
     recordingStarted = false;
     tempInInterval = curveBuffer->getTempInInterval();
@@ -51,6 +54,7 @@ TSController::TSController(QWidget *parent) :
     ui->tempInScaleSlider->setVisible(false);
     ui->tempOutScaleSlider->setVisible(false);
     ui->volumeScaleSlider->setVisible(false);
+    ui->breakExamButton->setVisible(false);
     patientsConnection = QSqlDatabase::addDatabase("QSQLITE","Patients");
     patientsConnection.setDatabaseName("commondb\\common.db");
     if(!patientsConnection.open())
@@ -90,6 +94,8 @@ TSController::TSController(QWidget *parent) :
     connect(ui->tempInScroll,SIGNAL(valueChanged(int)),this,SLOT(changeTempInScrollValue(int)));
     connect(ui->breakExamButton,SIGNAL(clicked()),this,SLOT(breakExam()));
     connect(ui->resultsButton,SIGNAL(clicked()),this,SLOT(processDataParams()));
+    connect(ui->patientsTableView,SIGNAL(deleteRequest(int)),this,SLOT(deletePatient(int)));
+    connect(ui->examsTableView,SIGNAL(deleteRequest(int)),this,SLOT(deleteExam(int)));
     ui->resultsButton->setEnabled(true);
     ui->backPatientProfileButton->installEventFilter(this);
     ui->backPatientListButton->installEventFilter(this);
@@ -230,34 +236,9 @@ void TSController::savePatientProfile()
             return;
         }
         record = patientsModel->record(patientsModel->rowCount()-1);
-
-        /* TODO вынести создание базы в отдельный метод */
-        /*
-            examinationsConnection = QSqlDatabase::addDatabase("QSQLITE","ExamConnection");
-            examinationsConnection.setDatabaseName("privatedb\\"+record.value("id").toString()+"_"+
-                                                   record.value("code").toString()+".db");
-            if(!examinationsConnection.open())
-            {
-                qDebug()<<examinationsConnection.lastError().text();
-                patientsModel->removeRow(patientsModel->rowCount()-1);
-                QMessageBox msgBox(this);
-                msgBox.setWindowTitle(tr("Ошибка"));
-                msgBox.setText(tr("Произошла ошибка. Обратитесь к разработчикам. Код: 00002"));
-                msgBox.exec();
-                ui->mainBox->setCurrentIndex(0);
-                return;
-            }
-            QSqlQuery q(examinationsConnection);
-            q.prepare("CREATE TABLE `examinations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT,`date` DATE,`time` TIME,`indication` TEXT,`diagnosis` TEXT,`nurse` VARCHAR(50),`doctor` VARCHAR(50),`tempOut` TEXT,`tempIn` TEXT,`volume`  TEXT);");
-            if(!q.exec())
-            {
-                qDebug()<<q.lastError().text();
-            }
-            */
-        /* TODO */
         openPrivateDB(record);
         QSqlQuery q(examinationsConnection);
-        q.prepare("CREATE TABLE `examinations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT,`date` DATE,`time` TIME,`indication` TEXT,`diagnosis` TEXT,`nurse` VARCHAR(50),`doctor` VARCHAR(50),`tempOut` TEXT,`tempIn` TEXT,`volume`  TEXT);");
+        q.prepare("CREATE TABLE `examinations` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT,`date` DATE,`time` TIME,`indication` TEXT, `diagnosis` TEXT,`nurse` VARCHAR(50),`doctor` VARCHAR(50), `tempOut` TEXT,`tempIn` TEXT,`volume`  TEXT, `volZero` INT,volIn INT, volOut INT);");
         if(!q.exec())
         {
             qDebug()<<q.lastError().text();
@@ -275,7 +256,6 @@ void TSController::savePatientProfile()
         }
         ui->mainBox->setCurrentIndex(3);
         ui->examsTableView->horizontalHeader()->setDefaultSectionSize(ui->examsTableView->width()/2-1);
-        //currentAction = NoAction;
         break;
     }
     case EditPatientProfileAction:
@@ -316,71 +296,70 @@ void TSController::rejectPatientProfile()
     }
 }
 
-void TSController::calibrateVolume()
-{
-    ofstream f("test.csv");
-
+void TSController::calibrateVolume(){
+    QSettings settings("settings.ini",QSettings::IniFormat);
     QDialog d(this);
     Ui::TSProgressDialog dui;
     dui.setupUi(&d);
     d.setWindowTitle(tr("Предупреждение"));
     readerThread->setReadingType(ReadForVolZer);
-    /*QMessageBox msgBox(this);
-    msgBox.setWindowTitle(tr("Предупреждение"));
-    msgBox.setText(tr("Идет подготовка.\nПожалуйста подождите около 5 секунд..."));
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setFont(QFont("MS Shell Dlg 2",12,12));*/
     readerThread->startRead();
     dui.information->setText(tr("Идет подготовка..."));
+    dui.acceptButton->setVisible(false);
     connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
     connect(readerThread,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
-    switch(d.exec())
-    {
-        case 1:
-        {
-            //msgBox.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
+    switch(d.exec()){
+        case 1:{
+            settings.setValue("volZero",curveBuffer->volumeColibration());
             dui.information->setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
             dui.progressBar->setVisible(false);
+            dui.acceptButton->setVisible(true);
             break;
         }
         default: break;
     }
     disconnect(&d,SLOT(accept()));
     readerThread->stopRead();
-    if(d.exec()==1)
-    {
+    if(d.exec()==1){
+        dui.acceptButton->setVisible(false);
+        connect(&cPlotingTimer,SIGNAL(timeout()),this,SLOT(plotCalibration()));
         readerThread->setReadingType(ReadForVolVal);
         readerThread->startRead();
-        connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
-        dui.progressBar->setVisible(true);
-        dui.information->setText(tr("Идет калибровка. Подождите..."));
+        cPlotingTimer.start(100);
+        //connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
+        //dui.progressBar->setVisible(true);
+        //dui.information->setText(tr("Идет калибровка. Подождите..."));
     }
 
-    if(d.exec()==1)
-    {
+    /*if(d.exec()==1){
         int *vol = curveBuffer->volume();
         tsanalitics ta;
-        for(int i=0;i<curveBuffer->end();i++)
-        {
+        for(int i=0;i<curveBuffer->end();i++){
             ta.append(vol[i]);
             f<<vol[i]<<endl;
         }
         ta.findExtremums();
         ta.deleteBadExtremums();
+        settings.setValue("volOutLtr",ta.getMin());
+        settings.setValue("volInLtr",ta.getMax());
         curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
         readerThread->stopRead();
         curveBuffer->setEnd(0);
+        settings.sync();
         dui.progressBar->setVisible(false);
+        dui.acceptButton->setVisible(true);
         dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
     }
-    if(d.exec()==1)
-    {
+    if(d.exec()==1){
         ui->mainBox->setCurrentIndex(5);
         ui->managmentBox->setVisible(true);
         ui->managmentBox->setEnabled(true);
+        ui->startExam->setEnabled(true);
+        ui->stopExam->setEnabled(true);
         initPaintDevices();
         plotNow();
     }
+    */
 }
 
 void TSController::calibrateTemperature()
@@ -390,7 +369,15 @@ void TSController::calibrateTemperature()
 
 void TSController::rejectColibration()
 {
+    QSettings settings("settings.ini",QSettings::IniFormat);
+    curveBuffer->setVolumeColibration(settings.value("volZero").toInt(),false);
+    qDebug()<<"volColibr: "<<curveBuffer->volumeColibration();
+    curveBuffer->setVolumeConverts(settings.value("volInLtr").toInt(),
+                                   settings.value("volOutLtr").toInt());
     ui->mainBox->setCurrentIndex(5);
+    initPaintDevices();
+    plotNow();
+    ui->managmentBox->setVisible(true);
     ui->managmentBox->setEnabled(true);
 }
 
@@ -409,9 +396,6 @@ void TSController::initPaintDevices()
     pTempOut.begin(&bTempOut);
     screenLimit = W;
     curveBuffer->setScreenLimit(W);
-    volume = curveBuffer->volume();
-    tempIn = curveBuffer->tempIn();
-    tempOut = curveBuffer->tempOut();
     startIndex = 0;
 }
 
@@ -501,10 +485,76 @@ void TSController::plotNow()
     }
 }
 
+void TSController::plotCalibration(){
+    int endIndex = curveBuffer->end();
+    if(endIndex<1200){
+        pcVolume.fillRect(0,0,cW,cH,Qt::white);
+        int h = cH/2;
+        int step = h/10;
+        if(h%10>=5){
+            h+=step/2;
+        }
+        int i;
+        pcVolume.setPen(QColor(225,225,225));
+        for(i=step;i<h;i+=step){
+            pcVolume.drawLine(0,h+i,cW,h+i);
+            pcVolume.drawLine(0,h-i,cW,h-i);
+        }
+        for(i=10;i<cW;i+=10){
+            pcVolume.drawLine(i,0,i,cH);
+        }
+        float K = (float)h/2000;
+        step = ceil((float)1200/cW);
+        pcVolume.setPen(QColor(0,0,0));
+        int j=0;
+        for(i=0;i<cW-1;i++){
+            if(i>=endIndex||j+step>=endIndex)break;
+            pcVolume.drawLine(i,h-K*volume[j],i+1,h-K*volume[j+step]);
+            j+=step;
+        }
+        ui->calibrateVolumeAnimation->setPixmap(bcVolume);
+    }
+    else{
+        cPlotingTimer.stop();
+        QSettings settings("settings.ini",QSettings::IniFormat);
+        QDialog d(this);
+        Ui::TSProgressDialog dui;
+        dui.setupUi(&d);
+        d.setWindowTitle(tr("Предупреждение"));
+        int *vol = curveBuffer->volume();
+        tsanalitics ta;
+        for(int i=0;i<curveBuffer->end();i++){
+            ta.append(vol[i]);
+
+        }
+        ta.findExtremums();
+        ta.deleteBadExtremums();
+        settings.setValue("volOutLtr",ta.getMin());
+        settings.setValue("volInLtr",ta.getMax());
+        curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
+        qDebug()<<"reading is finished";
+        readerThread->stopRead();
+        curveBuffer->setEnd(0);
+        settings.sync();
+        dui.progressBar->setVisible(false);
+        dui.acceptButton->setVisible(true);
+        dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
+        if(d.exec()==1){
+            ui->mainBox->setCurrentIndex(5);
+            ui->managmentBox->setVisible(true);
+            ui->managmentBox->setEnabled(true);
+            ui->startExam->setEnabled(true);
+            ui->stopExam->setEnabled(true);
+            initPaintDevices();
+            plotNow();
+        }
+    }
+}
+
 void TSController::startExam()
 {
-    recordingStarted = true;
     readerThread->setReadingType(ReadAll);
+    recordingStarted = true;
     readerThread->startRead();
     tempInScaleRate = 1.0/5000;
     tempOutScaleRate = 1.0/5000;
@@ -551,6 +601,9 @@ void TSController::stopExam()
             val.append(QString::number(mass[i])+";");
         }
         record.setValue("tempOut",val);
+        record.setValue("volZero",0);//curveBuffer->volumeColibration());
+        record.setValue("volIn",curveBuffer->volumeConverts().at(1));
+        record.setValue("volOut",curveBuffer->volumeConverts().at(0));
         record.setValue("date",QDate::currentDate().toString("yyyy-MM-dd"));
         record.setValue("time",QTime::currentTime().toString("hh:mm"));
         if(!examinationsModel->insertRecord(-1,record))
@@ -669,6 +722,14 @@ void TSController::scrollGraphics(int value)
 void TSController::createNewExam()
 {
     ui->mainBox->setCurrentIndex(4);
+    cH = ui->calibrateVolumeAnimation->height();
+    cW = ui->calibrateVolumeAnimation->width();
+    qDebug()<<"height: "<<cH<<" width: "<<cW;
+    bcVolume = QPixmap(cW,cH);
+    qDebug()<<"height: "<<bcVolume.height()<<" width: "<<bcVolume.width();
+    pcVolume.begin(&bcVolume);
+    curveBuffer->setEnd(0);
+    plotCalibration();
 }
 
 void TSController::openExam(QModelIndex ind)
@@ -692,7 +753,12 @@ void TSController::openExam(QModelIndex ind)
         tempout[i] = list.at(i).toInt();
     }
     curveBuffer->setValues(volume,tempin,tempout,list.count());
-    //curveBuffer->setStartIndex(0);
+    curveBuffer->setVolumeColibration(record.value("volZero").toInt(),false);
+
+    curveBuffer->setVolumeConverts(record.value("volOut").toInt(),
+                                   record.value("volIn").toInt());
+    ui->startExam->setEnabled(false);
+    ui->stopExam->setEnabled(false);
     ui->mainBox->setCurrentIndex(5);
     ui->horizontalScrollBar->setMaximum((list.count()-ui->gVolume->width())/10);
     ui->horizontalScrollBar->setValue(0);
@@ -706,6 +772,7 @@ void TSController::openExam(QModelIndex ind)
     ui->managmentBox->setVisible(true);
     ui->managmentBox->setEnabled(true);
     plotNow();
+    processDataParams();
 }
 
 void TSController::resizeEvent(QResizeEvent *evt)
@@ -999,4 +1066,23 @@ void TSController::processDataParams(){
     qtw->setItem(13,1,getQTableWidgetItem(AvgTempInMinusAvgTempOut));
     qtw->removeRow(0);
     qtw->show();
+}
+
+void TSController::deletePatient(int index){
+    QSqlRecord record = patientsModel->record(index);
+    QString fileName = "privatedb\\";
+    fileName.append(record.value("id").toString()+"_"
+                    +record.value("code").toString()+".db");
+    QFile file(fileName);
+    if(file.exists()){
+        if(file.remove()){
+            qDebug()<<"file: "<<fileName<<" is deleted succesfuly";
+        }
+        file.close();
+    }
+    patientsModel->removeRow(index);
+}
+
+void TSController::deleteExam(int index){
+    examinationsModel->removeRow(index);
 }

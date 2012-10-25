@@ -38,7 +38,7 @@ public:
     int* tempIn();
     int* tempOut();
     int* volume();
-    void setVolumeColibration(int c);
+    void setVolumeColibration(int c,bool realtime);
     void setValues(int* volume,int* tin,int* tout, int n);
     void append(int v, int tI, int tO, bool realtime = true);
     void setScreenLimit(int sl);
@@ -51,6 +51,7 @@ public:
     int* getVolumeInterval();
     int volumeColibration();
     void setVolumeConverts(int pos,int neg);
+    QVector<int> volumeConverts();
     float volToLtr(int vol);
     int setReference(QSettings *set);
     float tempInToDeg(int temp);

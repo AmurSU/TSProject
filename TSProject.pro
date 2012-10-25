@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     bdgod.cpp \
     models/TSPatients.cpp \
     models/TSExaminations.cpp \
-    tsanalitics.cpp
+    tsanalitics.cpp \
+    inputs/tstableview.cpp
 
 HEADERS  += \
     tsmodel.h \
@@ -39,7 +40,8 @@ HEADERS  += \
     bdgod.h \
     models/TSPatients.h \
     models/TSExaminations.h \
-    tsanalitics.h
+    tsanalitics.h \
+    inputs/tstableview.h
 
 LIBS += -L"dll/*.dll"
 FORMS    += \
@@ -55,4 +57,6 @@ RESOURCES += \
 
 OTHER_FILES += \
     db_structure.sql
+
+
 

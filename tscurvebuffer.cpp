@@ -206,9 +206,12 @@ void TSCurveBuffer::setValues(int *vol, int *tin, int *tout, int n)
     }
 }
 
-void TSCurveBuffer::setVolumeColibration(int c)
+void TSCurveBuffer::setVolumeColibration(int c,bool realtime = true)
 {
-    ts_volumeColibration = c * VOLTAGE_RATE;
+    if(realtime)
+        ts_volumeColibration = c * VOLTAGE_RATE;
+    else
+        ts_volumeColibration = c;
 }
 
 
@@ -304,6 +307,13 @@ void TSCurveBuffer::setVolumeConverts(int pos, int neg)
 {
     ts_volumePosConvert=pos;
     ts_volumeNegConvert=neg;
+}
+
+QVector<int> TSCurveBuffer::volumeConverts(){
+    QVector<int> v;
+    v.push_back(ts_volumeNegConvert);
+    v.push_back(ts_volumePosConvert);
+    return v;
 }
 
 float TSCurveBuffer::volToLtr(int vol)

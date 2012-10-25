@@ -44,6 +44,7 @@ public slots:
     void stopExam();
     void scrollGraphics(int value);
     void plotNow();
+    void plotCalibration();
     void openPatientList();
     void completePatientName(QString string);
     void openPatientProfile(QModelIndex ind);
@@ -60,6 +61,8 @@ public slots:
     void changeTempOutScrollValue(int value);
     void breakExam();
     void processDataParams();
+    void deletePatient(int index);
+    void deleteExam(int index);
 protected:
     void initPaintDevices();
     void resizeEvent(QResizeEvent *evt);
@@ -77,9 +80,12 @@ private:
     //Все для рисования
     TSCurveBuffer* curveBuffer;
     QTimer plotingTimer;
+    QTimer cPlotingTimer;
+    QPixmap bcVolume;
     QPixmap bVolume;
     QPixmap bTempIn;
     QPixmap bTempOut;
+    QPainter pcVolume;
     QPainter pVolume;
     QPainter pTempIn;
     QPainter pTempOut;
@@ -90,6 +96,8 @@ private:
     int startIndex;
     int W;
     int H;
+    int cH;
+    int cW;
     bool recordingStarted;
     float volumeScaleRate;
     float tempInScaleRate;
