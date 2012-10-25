@@ -932,8 +932,28 @@ void TSController::processDataParams(){
     }
     ga->findExtremums();
     ga->deleteBadExtremums();
-    AvgExpirationSpeed = ga->getAvgExpiratorySpeed();
 
+    int *ti = curveBuffer->tempIn();
+    for(i=0;i<curveBuffer->end();i++){
+        gai->append(ti[i]);
+    }
+    gai->findExtremums();
+    gai->deleteBadExtremums();
+
+    int *to = curveBuffer->tempOut();
+    for(i=0;i<curveBuffer->end();i++){
+        gao->append(to[i]);
+    }
+    gao->findExtremums();
+    gao->deleteBadExtremums();
+
+    AvgExpirationSpeed = ga->getAvgExpiratorySpeed();
+    QVector<extremum> *v_vol = ga->getExtremums();
+    QVector<extremum> *v_ti = gai->getExtremums();
+    QVector<extremum> *v_to = gao->getExtremums();
+ /*   for(i=0;i<v_ti->size();i++){
+
+    }*/
     qtw->setItem(1,0,getQTableWidgetItem(tr("—редн€€ скорость выдоха(л/с)")));
     qtw->setItem(1,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(100*AvgExpirationSpeed))));
 
@@ -975,23 +995,13 @@ void TSController::processDataParams(){
     qtw->setItem(10,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(MVL))));
 
     ga->clear();
-    int *ti = curveBuffer->tempIn();
-    for(i=0;i<curveBuffer->end();i++){
-        gai->append(ti[i]);
-    }
-    gai->findExtremums();
-    gai->deleteBadExtremums();
+
     AvgTempIn = gai->getMinAvgs();
     qtw->setItem(11,0,getQTableWidgetItem(tr("—редн€€ температура вдоха( 'C)")));
     qDebug()<<"AvgTempIn"<<AvgTempIn;
     qtw->setItem(11,1,getQTableWidgetItem(QString::number(curveBuffer->tempInToDeg(AvgTempIn))));
     gai->clear();
-    int *to = curveBuffer->tempOut();
-    for(i=0;i<curveBuffer->end();i++){
-        gao->append(to[i]);
-    }
-    gao->findExtremums();
-    gao->deleteBadExtremums();
+
     AvgTempOut = gao->getMaxAvgs();
     qtw->setItem(12,0,getQTableWidgetItem(tr("—редн€€ температура выдоха( 'C)")));
     qtw->setItem(12,1,getQTableWidgetItem(QString::number(curveBuffer->tempOutToDeg(AvgTempOut))));

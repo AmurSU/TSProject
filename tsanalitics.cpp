@@ -374,6 +374,10 @@ int tsanalitics::getMin(){
     return ts_row_data->at(min_index);
 }
 
+QVector<extremum> *tsanalitics::getExtremums(){
+    return ts_extremums;
+}
+
 int tsanalitics::fabs(int a){
     if( a<0 )
         return -a;

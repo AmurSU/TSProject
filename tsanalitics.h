@@ -41,6 +41,7 @@ public:
     void printVec(int k);
     int getMax();
     int getMin();
+    QVector<extremum>* getExtremums();
 private:
     int fabs(int a);
     void deleteEqualSignExtremums();
