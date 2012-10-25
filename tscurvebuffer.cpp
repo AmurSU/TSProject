@@ -17,7 +17,9 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     ts_volumeNegConvert=-1;
     out_file=fopen("output.txt","w");
     int i;
-    for(i=0;i<3;i++){
+    max_v=-1100000;
+    min_v=10000;
+    /*for(i=0;i<3;i++){
         ts_max_lev[i]=-100000;
         ts_min_lev[i]=1000000;
     }
@@ -33,7 +35,7 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
 
     ts_vm_up_lvl=ts_volumeColibration+2;
     ts_vm_max=-100000;
-    ts_period_for_count_avgs=50;
+    ts_period_for_count_avgs=50;*/
     volfile.open("volume.csv");
     ga_it = new tsanalitics();
     ga_ot = new tsanalitics();
@@ -128,13 +130,32 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     CurvesSegnments segs;
     if(ts_end>0)
     {
+        if (ts_integral[ts_end-1]>=max_v){
+            max_v=ts_integral[ts_end-1];
+            maxc_v=ts_end-1;
+        }
+        if (ts_integral[ts_end-1]<=min_v){
+            min_v=ts_integral[ts_end-1];
+            minc_v=ts_end-1;
+        }
         segs.prevV = ts_volume[ts_end];
         segs.prevTin = ts_tempIn[ts_end];
         segs.prevTout = ts_tempOut[ts_end];
         if(abs(v)>=8)
         {
-            if(realtime)
+            if(realtime){
                 ts_integral[ts_end] = 0.1*v + ts_integral[ts_end-1];
+                if( ts_end-maxc_v>1 && v>100){
+                    ts_integral[ts_end]=0;
+                    qDebug()<<"Oh shit, we should obrezat this verhushka.";
+                    max_v=-10000;
+                }
+                if( ts_end-minc_v>1 && v<-100){
+                    ts_integral[ts_end]=0;
+                    qDebug()<<"Oh shit, we should obrezat this nizushka.";
+                    min_v=10000;
+                }
+            }
             else
                 ts_integral[ts_end] = v;
         }
@@ -154,7 +175,7 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     emit changed(segs);
     ts_end++;
 }
-
+/*
 void TSCurveBuffer::findLevels(){
     if(ts_end%ts_period_for_count_avgs+1){
         ts_low_max_lev[0]=0;
@@ -195,7 +216,7 @@ void TSCurveBuffer::findLevels(){
             qDebug()<<ts_low_max_lev[0]<<ts_height_min_lev[0]<<ts_low_max_lev[1]<<ts_height_min_lev[1]<<ts_low_max_lev[2]<<ts_height_min_lev[2];
         }
     }
-}
+}*/
 
 void TSCurveBuffer::setValues(int *vol, int *tin, int *tout, int n)
 {

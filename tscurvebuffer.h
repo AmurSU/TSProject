@@ -79,7 +79,7 @@ private:
     int ts_mi_out_cnt;
     int ts_check;
     void findLevels();
-    int max_v,min_v,maxc_v;
+    int max_v,maxc_v,min_v,minc_v;
     //int ts_tempIn_extr
   /*  int ts_max_lev[3], ts_min_lev[3];
     int ts_low_max_lev[3],ts_height_min_lev[3];
