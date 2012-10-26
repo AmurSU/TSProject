@@ -27,7 +27,7 @@ int tsanalitics::getMaxAvgs(){
     int i=0, sum = 0, cntr=0;
     for(i=0; i<ts_extremums->size();i++){
         if( ts_extremums->at(i).type == 1 ){
-            sum += ts_extremums->at(i).y;
+            sum += fabs(ts_extremums->at(i).y);
             cntr++;
         }
     }
@@ -232,241 +232,270 @@ int tsanalitics::deleteBadExtremums(){
 
 int tsanalitics::getBreathingVolume(){
     int i=0,sum_mn=0,k=0;
+    QVector<int> exts;
+    qDebug()<<"Fuck";
+    int max=-10000;
+    for(i=0;i<ts_extremums->size();i++){
+        if(fabs(ts_extremums->at(i).y)>max)
+            max=fabs(ts_extremums->at(i).y);
+    }
     for( i=0;i<ts_extremums->size();i++){
         if(ts_extremums->at(i).type==-1){
-            if(fabs(ts_extremums->at(i).y)<9000){
+            if(fabs(fabs(ts_extremums->at(i).y)-max)<400 && fabs(ts_extremums->at(i).y)<9000 && ts_extremums->at(i).y!=0 && fabs(ts_extremums->at(i).y)>600){
                 sum_mn+=fabs(ts_extremums->at(i).y);
                 k++;
+                exts.append(fabs(ts_extremums->at(i).y));
                 qDebug()<<"ts_extremums->at(i).y"<<ts_extremums->at(i).y<<"sum_mn"<<sum_mn;
             }
         }
     }
-    if(k>0)
-        return fabs(sum_mn/k);
-    else
-        return -1;
-}
-
-int tsanalitics::getAvgInspiratorySpeed(){
-    int i=0,sum=0,count=0;
-    for(i=0;i<ts_extremums->size()-1;i++){
-        if( ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1 ){
-            sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
-            count++;
-        }
-    }
-    if(count)
-        return sum/count;
-    else
-        return -1;
-}
-
-int tsanalitics::getAvgExpiratorySpeed(){
-    int i=0,sum=0,count=0;
-    for(i=0;i<ts_extremums->size()-1;i++){
-        if( ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1 ){
-            sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
-            count++;
-        }
-    }
-    if(count)
-        return sum/count;
-    else
-        return -1;
-}
-
-int tsanalitics::getMaxInspiratorySpeed(){
-    int i=0,speed=-10000,oldspeed=-10000;
-    for(i=0;i<ts_extremums->size()-1;i++){
-        if( ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1 ){
-            speed=(fabs(ts_extremums->at(i+1).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
-            if(speed > oldspeed ){
-                oldspeed=speed;
+    /*for(i=1;i<exts.size();i++){
+        if(fabs(fabs(ts_extremums->at(i).y)-fabs(ts_extremums->at(i-1).y)) >300 ){
+            if(fabs(ts_extremums->at(i).y)>fabs(ts_extremums->at(i-1).y)){
+                ts_extremums->remove(i-1,1);
+                qDebug()<<"remove first";
+            }
+            else{
+                ts_extremums->remove(i,1);
+                qDebug()<<"remove second";
             }
         }
     }
-    return oldspeed;
-}
+    for(i=0;i<exts.size();i++){
+        sum_mn+=fabs(exts.at(i));
+        k++;
+    }*/
+        if(k>0){
+            //return fabs(sum_mn/k);
+            return max;
+        }
+        else
+            return -1;
+    }
 
-int tsanalitics::getMaxExpiratorySpeed(){
-    int i=0,speed=-10000,oldspeed=-10000;
-    for(i=0;i<ts_extremums->size()-1;i++){
-        if( ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1 ){
-            speed=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
-            if(speed > oldspeed ){
-                oldspeed=speed;
+    int tsanalitics::getAvgInspiratorySpeed(){
+        int i=0,sum=0,count=0;
+        for(i=0;i<ts_extremums->size()-1;i++){
+            if( ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1 ){
+                sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
+                count++;
             }
         }
+        if(count)
+            return sum/count;
+        else
+            return -1;
     }
-    return oldspeed;
-}
 
-void tsanalitics::append(int n){
-    ts_row_data->push_back(n);
-}
+    int tsanalitics::getAvgExpiratorySpeed(){
+        int i=0,sum=0,count=0;
+        for(i=0;i<ts_extremums->size()-1;i++){
+            if( ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1 ){
+                sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
+                count++;
+            }
+        }
+        if(count)
+            return sum/count;
+        else
+            return -1;
+    }
 
-void tsanalitics::clear(){
-    int i=0;
-    ts_extremums->remove(0,ts_extremums->size());
-    /* for(i=0;i<ts_extremums->size();i++){
+    int tsanalitics::getMaxInspiratorySpeed(){
+        int i=0,speed=-10000,oldspeed=-10000;
+        for(i=0;i<ts_extremums->size()-1;i++){
+            if( ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1 ){
+                speed=(fabs(ts_extremums->at(i+1).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
+                if(speed > oldspeed ){
+                    oldspeed=speed;
+                }
+            }
+        }
+        return oldspeed;
+    }
+
+    int tsanalitics::getMaxExpiratorySpeed(){
+        int i=0,speed=-10000,oldspeed=-10000;
+        for(i=0;i<ts_extremums->size()-1;i++){
+            if( ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1 ){
+                speed=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
+                if(speed > oldspeed ){
+                    oldspeed=speed;
+                }
+            }
+        }
+        return oldspeed;
+    }
+
+    void tsanalitics::append(int n){
+        ts_row_data->push_back(n);
+    }
+
+    void tsanalitics::clear(){
+        int i=0;
+        ts_extremums->remove(0,ts_extremums->size());
+        /* for(i=0;i<ts_extremums->size();i++){
         ts_extremums->erase(i);
     }*/
-    ts_extremums->clear();
-
-}
-
-int tsanalitics::getMaxsSum(){
-    int sum=0, i=0;
-    for(i=0;i<ts_extremums->size();i++){
-        if(ts_extremums->at(i).type==1)
-            sum+=ts_extremums->at(i).y;
+        ts_extremums->clear();
     }
-    return sum;
-}
 
-int tsanalitics::getMinsSum(){
-    int sum=0, i=0;
-    for(i=0;i<ts_extremums->size();i++){
-        if(ts_extremums->at(i).type==-1)
-            sum+=ts_extremums->at(i).y;
-    }
-    return sum;
-}
-
-int tsanalitics::getMVL(){
-    int air = getMinsSum();
-    int time = getTime();
-    if( time!=0)
-        return air*6000/time;
-    else
-        return -1;
-}
-
-void tsanalitics::printVec(int k){
-    int i=0;
-    if(k>0)
+    int tsanalitics::getMaxsSum(){
+        int sum=0, i=0;
         for(i=0;i<ts_extremums->size();i++){
             if(ts_extremums->at(i).type==1)
-                printf("%d ",ts_extremums->at(i).y);
+                sum+=ts_extremums->at(i).y;
         }
-    else
+        return sum;
+    }
+
+    int tsanalitics::getMinsSum(){
+        int sum=0, i=0;
         for(i=0;i<ts_extremums->size();i++){
             if(ts_extremums->at(i).type==-1)
-                printf("%d ",ts_extremums->at(i).y);
+                sum+=ts_extremums->at(i).y;
         }
-}
-
-int tsanalitics::getMax(){
-    int i=0, max_index=0;
-    for (i=0;i<ts_row_data->size();i++){
-        if( ts_row_data->at(i)> ts_row_data->at(max_index) )
-            max_index = i;
+        return sum;
     }
-    return ts_row_data->at(max_index);
-}
 
-int tsanalitics::getMin(){
-    int i=0, min_index=0;
-    for (i=0;i<ts_row_data->size();i++){
-        if( ts_row_data->at(i)< ts_row_data->at(min_index) )
-            min_index = i;
+    int tsanalitics::getMVL(){
+        int air = getMinsSum();
+        int time = getTime();
+        if( time!=0)
+            return air*6000/time;
+        else
+            return -1;
     }
-    return ts_row_data->at(min_index);
-}
 
-int tsanalitics::fabs(int a){
-    if( a<0 )
-        return -a;
-    else
-        return a;
-}
+    void tsanalitics::printVec(int k){
+        int i=0;
+        if(k>0)
+            for(i=0;i<ts_extremums->size();i++){
+                if(ts_extremums->at(i).type==1)
+                    printf("%d ",ts_extremums->at(i).y);
+            }
+        else
+            for(i=0;i<ts_extremums->size();i++){
+                if(ts_extremums->at(i).type==-1)
+                    printf("%d ",ts_extremums->at(i).y);
+            }
+    }
 
-void tsanalitics::deleteEqualSignExtremums(){
-    int i=0;
-    for(i=0;i<ts_extremums->size()-1;i++){
-        if( ts_extremums->at(i).y == ts_extremums->at(i+1).y ){
-            ts_extremums->remove(i);
-            if (i)
-                i--;
+    int tsanalitics::getMax(){
+        int i=0, max_index=0;
+        for (i=0;i<ts_row_data->size();i++){
+            if( ts_row_data->at(i)> ts_row_data->at(max_index) )
+                max_index = i;
         }
+        return ts_row_data->at(max_index);
     }
-    for(i=0;i<ts_extremums->size()-1;i++){
-        if( ts_extremums->at(i).type == ts_extremums->at(i+1).type ){
-            if(ts_extremums->at(i).type==1){
-                if(ts_extremums->at(i).y < ts_extremums->at(i+1).y){
-                    ts_extremums->remove(i);
-                }else{
-                    ts_extremums->remove(i+1);
+
+    int tsanalitics::getMin(){
+        int i=0, min_index=0;
+        for (i=0;i<ts_row_data->size();i++){
+            if( ts_row_data->at(i)< ts_row_data->at(min_index) )
+                min_index = i;
+        }
+        return ts_row_data->at(min_index);
+    }
+
+    QVector<extremum> *tsanalitics::getExtremums(){
+        return ts_extremums;
+    }
+
+    int tsanalitics::fabs(int a){
+        if( a<0 )
+            return -a;
+        else
+            return a;
+    }
+
+    void tsanalitics::deleteEqualSignExtremums(){
+        int i=0;
+        for(i=0;i<ts_extremums->size()-1;i++){
+            if( ts_extremums->at(i).y == ts_extremums->at(i+1).y ){
+                ts_extremums->remove(i);
+                if (i)
+                    i--;
+            }
+        }
+        for(i=0;i<ts_extremums->size()-1;i++){
+            if( ts_extremums->at(i).type == ts_extremums->at(i+1).type ){
+                if(ts_extremums->at(i).type==1){
+                    if(ts_extremums->at(i).y < ts_extremums->at(i+1).y){
+                        ts_extremums->remove(i);
+                    }else{
+                        ts_extremums->remove(i+1);
+                    }
+                    if (i)
+                        i--;
                 }
-                if (i)
-                    i--;
-            }
-            if(ts_extremums->at(i).type==-1){
-                if(ts_extremums->at(i).y > ts_extremums->at(i+1).y){
-                    ts_extremums->remove(i);
-                }else{
-                    ts_extremums->remove(i+1);
+                if(ts_extremums->at(i).type==-1){
+                    if(ts_extremums->at(i).y > ts_extremums->at(i+1).y){
+                        ts_extremums->remove(i);
+                    }else{
+                        ts_extremums->remove(i+1);
+                    }
+                    if (i)
+                        i--;
                 }
-                if (i)
-                    i--;
             }
         }
     }
-}
 
-void tsanalitics::deleteSimilarInMeaningExtremums(){
-    int i=0;
-    for (i=0;i<ts_extremums->size()-1;i++){
-        if(ts_extremums->at(i+1).x-ts_extremums->at(i).x <50 && fabs(ts_extremums->at(i+1).y-ts_extremums->at(i).y)<600 ){
-            if ( fabs(fabs(getMax())-fabs(ts_extremums->at(i).y)) < fabs(fabs(ts_extremums->at(i).y)-fabs(getMin())) &&
-                 fabs(fabs(getMax())-fabs(ts_extremums->at(i+1).y)) < fabs(fabs(ts_extremums->at(i+1).y)-fabs(getMin()))
-                 ){
-                if(ts_extremums->at(i).y <= ts_extremums->at(i+1).y)
-                    ts_extremums->remove(i,1);
-                else
-                    ts_extremums->remove(i+1,1);
-                if (i)
-                    i--;
-            }else if ( fabs(fabs(getMax())-fabs(ts_extremums->at(i).y)) > fabs(fabs(ts_extremums->at(i).y)-fabs(getMin())) &&
-                       fabs(fabs(getMax())-fabs(ts_extremums->at(i+1).y)) > fabs(fabs(ts_extremums->at(i+1).y)-fabs(getMin()))
-                       ){
-                if(ts_extremums->at(i).y >= ts_extremums->at(i+1).y)
-                    ts_extremums->remove(i,1);
-                else
-                    ts_extremums->remove(i+1,1);
-                if (i)
-                    i--;
+    void tsanalitics::deleteSimilarInMeaningExtremums(){
+        int i=0;
+        for (i=0;i<ts_extremums->size()-1;i++){
+            if(ts_extremums->at(i+1).x-ts_extremums->at(i).x <50 && fabs(ts_extremums->at(i+1).y-ts_extremums->at(i).y)<600 ){
+                if ( fabs(fabs(getMax())-fabs(ts_extremums->at(i).y)) < fabs(fabs(ts_extremums->at(i).y)-fabs(getMin())) &&
+                     fabs(fabs(getMax())-fabs(ts_extremums->at(i+1).y)) < fabs(fabs(ts_extremums->at(i+1).y)-fabs(getMin()))
+                     ){
+                    if(ts_extremums->at(i).y <= ts_extremums->at(i+1).y)
+                        ts_extremums->remove(i,1);
+                    else
+                        ts_extremums->remove(i+1,1);
+                    if (i)
+                        i--;
+                }else if ( fabs(fabs(getMax())-fabs(ts_extremums->at(i).y)) > fabs(fabs(ts_extremums->at(i).y)-fabs(getMin())) &&
+                           fabs(fabs(getMax())-fabs(ts_extremums->at(i+1).y)) > fabs(fabs(ts_extremums->at(i+1).y)-fabs(getMin()))
+                           ){
+                    if(ts_extremums->at(i).y >= ts_extremums->at(i+1).y)
+                        ts_extremums->remove(i,1);
+                    else
+                        ts_extremums->remove(i+1,1);
+                    if (i)
+                        i--;
+                }
             }
         }
     }
-}
 
-void tsanalitics::deletePatternLightningExtremums(){
-    int i=0;
-    for (i=3;i<ts_extremums->size();i++){
-        if( ts_extremums->at(i).x-ts_extremums->at(i-3).x < 110 )
-            //( ts_extremums->at(i).type==-1 && ts_extremums->at(i-1).type==1 && ts_extremums->at(i-2).type==-1 && ts_extremums->at(i-3).type==1 )
-            //&&
-            if (  (ts_extremums->at(i).y < ts_extremums->at(i-1).y && ts_extremums->at(i).y < ts_extremums->at(i-2).y  && ts_extremums->at(i).y < ts_extremums->at(i-3).y )
-                  && (ts_extremums->at(i-3).y > ts_extremums->at(i-2).y && ts_extremums->at(i-3).y > ts_extremums->at(i-1).y && ts_extremums->at(i-3).y > ts_extremums->at(i).y)
-                  && (ts_extremums->at(i-1).y > ts_extremums->at(i).y && ts_extremums->at(i-1).y > ts_extremums->at(i-2).y && ts_extremums->at(i-1).y < ts_extremums->at(i-3).y)
-                  && (ts_extremums->at(i-2).y > ts_extremums->at(i).y && ts_extremums->at(i-2).y < ts_extremums->at(i-1).y && ts_extremums->at(i-2).y < ts_extremums->at(i-3).y)
-                  ){
-                ts_extremums->remove(i-2,2);
-                if (i)
-                    i--;
-                //qDebug()<<"Need remove middle first figure ";
-                //(ts_extremums->at(i).type==1 && ts_extremums->at(i-1).type==-1 && ts_extremums->at(i-2).type==1 && ts_extremums->at(i-3).type==-1 )
+    void tsanalitics::deletePatternLightningExtremums(){
+        int i=0;
+        for (i=3;i<ts_extremums->size();i++){
+            if( ts_extremums->at(i).x-ts_extremums->at(i-3).x < 110 )
+                //( ts_extremums->at(i).type==-1 && ts_extremums->at(i-1).type==1 && ts_extremums->at(i-2).type==-1 && ts_extremums->at(i-3).type==1 )
                 //&&
-            }else if (  (ts_extremums->at(i).y > ts_extremums->at(i-1).y && ts_extremums->at(i).y > ts_extremums->at(i-2).y  && ts_extremums->at(i).y > ts_extremums->at(i-3).y )
-                        && (ts_extremums->at(i-3).y < ts_extremums->at(i-2).y && ts_extremums->at(i-3).y < ts_extremums->at(i-1).y && ts_extremums->at(i-3).y < ts_extremums->at(i).y)
-                        && (ts_extremums->at(i-1).y < ts_extremums->at(i).y && ts_extremums->at(i-1).y < ts_extremums->at(i-2).y && ts_extremums->at(i-1).y > ts_extremums->at(i-3).y)
-                        && (ts_extremums->at(i-2).y < ts_extremums->at(i).y && ts_extremums->at(i-2).y > ts_extremums->at(i-1).y && ts_extremums->at(i-2).y > ts_extremums->at(i-3).y)
-                        ){
-                ts_extremums->remove(i-2,2);
-                if (i)
-                    i--;
-                //qDebug()<<"Need remove middle second figure ";
-            }
+                if (  (ts_extremums->at(i).y < ts_extremums->at(i-1).y && ts_extremums->at(i).y < ts_extremums->at(i-2).y  && ts_extremums->at(i).y < ts_extremums->at(i-3).y )
+                      && (ts_extremums->at(i-3).y > ts_extremums->at(i-2).y && ts_extremums->at(i-3).y > ts_extremums->at(i-1).y && ts_extremums->at(i-3).y > ts_extremums->at(i).y)
+                      && (ts_extremums->at(i-1).y > ts_extremums->at(i).y && ts_extremums->at(i-1).y > ts_extremums->at(i-2).y && ts_extremums->at(i-1).y < ts_extremums->at(i-3).y)
+                      && (ts_extremums->at(i-2).y > ts_extremums->at(i).y && ts_extremums->at(i-2).y < ts_extremums->at(i-1).y && ts_extremums->at(i-2).y < ts_extremums->at(i-3).y)
+                      ){
+                    ts_extremums->remove(i-2,2);
+                    if (i)
+                        i--;
+                    //qDebug()<<"Need remove middle first figure ";
+                    //(ts_extremums->at(i).type==1 && ts_extremums->at(i-1).type==-1 && ts_extremums->at(i-2).type==1 && ts_extremums->at(i-3).type==-1 )
+                    //&&
+                }else if (  (ts_extremums->at(i).y > ts_extremums->at(i-1).y && ts_extremums->at(i).y > ts_extremums->at(i-2).y  && ts_extremums->at(i).y > ts_extremums->at(i-3).y )
+                            && (ts_extremums->at(i-3).y < ts_extremums->at(i-2).y && ts_extremums->at(i-3).y < ts_extremums->at(i-1).y && ts_extremums->at(i-3).y < ts_extremums->at(i).y)
+                            && (ts_extremums->at(i-1).y < ts_extremums->at(i).y && ts_extremums->at(i-1).y < ts_extremums->at(i-2).y && ts_extremums->at(i-1).y > ts_extremums->at(i-3).y)
+                            && (ts_extremums->at(i-2).y < ts_extremums->at(i).y && ts_extremums->at(i-2).y > ts_extremums->at(i-1).y && ts_extremums->at(i-2).y > ts_extremums->at(i-3).y)
+                            ){
+                    ts_extremums->remove(i-2,2);
+                    if (i)
+                        i--;
+                    //qDebug()<<"Need remove middle second figure ";
+                }
+        }
     }
-}

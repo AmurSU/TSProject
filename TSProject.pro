@@ -52,11 +52,9 @@ FORMS    += \
     dialog.ui \
     tsresultsview.ui \
     tsvolsignalwidget.ui
+
 RESOURCES += \
     iconResourse.qrc
 
 OTHER_FILES += \
     db_structure.sql
-
-
-

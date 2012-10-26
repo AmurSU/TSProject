@@ -15,11 +15,11 @@ void TSReaderThread::startRead (){
 }
 void TSReaderThread::stopRead (){
     ReadingStarted=false;
+    this->terminate();
     if(reader!=0){
-        delete reader;
+        //delete reader;
         reader = 0;
     }
-    this->terminate();
 }
 
 

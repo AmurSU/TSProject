@@ -60,6 +60,7 @@ public:
     QColor volColor;
     QColor tinColor;
     QColor toutColor;
+    void clean();
 signals:
     void changed(CurvesSegnments s);
     void overflowed();
@@ -79,20 +80,9 @@ private:
     MonotonicityInterval ts_monoInterval_out[1000];
     int ts_mi_out_cnt;
     int ts_check;
-    //int ts_tempIn_extr
-    int ts_max_lev[3], ts_min_lev[3];
-    int ts_low_max_lev[3],ts_height_min_lev[3];
-    int ts_avgTempIn, ts_avgTempOut;
-    int ts_up_sqc_cnt, ts_up_sqc_max,ts_down_sqc_cnt, ts_down_sqc_min;
-    int ts_up_TempIn_sum, ts_down_TempIn_sum, ts_up_TempOut_sum, ts_down_TempOut_sum;
-    int ts_num_up_extr_TempIn;
-    int ts_num_up_extr_TempOut;
     void findLevels();
-    int ts_num_down_extr_TempIn;
-    int ts_avgti,ts_avgto;
-    int ts_vm_up_lvl, ts_vm_max, ts_vm_max_avg,ts_vm_up_cnt;
-    int ts_sniff_cntr, ts_sniff_period_cntr,ts_avgDo;
-    int ts_period_for_count_avgs;
+    int max_v,maxc_v,min_v,minc_v;
+
     int ts_minTempIn;
     int ts_maxTempIn;
     int ts_minTempOut;
