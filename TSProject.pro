@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     models/TSPatients.cpp \
     models/TSExaminations.cpp \
     tsanalitics.cpp \
-    inputs/tstableview.cpp
+    inputs/tstableview.cpp \
+    tsrealtimecontainer.cpp
 
 HEADERS  += \
     tsmodel.h \
@@ -41,7 +42,8 @@ HEADERS  += \
     models/TSPatients.h \
     models/TSExaminations.h \
     tsanalitics.h \
-    inputs/tstableview.h
+    inputs/tstableview.h \
+    tsrealtimecontainer.h
 
 LIBS += -L"dll/*.dll"
 FORMS    += \

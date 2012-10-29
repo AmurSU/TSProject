@@ -1,6 +1,7 @@
 #include "tscurvebuffer.h"
 #include <QDebug>
 #include <tsanalitics.h>
+#include <tsrealtimecontainer.h>
 
 TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     QObject(parent)
@@ -37,6 +38,7 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     ts_vm_max=-100000;
     ts_period_for_count_avgs=50;*/
     volfile.open("volume.csv");
+    realcontainer = new tsrealtimecontainer();
     ga_it = new tsanalitics();
     ga_ot = new tsanalitics();
     ga_vo = new tsanalitics();
@@ -94,10 +96,14 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     ga_it->append(ts_tempIn[ts_end-1]);
     ga_ot->append(ts_tempOut[ts_end-1]);
     ga_vo->append(ts_integral[ts_end-1]);
+    realcontainer->appendTi(ts_tempIn[ts_end-1]);
+    realcontainer->appendTo(ts_tempOut[ts_end-1]);
+    realcontainer->appendVo(ts_integral[ts_end-1]);
     if(realtime){
         int num=500;
         if(ts_end%num==0){
-            int sum=0,i=0;
+            realcontainer->calcParams();
+            /*int sum=0,i=0;
             ga_it->findExtremums();
             ga_it->deleteBadExtremums();
             AvgTempIn = ga_it->getMinAvgs();
@@ -112,20 +118,20 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
 
             ga_vo->findExtremums();
             ga_vo->deleteBadExtremums();
-            BreathingVolume = ga_vo->getBreathingVolume();
+            BreathingVolume = ga_vo->getBreathingVolume();*/
             /*BreathVolumes.append(BreathingVolume);
 
             for(i=0;i<BreathVolumes.size();i++){
                 sum+=BreathVolumes.at(i);
             }
             BreathingVolume = (sum+BreathingVolume)/(i+1);*/
-
+            /*
             InspirationFrequency = ga_vo->getFrequency();
             //qDebug()<<"BreathingVolume"<<BreathingVolume;
             //qDebug()<<"InspirationFrequency"<<InspirationFrequency;
 
             ga_vo->clear();
-            emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);
+            emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);*/
         }
     }
     v -= ts_volumeColibration;

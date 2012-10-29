@@ -8,6 +8,7 @@
 #include <tsanalitics.h>
 #include <QVector>
 #include <tsanalitics.h>
+#include <tsrealtimecontainer.h>
 using namespace std;
 
 #define VOLTAGE_RATE    0.61
@@ -100,6 +101,7 @@ private:
     int AvgTempIn,AvgTempOut,InspirationFrequency,BreathingVolume;
     tsanalitics *ga_it, *ga_ot, *ga_vo;
     int bv,bvo,dbv;
+    tsrealtimecontainer *realcontainer;
     QVector<int> BreathVolumes;
 
 };
