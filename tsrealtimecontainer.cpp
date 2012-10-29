@@ -26,9 +26,6 @@ void tsrealtimecontainer::appendVo(int vo)
 
 void tsrealtimecontainer::calcParams()
 {
-    int num=500;
-
-    int sum=0,i=0;
     ga_it->findExtremums();
     ga_it->deleteBadExtremums();
     AvgTempIn = ga_it->getMinAvgs();
@@ -52,6 +49,7 @@ void tsrealtimecontainer::calcParams()
         BreathingVolume = (sum+BreathingVolume)/(i+1);*/
 
     InspirationFrequency = ga_vo->getFrequency();
+
     //qDebug()<<"BreathingVolume"<<BreathingVolume;
     //qDebug()<<"InspirationFrequency"<<InspirationFrequency;
 

@@ -16,8 +16,10 @@ void TSReaderThread::startRead (){
 void TSReaderThread::stopRead (){
     ReadingStarted=false;
     this->terminate();
+
     if(reader!=0){
         //delete reader;
+        reader->closeReader();
         reader = 0;
     }
 }

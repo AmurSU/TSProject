@@ -62,10 +62,11 @@ public:
     QColor tinColor;
     QColor toutColor;
     void clean();
+    void setRealtimeContainer(tsrealtimecontainer *box);
 signals:
     void changed(CurvesSegnments s);
     void overflowed();
-    void updateAverageData(int avgTempIn, int avgTempOut, int avgDo, int ChD);
+    //void updateAverageData(int avgTempIn, int avgTempOut, int avgDo, int ChD);
 public slots:
 private:
     int ts_volume[18000];

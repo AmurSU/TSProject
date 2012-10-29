@@ -13,6 +13,7 @@
 #include "models/TSExaminations.h"
 #include "models/TSPatients.h"
 #include <QTableWidget>
+#include <tsrealtimecontainer.h>
 namespace Ui {
     class TSView;
     class TSProgressDialog;
@@ -118,6 +119,7 @@ private:
     TSExaminations *examinationsModel;
     QSqlDatabase patientsConnection;
     QSqlDatabase examinationsConnection;
+    tsrealtimecontainer *realcontainer;
 };
 
 #endif // TSVIEW_H

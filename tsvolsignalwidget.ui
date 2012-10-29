@@ -11,21 +11,9 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Максимальныая вентиляция лекких</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,5">
-   <item>
-    <widget class="QLabel" name="label">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Минутная вентиляция легких</string>
-     </property>
-    </widget>
-   </item>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="5">
    <item>
     <widget class="QLabel" name="MVL">
      <property name="font">

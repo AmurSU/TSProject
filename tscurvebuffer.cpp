@@ -38,7 +38,7 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     ts_vm_max=-100000;
     ts_period_for_count_avgs=50;*/
     volfile.open("volume.csv");
-    realcontainer = new tsrealtimecontainer();
+    //realcontainer = new tsrealtimecontainer();
     ga_it = new tsanalitics();
     ga_ot = new tsanalitics();
     ga_vo = new tsanalitics();
@@ -99,39 +99,11 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     realcontainer->appendTi(ts_tempIn[ts_end-1]);
     realcontainer->appendTo(ts_tempOut[ts_end-1]);
     realcontainer->appendVo(ts_integral[ts_end-1]);
+    //qDebug()<<"FuckFuckFuckFuckFuckFuckFuckFuckFuckFuckFuckFuck";
     if(realtime){
         int num=500;
         if(ts_end%num==0){
             realcontainer->calcParams();
-            /*int sum=0,i=0;
-            ga_it->findExtremums();
-            ga_it->deleteBadExtremums();
-            AvgTempIn = ga_it->getMinAvgs();
-            ga_it->clear();
-            //qDebug()<<"AvgTempIn="<<AvgTempIn;
-
-            ga_ot->findExtremums();
-            ga_ot->deleteBadExtremums();
-            AvgTempOut = ga_ot->getMaxAvgs();
-            ga_ot->clear();
-            //qDebug()<<"AvgTempOut="<<AvgTempOut;
-
-            ga_vo->findExtremums();
-            ga_vo->deleteBadExtremums();
-            BreathingVolume = ga_vo->getBreathingVolume();*/
-            /*BreathVolumes.append(BreathingVolume);
-
-            for(i=0;i<BreathVolumes.size();i++){
-                sum+=BreathVolumes.at(i);
-            }
-            BreathingVolume = (sum+BreathingVolume)/(i+1);*/
-            /*
-            InspirationFrequency = ga_vo->getFrequency();
-            //qDebug()<<"BreathingVolume"<<BreathingVolume;
-            //qDebug()<<"InspirationFrequency"<<InspirationFrequency;
-
-            ga_vo->clear();
-            emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);*/
         }
     }
     v -= ts_volumeColibration;
@@ -158,13 +130,13 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
                     qDebug()<<"Oh shit, we should obrezat this verhushka.";
                     max_v=-10000;
                     maxc_v=ts_end;
-                }else
-                    if( ts_end-minc_v>1 && v<-10){
-                        ts_integral[ts_end]=0;
-                        qDebug()<<"Oh shit, we should obrezat this nizushka.";
-                        min_v=10000;
-                        minc_v=ts_end;
-                    }
+                }
+                if( ts_end-minc_v>1 && v<-10){
+                    ts_integral[ts_end]=0;
+                    qDebug()<<"Oh shit, we should obrezat this nizushka.";
+                    min_v=10000;
+                    minc_v=ts_end;
+                }
             }
             else
                 ts_integral[ts_end] = v;
@@ -349,6 +321,7 @@ QVector<int> TSCurveBuffer::volumeConverts(){
 
 float TSCurveBuffer::volToLtr(int vol)
 {
+    qDebug()<<"ts_volumeNegConvert: "<<ts_volumeNegConvert;
     if(vol<0)
     {
         return (float)vol/ts_volumeNegConvert;
@@ -374,6 +347,11 @@ void TSCurveBuffer::clean(){
     ga_it->clear();
     ga_ot->clear();
     ga_vo->clear();
+}
+
+void TSCurveBuffer::setRealtimeContainer(tsrealtimecontainer *box)
+{
+    realcontainer=box;
 }
 
 int TSCurveBuffer::setReference(QSettings *set)

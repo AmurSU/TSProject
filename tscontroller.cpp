@@ -24,6 +24,7 @@
 #include <QSettings>
 #include <tsanalitics.h>
 #include <QTableWidget>
+#include <tsrealtimecontainer.h>
 using namespace std;
 
 
@@ -49,6 +50,8 @@ TSController::TSController(QWidget *parent) :
     tempOutInterval = curveBuffer->getTempOutInterval();
     tempOutAdaptive = 1.0;
     scaleScroll[0]=1;scaleScroll[1]=3;scaleScroll[2]=5;scaleScroll[3]=7;scaleScroll[4]=9;
+    realcontainer= new tsrealtimecontainer();
+    curveBuffer->setRealtimeContainer(realcontainer);
     ui->managmentBox->setVisible(false);
     ui->vertLabel->setVisible(false);
     ui->horLabel->setVisible(false);
@@ -76,11 +79,11 @@ TSController::TSController(QWidget *parent) :
     connect(ui->openButton,SIGNAL(clicked()),this,SLOT(openPatientList()));
     connect(ui->nameFilterEdit,SIGNAL(textChanged(QString)),this,SLOT(completePatientName(QString)));
     connect(ui->patientsTableView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(openPatientProfile(QModelIndex)));
-    connect(curveBuffer,SIGNAL(updateAverageData(int,int,int,int)),this,SLOT(showAverageData(int,int,int,int)));
-    connect(ui->fName,SIGNAL(editingFinished()),this,SLOT(completePatientId()));
-    connect(ui->sName,SIGNAL(editingFinished()),this,SLOT(completePatientId()));
-    connect(ui->fdName,SIGNAL(editingFinished()),this,SLOT(completePatientId()));
-    connect(ui->date,SIGNAL(editingFinished()),this,SLOT(completePatientId()));
+    connect(realcontainer,SIGNAL(updateAverageData(int,int,int,int)),this,SLOT(showAverageData(int,int,int,int)));
+    //connect(ui->fName,SIGNAL(editingFinished()),this,SLOT(completePatientId()));
+    //connect(ui->sName,SIGNAL(editingFinished()),this,SLOT(completePatientId()));
+    //connect(ui->fdName,SIGNAL(editingFinished()),this,SLOT(completePatientId()));
+    //connect(ui->date,SIGNAL(editingFinished()),this,SLOT(completePatientId()));
     connect(ui->editProfileButton,SIGNAL(clicked()),this,SLOT(editPatientProfile()));
     connect(ui->rejectProfileButton,SIGNAL(clicked()),this,SLOT(rejectPatientProfile()));
     connect(ui->horizontalScrollBar,SIGNAL(valueChanged(int)),this,SLOT(scrollGraphics(int)));
@@ -143,6 +146,7 @@ void TSController::editPatientProfile()
         ui->fName->setText(record.value("fname").toString());
         ui->sName->setText(record.value("sname").toString());
         ui->fdName->setText(record.value("fdname").toString());
+        ui->idEdit->setText(record.value("code").toString());
         ui->mvl->setText(record.value("mvl").toString());
         QStringList d = record.value("birth_date").toString().split("-");
         QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
@@ -171,11 +175,13 @@ void TSController::savePatientProfile()
     record.setValue("fdname", ui->fdName->text().toUpper());
     record.setValue("code",ui->idEdit->text().toUpper());
     record.setValue("mvl",ui->mvl->text().toUpper());
-    switch(ui->mGenderRadio->isChecked())
-    {
-    case 0: {record.setValue("genger",tr("ж")); break;}
-    case 1: {record.setValue("genger",tr("ж")); break;}
+    if(ui->mGenderRadio->isChecked()){
+        record.setValue("gender",tr("м"));
     }
+    else{
+        record.setValue("gender",tr("ж"));
+    }
+    qDebug()<<"GEnder"<<record.value("gender").toString();
     QStringList d = ui->date->text().split("-");
     QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
     record.setValue("birth_date",date);
@@ -269,7 +275,7 @@ void TSController::savePatientProfile()
         }
         patientsModel->submitAll();
         patientsModel->select();
-        ui->mainBox->setCurrentIndex(2);
+        ui->mainBox->setCurrentIndex(3);
         currentAction = NoAction;
         break;
     }
@@ -659,21 +665,6 @@ void TSController::openPatientProfile(QModelIndex ind)
     ui->patientPageLabel->setText(tr("Пациент: ")+record.value("sname").toString()+" "+record.value("fname").toString()+
                                   " "+record.value("fdname").toString());
     openPrivateDB(record);
-    /*
-    examinationsConnection = QSqlDatabase::addDatabase("QSQLITE","ExamConnection");
-    QDir d("privatedb");
-    examinationsConnection.setDatabaseName("privatedb\\"+record.value("id").toString()
-                                           +"_"+record.value("code").toString()+".db");
-    if(!examinationsConnection.open()||!d.exists())
-    {
-        QMessageBox msg(this);
-        msg.setWindowTitle(tr("Ошибка"));
-        msg.setText(tr("Произошла потеря данных.\nВыполните восстановление."));
-        msg.exec();
-        ui->mainBox->setCurrentIndex(0);
-        return;
-    }
-    */
     patientsModel->setFilter("id="+record.value("id").toString());
     examinationsModel = new TSExaminations(examinationsConnection);
     ui->examsTableView->setModel(examinationsModel);
@@ -697,8 +688,10 @@ void TSController::showAverageData(int avgTempIn, int avgTempOut, int avgDO, int
                                   curveBuffer->tempInToDeg(avgTempIn),'g',2)+" 'C");
     ui->toutInfolabel->setText("Tout="+QString::number(
                                    curveBuffer->tempInToDeg(avgTempOut),'g',2)+" 'C");
-    int mvl = patientsModel->record(0).value("mvl").toDouble()*100/
-            (curveBuffer->volToLtr(avgDO)*avgCHD);
+
+    int mvl = curveBuffer->volToLtr(avgDO)*avgCHD*100/patientsModel->record(0).value("mvl").toDouble();
+
+
     if(recordingStarted&&curveBuffer->end()>500)
         volWidget->MVL->setText(QString::number(mvl)+"%");
 }

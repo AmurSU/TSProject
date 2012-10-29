@@ -241,7 +241,7 @@ int tsanalitics::getBreathingVolume(){
     }
     for( i=0;i<ts_extremums->size();i++){
         if(ts_extremums->at(i).type==-1){
-            if(fabs(fabs(ts_extremums->at(i).y)-max)<400 && fabs(ts_extremums->at(i).y)<9000 && ts_extremums->at(i).y!=0 && fabs(ts_extremums->at(i).y)>600){
+            if(fabs(fabs(ts_extremums->at(i).y)-max)<600 && fabs(ts_extremums->at(i).y)<9000 && ts_extremums->at(i).y!=0 && fabs(ts_extremums->at(i).y)>600){
                 sum_mn+=fabs(ts_extremums->at(i).y);
                 k++;
                 exts.append(fabs(ts_extremums->at(i).y));
@@ -266,8 +266,8 @@ int tsanalitics::getBreathingVolume(){
         k++;
     }*/
         if(k>0){
-            //return fabs(sum_mn/k);
-            return max;
+            return fabs(sum_mn/k);
+            //return max;
         }
         else
             return -1;
@@ -281,8 +281,11 @@ int tsanalitics::getBreathingVolume(){
                 count++;
             }
         }
-        if(count)
+        if(count){
+            qDebug()<<"Bliat getAvgInspiratorySpeed"<<sum<<"fffsfsw"<<count;
             return sum/count;
+
+        }
         else
             return -1;
     }
@@ -359,7 +362,8 @@ int tsanalitics::getBreathingVolume(){
     }
 
     int tsanalitics::getMVL(){
-        int air = getMinsSum();
+        return getBreathingVolume()*getFrequency();
+        int air = getMaxsSum();
         int time = getTime();
         if( time!=0)
             return air*6000/time;
