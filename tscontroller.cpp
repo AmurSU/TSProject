@@ -24,6 +24,10 @@
 #include <QSettings>
 #include <tsanalitics.h>
 #include <QTableWidget>
+#include <QPrinter>
+#include <QPrintDialog>
+#include <ui_tsprintview.h>
+#include <QPrintEngine>
 using namespace std;
 
 
@@ -97,6 +101,7 @@ TSController::TSController(QWidget *parent) :
     connect(ui->resultsButton,SIGNAL(clicked()),this,SLOT(processDataParams()));
     connect(ui->patientsTableView,SIGNAL(deleteRequest(int)),this,SLOT(deletePatient(int)));
     connect(ui->examsTableView,SIGNAL(deleteRequest(int)),this,SLOT(deleteExam(int)));
+    connect(ui->printButton,SIGNAL(clicked()),this,SLOT(printReport()));
     ui->resultsButton->setEnabled(true);
     ui->backPatientProfileButton->installEventFilter(this);
     ui->backPatientListButton->installEventFilter(this);
@@ -310,14 +315,14 @@ void TSController::calibrateVolume(){
     connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
     connect(readerThread,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
     switch(d.exec()){
-        case 1:{
-            settings.setValue("volZero",curveBuffer->volumeColibration());
-            dui.information->setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
-            dui.progressBar->setVisible(false);
-            dui.acceptButton->setVisible(true);
-            break;
-        }
-        default: break;
+    case 1:{
+        settings.setValue("volZero",curveBuffer->volumeColibration());
+        dui.information->setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
+        dui.progressBar->setVisible(false);
+        dui.acceptButton->setVisible(true);
+        break;
+    }
+    default: break;
     }
     disconnect(&d,SLOT(accept()));
     readerThread->stopRead();
@@ -1022,11 +1027,12 @@ void TSController::processDataParams(){
     QVector<extremum> *v_vol = ga->getExtremums();
     QVector<extremum> *v_ti = gai->getExtremums();
     QVector<extremum> *v_to = gao->getExtremums();
- /*   for(i=0;i<v_ti->size();i++){
+    /*   for(i=0;i<v_ti->size();i++){
 
     }*/
     qtw->setItem(1,0,getQTableWidgetItem(tr("Средняя скорость выдоха(л/с)")));
-    qtw->setItem(1,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(100*AvgExpirationSpeed))));
+    //qtw->setItem(1,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(100*AvgExpirationSpeed))));
+    qtw->setItem(1,1,getQTableWidgetItem(QString::number(AvgExpirationSpeed)));
 
     AvgInspirationSpeed = ga->getAvgInspiratorySpeed();
     qtw->setItem(2,0,getQTableWidgetItem(tr("Средняя скорость вдоха(л/с)")));
@@ -1081,6 +1087,7 @@ void TSController::processDataParams(){
     qtw->setItem(13,0,getQTableWidgetItem(tr("Средняя Твдоха-Средняя Твыдоха( 'C)")));
     qtw->setItem(13,1,getQTableWidgetItem(curveBuffer->tempOutToDeg(AvgTempOut)-curveBuffer->tempInToDeg(AvgTempIn)));
     qtw->removeRow(0);
+
     qtw->show();
 }
 
@@ -1101,4 +1108,150 @@ void TSController::deletePatient(int index){
 
 void TSController::deleteExam(int index){
     examinationsModel->removeRow(index);
+}
+
+void TSController::printReport()
+{
+    QPrinter printer;
+    QPrintDialog *dialog = new QPrintDialog(&printer, this);
+    dialog->setWindowTitle(tr("Предварительный просмотр"));
+
+    int endIndex=curveBuffer->end();
+
+    float listh=(printer.widthMM()-10)*printer.resolution()/25.4-60;
+    float listw=(printer.heightMM()-20)*printer.resolution()/25.4-60;
+    printer.setPageMargins(5,20,5,5,QPrinter::Millimeter);
+    qDebug()<<"listw"<<listw;
+    qDebug()<<"listh"<<listh;
+    printer.setOrientation(QPrinter::Landscape);
+    printer.setResolution(QPrinter::HighResolution);
+    printer.setPaperSize(QPrinter::A4);
+
+
+    qDebug()<<"printer.width()"<<printer.widthMM();
+    qDebug()<<"printer.height()"<<printer.heightMM();
+
+
+
+    Ui::Form pf;
+
+    pf.setupUi(&wpf);
+    pf.mainBox->setMaximumSize((int)listw,(int)listh);
+    pf.mainBox->setMinimumSize((int)listw,(int)listh);
+    pf.resultsTable->setMinimumWidth(20+(int)listw/3);
+    pf.resultsTable->setRowCount(13);
+    pf.resultsTable->setColumnCount(2);
+    pf.resultsTable->verticalHeader()->setVisible(false);
+    pf.resultsTable->setHorizontalHeaderLabels(QString(tr("Параметр; Значение")).split(";"));
+    pf.resultsTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    int i=0,j=0;
+    for(i=0;i<12;i++){
+        for(j=0;j<2;j++){
+            pf.resultsTable->setItem(i,j,getQTableWidgetItem(ui->resultsTable->item(i,j)->text()));
+        }
+    }
+    int myH=0,myW=0;
+    wpf.resize(pf.mainBox->size());
+    wpf.show();
+
+    myH = pf.gVolume->height();
+    myW = pf.gVolume->width();
+
+    QPixmap pmTempIn(myW,myH);
+    QPixmap pmTempOut(myW,myH);
+    QPixmap pmVolume(myW,myH);
+
+    QPainter prTempIn;
+    QPainter prTempOut;
+    QPainter prVolume;
+    prTempIn.begin(&pmTempIn);
+    prTempOut.begin(&pmTempOut);
+    prVolume.begin(&pmVolume);
+
+    int h = pf.gVolume->height()/2;
+    int step = h/10;
+    startIndex = endIndex - (myW-35);
+    if(startIndex < 0) startIndex = 0;
+    if(h%10>=5)
+    {
+        h+=step/2;
+    }
+    prVolume.fillRect(0,0,myW,myH,Qt::white);
+    prTempIn.fillRect(0,0,myW,myH,Qt::white);
+    prTempOut.fillRect(0,0,myW,myH,Qt::white);
+
+    prVolume.setPen(QColor(225,225,225));
+    prTempIn.setPen(QColor(225,225,225));
+    prTempOut.setPen(QColor(225,225,225));
+    for(i=step;i<h;i+=step)
+    {
+        prVolume.drawLine(0,h+i,myW,h+i);
+        prTempIn.drawLine(0,h+i,myW,h+i);
+        prTempOut.drawLine(0,h+i,myW,h+i);
+        prVolume.drawLine(0,h-i,myW,h-i);
+        prTempIn.drawLine(0,h-i,myW,h-i);
+        prTempOut.drawLine(0,h-i,myW,h-i);
+    }
+    for(i=10;i<myW;i+=10)
+    {
+        prVolume.drawLine(i,0,i,h<<1);
+        prTempIn.drawLine(i,0,i,h<<1);
+        prTempOut.drawLine(i,0,i,h<<1);
+    }
+    prVolume.setPen(QColor(0,0,0));
+    prTempIn.setPen(QColor(0,0,0));
+    prTempOut.setPen(curveBuffer->toutColor);
+    prVolume.setPen(QColor(255,0,0));
+    int* tinInt = curveBuffer->getTempInInterval();
+    int* toutInt = curveBuffer->getTempOutInterval();
+    int* volInt = curveBuffer->getVolumeInterval();
+    float tempInK = 1;
+    float tempOutK = 1;
+    float tempInZ = h;
+    float tempOutZ = h;
+    tempInAdaptive = (float)myH/
+            (tinInt[1]-tinInt[0]);
+    tempOutAdaptive = (float)myH/
+            (toutInt[1]-toutInt[0]);
+    volumeAdaptive = (float)myH/(volInt[1]-volInt[0]);
+    tempInZ = h + ceil((float)(tinInt[1]+tinInt[0])*tempInAdaptive*tempInK/2);
+    tempOutZ = h + ceil((float)(toutInt[1]+toutInt[0])*tempOutAdaptive*tempOutK/2);
+    float volumeK =1;
+
+    i=0;
+    int k=curveBuffer->end()/pf.gTempIn->width();
+    for(j=0;j<myW-35;j+=1)
+    {
+        if(i+startIndex>=k*endIndex)break;
+        prVolume.drawLine(
+                    j,
+                    h-volumeK*volumeAdaptive*volume[i+startIndex]
+                    ,j+1,
+                    h-volumeK*volumeAdaptive*volume[i+startIndex+k]
+                    );
+        prTempIn.drawLine(j,tempInZ-tempInK*tempInAdaptive*tempIn[i+startIndex]
+                          ,j+1,tempInZ-tempInK*tempInAdaptive*tempIn[i+startIndex+k]);
+        prTempOut.drawLine(j,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex]
+                           ,j+1,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex+k]);
+        i+=k;
+    }
+    pf.gVolume->setPixmap(pmVolume);
+    pf.gTempIn->setPixmap(pmTempIn);
+    pf.gTempOut->setPixmap(pmTempOut);
+    if(recordingStarted)
+    {
+        pf.horizontalScrollBar->setEnabled(false);
+        pf.horizontalScrollBar->setMaximum(startIndex/10);
+        pf.horizontalScrollBar->setValue(startIndex/10);
+    }
+    pf.PatientName->setText(patientsModel->record(0).value("sname").toString()+" "+patientsModel->record(0).value("fname").toString());
+
+
+    wpf.hide();
+//    if (dialog->exec() == QDialog::Accepted){
+//        QPainter painter;
+//        painter.begin(&printer);
+//        int i=0;
+//        pf.mainBox->render(&painter);
+//    }
 }

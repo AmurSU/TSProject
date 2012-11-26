@@ -41,7 +41,8 @@ HEADERS  += \
     models/TSPatients.h \
     models/TSExaminations.h \
     tsanalitics.h \
-    inputs/tstableview.h
+    inputs/tstableview.h \
+    ui_tsprintview.h
 
 LIBS += -L"dll/*.dll"
 FORMS    += \
@@ -51,7 +52,8 @@ FORMS    += \
     CRUDmw.ui \
     dialog.ui \
     tsresultsview.ui \
-    tsvolsignalwidget.ui
+    tsvolsignalwidget.ui \
+    tsprintview.ui
 
 RESOURCES += \
     iconResourse.qrc

@@ -13,11 +13,13 @@
 #include "models/TSExaminations.h"
 #include "models/TSPatients.h"
 #include <QTableWidget>
+#include "ui_tsprintview.h"
 namespace Ui {
     class TSView;
     class TSProgressDialog;
     class MainWindow;
     class TSVolSignalWidget;
+    class Form;
 }
 
 enum CurrentAction {NoAction,CreatePatientProfileAction,EditPatientProfileAction,GetingVolZero};
@@ -63,12 +65,14 @@ public slots:
     void processDataParams();
     void deletePatient(int index);
     void deleteExam(int index);
+    void printReport();
 protected:
     void initPaintDevices();
     void resizeEvent(QResizeEvent *evt);
     bool eventFilter(QObject *obj, QEvent *e);
     void openPrivateDB(QSqlRecord record);
 private:
+    QWidget wpf;
     QTableWidgetItem* getQTableWidgetItem(QVariant text);
     Ui::TSView *ui;
     Ui::MainWindow *w;
