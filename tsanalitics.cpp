@@ -361,6 +361,7 @@ int tsanalitics::getBreathingVolume(){
     int tsanalitics::getMVL(){
         int air = getMinsSum();
         int time = getTime();
+        return air;
         if( time!=0)
             return air*6000/time;
         else

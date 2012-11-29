@@ -22,6 +22,8 @@ Makefile*
 
 # .log files (usually created by QtTest - thanks to VestniK)
 *.log
+inp.txt
+out.csv
 
 # Built windows .exe and linux binaries
 # NOTE: PROJECT is a your project's name, analog of PROJECT.exe in Linux

@@ -60,6 +60,8 @@ public:
     QColor volColor;
     QColor tinColor;
     QColor toutColor;
+    int getLenght();
+    int lenght;
     void clean();
 signals:
     void changed(CurvesSegnments s);

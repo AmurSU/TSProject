@@ -928,6 +928,7 @@ bool TSController::eventFilter(QObject *obj, QEvent *e)
     {
         ui->mainBox->setCurrentIndex(0);
         patientsModel->setFilter("");
+        patientsModel->select();
     }
     if(obj == ui->backCallibrateButton && evt->button()==Qt::LeftButton)
     {
@@ -1003,21 +1004,21 @@ void TSController::processDataParams(){
             AvgRoundTime=0, AvgTempIn=0, AvgTempOut=0, AvgTempInMinusAvgTempOut=0, InspirationFrequency=0, BreathingVolume=0, MVL=0;
     int i=0;
     int *vo = curveBuffer->volume();
-    for(i=0;i<curveBuffer->end();i++){
+    for(i=0;i<curveBuffer->getLenght();i++){
         ga->append(vo[i]);
     }
     ga->findExtremums();
     ga->deleteBadExtremums();
 
     int *ti = curveBuffer->tempIn();
-    for(i=0;i<curveBuffer->end();i++){
+    for(i=0;i<curveBuffer->getLenght();i++){
         gai->append(ti[i]);
     }
     gai->findExtremums();
     gai->deleteBadExtremums();
 
     int *to = curveBuffer->tempOut();
-    for(i=0;i<curveBuffer->end();i++){
+    for(i=0;i<curveBuffer->getLenght();i++){
         gao->append(to[i]);
     }
     gao->findExtremums();
@@ -1027,24 +1028,21 @@ void TSController::processDataParams(){
     QVector<extremum> *v_vol = ga->getExtremums();
     QVector<extremum> *v_ti = gai->getExtremums();
     QVector<extremum> *v_to = gao->getExtremums();
-    /*   for(i=0;i<v_ti->size();i++){
 
-    }*/
     qtw->setItem(1,0,getQTableWidgetItem(tr("Средняя скорость выдоха(л/с)")));
-    //qtw->setItem(1,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(100*AvgExpirationSpeed))));
-    qtw->setItem(1,1,getQTableWidgetItem(QString::number(AvgExpirationSpeed)));
+    qtw->setItem(1,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*AvgExpirationSpeed)))));
 
     AvgInspirationSpeed = ga->getAvgInspiratorySpeed();
     qtw->setItem(2,0,getQTableWidgetItem(tr("Средняя скорость вдоха(л/с)")));
-    qtw->setItem(2,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(100*AvgInspirationSpeed))));
+    qtw->setItem(2,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*AvgInspirationSpeed)))));
 
     MaxExpirationSpeed = ga->getMaxExpiratorySpeed();
     qtw->setItem(3,0,getQTableWidgetItem(tr("Максимальная скорость выдоха(л/с)")));
-    qtw->setItem(3,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(100*MaxExpirationSpeed))));
+    qtw->setItem(3,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*MaxExpirationSpeed)))));
 
     MaxInspirationSpeed = ga->getMaxInspiratorySpeed();
     qtw->setItem(4,0,getQTableWidgetItem(tr("Максимальная скорость вдоха(л/с)")));
-    qtw->setItem(4,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(100*MaxInspirationSpeed))));
+    qtw->setItem(4,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*MaxInspirationSpeed)))));
 
     AvgExpirationTime = ga->getAvgExpiratoryTime();
     qtw->setItem(5,0,getQTableWidgetItem(tr("Среднее время выдоха(с)")));
@@ -1064,12 +1062,11 @@ void TSController::processDataParams(){
 
     BreathingVolume = ga->getBreathingVolume();
     qtw->setItem(9,0,getQTableWidgetItem(tr("Дыхательный объем(л)")));
-    qtw->setItem(9,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(BreathingVolume))));
-
+    qtw->setItem(9,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume)))));
 
     MVL = ga->getMVL();
-    qtw->setItem(10,0,getQTableWidgetItem(tr("Минутная вентиляция легких(л/мин)")));
-    qtw->setItem(10,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(MVL))));
+    qtw->setItem(10,0,getQTableWidgetItem(tr("Максимальная вентиляция легких(л/мин)")));
+    qtw->setItem(10,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MVL)))));
 
     ga->clear();
 
@@ -1116,29 +1113,22 @@ void TSController::printReport()
     QPrintDialog *dialog = new QPrintDialog(&printer, this);
     dialog->setWindowTitle(tr("Предварительный просмотр"));
 
-    int endIndex=curveBuffer->end();
+    int endIndex=curveBuffer->lenght;
 
-    float listh=(printer.widthMM()-10)*printer.resolution()/25.4-60;
-    float listw=(printer.heightMM()-20)*printer.resolution()/25.4-60;
-    printer.setPageMargins(5,20,5,5,QPrinter::Millimeter);
+    float listh=printer.widthMM()*printer.resolution()/25.4-60;
+    float listw=printer.heightMM()*printer.resolution()/25.4-60;
+    printer.setPageMargins(5,5,5,5,QPrinter::Millimeter);
     qDebug()<<"listw"<<listw;
     qDebug()<<"listh"<<listh;
     printer.setOrientation(QPrinter::Landscape);
     printer.setResolution(QPrinter::HighResolution);
     printer.setPaperSize(QPrinter::A4);
-
-
-    qDebug()<<"printer.width()"<<printer.widthMM();
-    qDebug()<<"printer.height()"<<printer.heightMM();
-
-
-
     Ui::Form pf;
 
     pf.setupUi(&wpf);
     pf.mainBox->setMaximumSize((int)listw,(int)listh);
     pf.mainBox->setMinimumSize((int)listw,(int)listh);
-    pf.resultsTable->setMinimumWidth(20+(int)listw/3);
+    pf.resultsTable->setMinimumWidth(40+(int)listw/3);
     pf.resultsTable->setRowCount(13);
     pf.resultsTable->setColumnCount(2);
     pf.resultsTable->verticalHeader()->setVisible(false);
@@ -1170,8 +1160,6 @@ void TSController::printReport()
 
     int h = pf.gVolume->height()/2;
     int step = h/10;
-    startIndex = endIndex - (myW-35);
-    if(startIndex < 0) startIndex = 0;
     if(h%10>=5)
     {
         h+=step/2;
@@ -1219,39 +1207,43 @@ void TSController::printReport()
     float volumeK =1;
 
     i=0;
-    int k=curveBuffer->end()/pf.gTempIn->width();
+
+    int k=ceil((float)curveBuffer->lenght/pf.gTempIn->width());
+    qDebug()<<"end index"<<curveBuffer->lenght;
+    qDebug()<<"end index"<<endIndex;
+    qDebug()<<"Curve end"<<curveBuffer->end();
+    qDebug()<<"!!!!!!!!!!!!!!!!!k="<<k;
+    qDebug()<<"pf.gTempIn->width()"<<pf.gTempIn->width();
     for(j=0;j<myW-35;j+=1)
     {
-        if(i+startIndex>=k*endIndex)break;
+        if(i>=k*endIndex)break;
         prVolume.drawLine(
-                    j,
-                    h-volumeK*volumeAdaptive*volume[i+startIndex]
-                    ,j+1,
-                    h-volumeK*volumeAdaptive*volume[i+startIndex+k]
+                    j,h-volumeK*volumeAdaptive*volume[i],j+1,h-volumeK*volumeAdaptive*volume[i+k]
                     );
-        prTempIn.drawLine(j,tempInZ-tempInK*tempInAdaptive*tempIn[i+startIndex]
-                          ,j+1,tempInZ-tempInK*tempInAdaptive*tempIn[i+startIndex+k]);
-        prTempOut.drawLine(j,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex]
-                           ,j+1,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex+k]);
+        prTempIn.drawLine(j,tempInZ-tempInK*tempInAdaptive*tempIn[i]
+                          ,j+1,tempInZ-tempInK*tempInAdaptive*tempIn[i+k]);
+        prTempOut.drawLine(j,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i]
+                           ,j+1,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+k]);
         i+=k;
     }
     pf.gVolume->setPixmap(pmVolume);
     pf.gTempIn->setPixmap(pmTempIn);
     pf.gTempOut->setPixmap(pmTempOut);
-    if(recordingStarted)
-    {
-        pf.horizontalScrollBar->setEnabled(false);
-        pf.horizontalScrollBar->setMaximum(startIndex/10);
-        pf.horizontalScrollBar->setValue(startIndex/10);
-    }
+
     pf.PatientName->setText(patientsModel->record(0).value("sname").toString()+" "+patientsModel->record(0).value("fname").toString());
 
 
     wpf.hide();
-//    if (dialog->exec() == QDialog::Accepted){
-//        QPainter painter;
-//        painter.begin(&printer);
-//        int i=0;
-//        pf.mainBox->render(&painter);
-//    }
+    if (dialog->exec() == QDialog::Accepted){
+        QPainter painter;
+        painter.begin(&printer);
+        int i=0;
+        pf.mainBox->render(&painter);
+    }
+}
+float TSController::fabs(float a){
+    if(a<0)
+        return -a;
+    else
+        return a;
 }

@@ -33,6 +33,7 @@ public:
     ~TSController();
 
 public slots:
+    float fabs(float a);
     void incCurrentIndex();
     void decCurrentIndex();
     void editPatientProfile();

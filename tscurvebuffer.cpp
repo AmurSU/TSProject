@@ -5,6 +5,7 @@
 TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     QObject(parent)
 {
+    lenght=0;
     ts_end = -1;
     ts_monoInterval_in[0].end=0;
     ts_monoInterval_in[0].start=0;
@@ -64,6 +65,7 @@ int* TSCurveBuffer::tempOut()
 
 void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
 {
+    lenght++;
     if(ts_end == 17999)
     {
         emit overflowed();
@@ -97,6 +99,7 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     if(realtime){
         int num=500;
         if(ts_end%num==0){
+
             int sum=0,i=0;
             ga_it->findExtremums();
             ga_it->deleteBadExtremums();
@@ -361,6 +364,11 @@ float TSCurveBuffer::tempInToDeg(int temp)
 float TSCurveBuffer::tempOutToDeg(int temp)
 {
     return TAN_2*(REF_VOLTAGE_2-temp);//+(float)REF_TEMP;
+}
+
+int TSCurveBuffer::getLenght()
+{
+    return lenght;
 }
 
 void TSCurveBuffer::clean(){
