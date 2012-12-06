@@ -159,32 +159,25 @@ int tsanalitics::setupData(QVector<int> *row_d){
 }
 
 int tsanalitics::findExtremums(){
-
-
-    qDebug()<<ts_row_data->size();
     for (int i = 1; i < ts_row_data->size()-1; ++i) {
         if( (ts_row_data->at(i-1)<=ts_row_data->at(i) && ts_row_data->at(i)>=ts_row_data->at(i+1) ) ||
                 (ts_row_data->at(i-1)>=ts_row_data->at(i) && ts_row_data->at(i)<=ts_row_data->at(i+1) ) ||
                 (ts_row_data->at(i-1)==ts_row_data->at(i) ) || ( ts_row_data->at(i)==ts_row_data->at(i+1) )
                 ){
-            //qDebug()<<"extremum exist"<<ts_row_data->at(i);
             extremum *extr = new extremum;
             extr->y = ts_row_data->at(i);
 
             extr->x = i;
             if (ts_row_data->at(i-1)<ts_row_data->at(i) && ts_row_data->at(i)>ts_row_data->at(i+1)){
                 extr->type=1;
-                //qDebug()<<"max="<<ts_row_data->at(i);
+
             }
             else{
                 extr->type=-1;
-                //qDebug()<<"min="<<ts_row_data->at(i);
             }
             ts_extremums->push_back(*extr);
         }
     }
-    //qDebug()<<"all max="<<getMax();
-    //qDebug()<<"all min="<<getMin();
 }
 
 int tsanalitics::deleteBadExtremums(){
@@ -231,17 +224,19 @@ int tsanalitics::deleteBadExtremums(){
 }
 
 int tsanalitics::getBreathingVolume(){
+    qDebug()<<"BLIAT--------------------------------------------------------------";
     int i=0,sum_mn=0,k=0;
     QVector<int> exts;
-    qDebug()<<"Fuck";
     int max=-10000;
     for(i=0;i<ts_extremums->size();i++){
+        qDebug()<<"fuck"<<ts_extremums->at(i).y;
         if(fabs(ts_extremums->at(i).y)>max)
             max=fabs(ts_extremums->at(i).y);
     }
     for( i=0;i<ts_extremums->size();i++){
         if(ts_extremums->at(i).type==-1){
-            if(fabs(fabs(ts_extremums->at(i).y)-max)<400 && fabs(ts_extremums->at(i).y)<9000 && ts_extremums->at(i).y!=0 && fabs(ts_extremums->at(i).y)>600){
+            if( ts_extremums->at(i).y!=0 && fabs(ts_extremums->at(i).y)>max/2){
+//                if(fabs(fabs(ts_extremums->at(i).y)-max)<2000 && fabs(ts_extremums->at(i).y)<11000 && ts_extremums->at(i).y!=0 && fabs(ts_extremums->at(i).y)>600){
                 sum_mn+=fabs(ts_extremums->at(i).y);
                 k++;
                 exts.append(fabs(ts_extremums->at(i).y));
@@ -265,238 +260,248 @@ int tsanalitics::getBreathingVolume(){
         sum_mn+=fabs(exts.at(i));
         k++;
     }*/
-        if(k>0){
-            //return fabs(sum_mn/k);
-            return max;
-        }
-        else
-            return -1;
+    if(k>0){
+        return sum_mn/k;
     }
+    else
+        return -1;
+}
 
-    int tsanalitics::getAvgInspiratorySpeed(){
-        int i=0,sum=0,count=0;
-        for(i=0;i<ts_extremums->size()-1;i++){
-            if( ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1 ){
-                sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
-                count++;
+int tsanalitics::getAvgInspiratorySpeed(){
+    int i=0,sum=0,count=0;
+    qDebug()<<"FUCK getAvgInspiratorySpeed";
+    for(i=0;i<ts_extremums->size()-1;i++){
+        if( ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1 && ts_extremums->at(i+1).x-ts_extremums->at(i).x<300 &&ts_extremums->at(i+1).x-ts_extremums->at(i).x>30){
+            sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
+            qDebug()<<sum;
+            //                qDebug()<<"getAvgInspiratorySpeed "<<ts_extremums->at(i).y;
+            //                qDebug()<<"ts_extremums->at(i).x "<<ts_extremums->at(i).x<<" "<<ts_extremums->at(i+1).x;
+            count++;
+        }
+    }
+    if(count)
+        return sum/count;
+    else
+        return -1;
+}
+
+int tsanalitics::getAvgExpiratorySpeed(){
+    int i=0,sum=0,count=0;
+    for(i=0;i<ts_extremums->size()-1;i++){
+        if( ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1 ){
+            sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
+            //                qDebug()<<"getAvgEXspiratorySpeed "<<ts_extremums->at(i).y;
+            //                qDebug()<<"ts_extremums->at(i).x "<<ts_extremums->at(i).x<<" "<<ts_extremums->at(i+1).x;
+            count++;
+        }
+    }
+    if(count)
+        return sum/count;
+    else
+        return -1;
+}
+
+int tsanalitics::getMaxInspiratorySpeed(){
+    int i=0,speed=-10000,oldspeed=-10000;
+    for(i=0;i<ts_extremums->size()-1;i++){
+        if( ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1 ){
+            speed=(fabs(ts_extremums->at(i+1).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
+            if(speed > oldspeed ){
+                oldspeed=speed;
             }
         }
-        if(count)
-            return sum/count;
-        else
-            return -1;
     }
+    return oldspeed;
+}
 
-    int tsanalitics::getAvgExpiratorySpeed(){
-        int i=0,sum=0,count=0;
-        for(i=0;i<ts_extremums->size()-1;i++){
-            if( ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1 ){
-                sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
-                count++;
+int tsanalitics::getMaxExpiratorySpeed(){
+    int i=0,speed=-10000,oldspeed=-10000;
+    for(i=0;i<ts_extremums->size()-1;i++){
+        if( ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1 ){
+            speed=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
+            if(speed > oldspeed ){
+                oldspeed=speed;
             }
         }
-        if(count)
-            return sum/count;
-        else
-            return -1;
     }
+    return oldspeed;
+}
 
-    int tsanalitics::getMaxInspiratorySpeed(){
-        int i=0,speed=-10000,oldspeed=-10000;
-        for(i=0;i<ts_extremums->size()-1;i++){
-            if( ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1 ){
-                speed=(fabs(ts_extremums->at(i+1).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
-                if(speed > oldspeed ){
-                    oldspeed=speed;
-                }
-            }
-        }
-        return oldspeed;
-    }
+void tsanalitics::append(int n){
+    ts_row_data->push_back(n);
+}
 
-    int tsanalitics::getMaxExpiratorySpeed(){
-        int i=0,speed=-10000,oldspeed=-10000;
-        for(i=0;i<ts_extremums->size()-1;i++){
-            if( ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==-1 ){
-                speed=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
-                if(speed > oldspeed ){
-                    oldspeed=speed;
-                }
-            }
-        }
-        return oldspeed;
-    }
-
-    void tsanalitics::append(int n){
-        ts_row_data->push_back(n);
-    }
-
-    void tsanalitics::clear(){
-        int i=0;
-        ts_extremums->remove(0,ts_extremums->size());
-        /* for(i=0;i<ts_extremums->size();i++){
+void tsanalitics::clear(){
+    int i=0;
+    ts_extremums->remove(0,ts_extremums->size());
+    /* for(i=0;i<ts_extremums->size();i++){
         ts_extremums->erase(i);
     }*/
-        ts_extremums->clear();
-    }
+    ts_extremums->clear();
+}
 
-    int tsanalitics::getMaxsSum(){
-        int sum=0, i=0;
-        for(i=0;i<ts_extremums->size();i++){
-            if(ts_extremums->at(i).type==1)
-                sum+=ts_extremums->at(i).y;
-        }
-        return sum;
+int tsanalitics::getMaxsSum(){
+    int sum=0, i=0;
+    for(i=0;i<ts_extremums->size();i++){
+        if(ts_extremums->at(i).type==1)
+            sum+=ts_extremums->at(i).y;
     }
+    return sum;
+}
 
-    int tsanalitics::getMinsSum(){
-        int sum=0, i=0;
-        for(i=0;i<ts_extremums->size();i++){
-            if(ts_extremums->at(i).type==-1)
-                sum+=ts_extremums->at(i).y;
-        }
-        return sum;
+int tsanalitics::getMinsSum(){
+    int sum=0, i=0;
+    for(i=0;i<ts_extremums->size();i++){
+        if(ts_extremums->at(i).type==-1)
+            sum+=ts_extremums->at(i).y;
     }
+    return sum;
+}
 
-    int tsanalitics::getMVL(){
-        int air = getMinsSum();
-        int time = getTime();
-        return air;
-        if( time!=0)
+int tsanalitics::getMVL(){
+    int air = getMinsSum();
+    int sum=0, i=0;
+    for(i=0;i<ts_extremums->size();i++){
+        if(ts_extremums->at(i).type==-1)
+            sum+=abs(ts_extremums->at(i).y);
+    }
+    //int time = getTime();
+    return sum;
+    /*if( time!=0)
             return air*6000/time;
         else
-            return -1;
-    }
+            return -1;*/
+}
 
-    void tsanalitics::printVec(int k){
-        int i=0;
-        if(k>0)
-            for(i=0;i<ts_extremums->size();i++){
-                if(ts_extremums->at(i).type==1)
-                    printf("%d ",ts_extremums->at(i).y);
-            }
-        else
-            for(i=0;i<ts_extremums->size();i++){
-                if(ts_extremums->at(i).type==-1)
-                    printf("%d ",ts_extremums->at(i).y);
-            }
-    }
-
-    int tsanalitics::getMax(){
-        int i=0, max_index=0;
-        for (i=0;i<ts_row_data->size();i++){
-            if( ts_row_data->at(i)> ts_row_data->at(max_index) )
-                max_index = i;
+void tsanalitics::printVec(int k){
+    int i=0;
+    if(k>0)
+        for(i=0;i<ts_extremums->size();i++){
+            if(ts_extremums->at(i).type==1)
+                printf("%d ",ts_extremums->at(i).y);
         }
-        return ts_row_data->at(max_index);
-    }
-
-    int tsanalitics::getMin(){
-        int i=0, min_index=0;
-        for (i=0;i<ts_row_data->size();i++){
-            if( ts_row_data->at(i)< ts_row_data->at(min_index) )
-                min_index = i;
+    else
+        for(i=0;i<ts_extremums->size();i++){
+            if(ts_extremums->at(i).type==-1)
+                printf("%d ",ts_extremums->at(i).y);
         }
-        return ts_row_data->at(min_index);
-    }
+}
 
-    QVector<extremum> *tsanalitics::getExtremums(){
-        return ts_extremums;
+int tsanalitics::getMax(){
+    int i=0, max_index=0;
+    for (i=0;i<ts_row_data->size();i++){
+        if( ts_row_data->at(i)> ts_row_data->at(max_index) )
+            max_index = i;
     }
+    return ts_row_data->at(max_index);
+}
 
-    int tsanalitics::fabs(int a){
-        if( a<0 )
-            return -a;
-        else
-            return a;
+int tsanalitics::getMin(){
+    int i=0, min_index=0;
+    for (i=0;i<ts_row_data->size();i++){
+        if( ts_row_data->at(i)< ts_row_data->at(min_index) )
+            min_index = i;
     }
+    return ts_row_data->at(min_index);
+}
 
-    void tsanalitics::deleteEqualSignExtremums(){
-        int i=0;
-        for(i=0;i<ts_extremums->size()-1;i++){
-            if( ts_extremums->at(i).y == ts_extremums->at(i+1).y ){
-                ts_extremums->remove(i);
+QVector<extremum> *tsanalitics::getExtremums(){
+    return ts_extremums;
+}
+
+int tsanalitics::fabs(int a){
+    if( a<0 )
+        return -a;
+    else
+        return a;
+}
+
+void tsanalitics::deleteEqualSignExtremums(){
+    int i=0;
+    for(i=0;i<ts_extremums->size()-1;i++){
+        if( ts_extremums->at(i).y == ts_extremums->at(i+1).y ){
+            ts_extremums->remove(i);
+            if (i)
+                i--;
+        }
+    }
+    for(i=0;i<ts_extremums->size()-1;i++){
+        if( ts_extremums->at(i).type == ts_extremums->at(i+1).type ){
+            if(ts_extremums->at(i).type==1){
+                if(ts_extremums->at(i).y < ts_extremums->at(i+1).y){
+                    ts_extremums->remove(i);
+                }else{
+                    ts_extremums->remove(i+1);
+                }
+                if (i)
+                    i--;
+            }
+            if(ts_extremums->at(i).type==-1){
+                if(ts_extremums->at(i).y > ts_extremums->at(i+1).y){
+                    ts_extremums->remove(i);
+                }else{
+                    ts_extremums->remove(i+1);
+                }
                 if (i)
                     i--;
             }
         }
-        for(i=0;i<ts_extremums->size()-1;i++){
-            if( ts_extremums->at(i).type == ts_extremums->at(i+1).type ){
-                if(ts_extremums->at(i).type==1){
-                    if(ts_extremums->at(i).y < ts_extremums->at(i+1).y){
-                        ts_extremums->remove(i);
-                    }else{
-                        ts_extremums->remove(i+1);
-                    }
-                    if (i)
-                        i--;
-                }
-                if(ts_extremums->at(i).type==-1){
-                    if(ts_extremums->at(i).y > ts_extremums->at(i+1).y){
-                        ts_extremums->remove(i);
-                    }else{
-                        ts_extremums->remove(i+1);
-                    }
-                    if (i)
-                        i--;
-                }
+    }
+}
+
+void tsanalitics::deleteSimilarInMeaningExtremums(){
+    int i=0;
+    for (i=0;i<ts_extremums->size()-1;i++){
+        if(ts_extremums->at(i+1).x-ts_extremums->at(i).x <50 && fabs(ts_extremums->at(i+1).y-ts_extremums->at(i).y)<600 ){
+            if ( fabs(fabs(getMax())-fabs(ts_extremums->at(i).y)) < fabs(fabs(ts_extremums->at(i).y)-fabs(getMin())) &&
+                 fabs(fabs(getMax())-fabs(ts_extremums->at(i+1).y)) < fabs(fabs(ts_extremums->at(i+1).y)-fabs(getMin()))
+                 ){
+                if(ts_extremums->at(i).y <= ts_extremums->at(i+1).y)
+                    ts_extremums->remove(i,1);
+                else
+                    ts_extremums->remove(i+1,1);
+                if (i)
+                    i--;
+            }else if ( fabs(fabs(getMax())-fabs(ts_extremums->at(i).y)) > fabs(fabs(ts_extremums->at(i).y)-fabs(getMin())) &&
+                       fabs(fabs(getMax())-fabs(ts_extremums->at(i+1).y)) > fabs(fabs(ts_extremums->at(i+1).y)-fabs(getMin()))
+                       ){
+                if(ts_extremums->at(i).y >= ts_extremums->at(i+1).y)
+                    ts_extremums->remove(i,1);
+                else
+                    ts_extremums->remove(i+1,1);
+                if (i)
+                    i--;
             }
         }
     }
+}
 
-    void tsanalitics::deleteSimilarInMeaningExtremums(){
-        int i=0;
-        for (i=0;i<ts_extremums->size()-1;i++){
-            if(ts_extremums->at(i+1).x-ts_extremums->at(i).x <50 && fabs(ts_extremums->at(i+1).y-ts_extremums->at(i).y)<600 ){
-                if ( fabs(fabs(getMax())-fabs(ts_extremums->at(i).y)) < fabs(fabs(ts_extremums->at(i).y)-fabs(getMin())) &&
-                     fabs(fabs(getMax())-fabs(ts_extremums->at(i+1).y)) < fabs(fabs(ts_extremums->at(i+1).y)-fabs(getMin()))
-                     ){
-                    if(ts_extremums->at(i).y <= ts_extremums->at(i+1).y)
-                        ts_extremums->remove(i,1);
-                    else
-                        ts_extremums->remove(i+1,1);
-                    if (i)
-                        i--;
-                }else if ( fabs(fabs(getMax())-fabs(ts_extremums->at(i).y)) > fabs(fabs(ts_extremums->at(i).y)-fabs(getMin())) &&
-                           fabs(fabs(getMax())-fabs(ts_extremums->at(i+1).y)) > fabs(fabs(ts_extremums->at(i+1).y)-fabs(getMin()))
-                           ){
-                    if(ts_extremums->at(i).y >= ts_extremums->at(i+1).y)
-                        ts_extremums->remove(i,1);
-                    else
-                        ts_extremums->remove(i+1,1);
-                    if (i)
-                        i--;
-                }
-            }
-        }
-    }
-
-    void tsanalitics::deletePatternLightningExtremums(){
-        int i=0;
-        for (i=3;i<ts_extremums->size();i++){
-            if( ts_extremums->at(i).x-ts_extremums->at(i-3).x < 110 )
-                //( ts_extremums->at(i).type==-1 && ts_extremums->at(i-1).type==1 && ts_extremums->at(i-2).type==-1 && ts_extremums->at(i-3).type==1 )
+void tsanalitics::deletePatternLightningExtremums(){
+    int i=0;
+    for (i=3;i<ts_extremums->size();i++){
+        if( ts_extremums->at(i).x-ts_extremums->at(i-3).x < 110 )
+            //( ts_extremums->at(i).type==-1 && ts_extremums->at(i-1).type==1 && ts_extremums->at(i-2).type==-1 && ts_extremums->at(i-3).type==1 )
+            //&&
+            if (  (ts_extremums->at(i).y < ts_extremums->at(i-1).y && ts_extremums->at(i).y < ts_extremums->at(i-2).y  && ts_extremums->at(i).y < ts_extremums->at(i-3).y )
+                  && (ts_extremums->at(i-3).y > ts_extremums->at(i-2).y && ts_extremums->at(i-3).y > ts_extremums->at(i-1).y && ts_extremums->at(i-3).y > ts_extremums->at(i).y)
+                  && (ts_extremums->at(i-1).y > ts_extremums->at(i).y && ts_extremums->at(i-1).y > ts_extremums->at(i-2).y && ts_extremums->at(i-1).y < ts_extremums->at(i-3).y)
+                  && (ts_extremums->at(i-2).y > ts_extremums->at(i).y && ts_extremums->at(i-2).y < ts_extremums->at(i-1).y && ts_extremums->at(i-2).y < ts_extremums->at(i-3).y)
+                  ){
+                ts_extremums->remove(i-2,2);
+                if (i)
+                    i--;
+                //qDebug()<<"Need remove middle first figure ";
+                //(ts_extremums->at(i).type==1 && ts_extremums->at(i-1).type==-1 && ts_extremums->at(i-2).type==1 && ts_extremums->at(i-3).type==-1 )
                 //&&
-                if (  (ts_extremums->at(i).y < ts_extremums->at(i-1).y && ts_extremums->at(i).y < ts_extremums->at(i-2).y  && ts_extremums->at(i).y < ts_extremums->at(i-3).y )
-                      && (ts_extremums->at(i-3).y > ts_extremums->at(i-2).y && ts_extremums->at(i-3).y > ts_extremums->at(i-1).y && ts_extremums->at(i-3).y > ts_extremums->at(i).y)
-                      && (ts_extremums->at(i-1).y > ts_extremums->at(i).y && ts_extremums->at(i-1).y > ts_extremums->at(i-2).y && ts_extremums->at(i-1).y < ts_extremums->at(i-3).y)
-                      && (ts_extremums->at(i-2).y > ts_extremums->at(i).y && ts_extremums->at(i-2).y < ts_extremums->at(i-1).y && ts_extremums->at(i-2).y < ts_extremums->at(i-3).y)
-                      ){
-                    ts_extremums->remove(i-2,2);
-                    if (i)
-                        i--;
-                    //qDebug()<<"Need remove middle first figure ";
-                    //(ts_extremums->at(i).type==1 && ts_extremums->at(i-1).type==-1 && ts_extremums->at(i-2).type==1 && ts_extremums->at(i-3).type==-1 )
-                    //&&
-                }else if (  (ts_extremums->at(i).y > ts_extremums->at(i-1).y && ts_extremums->at(i).y > ts_extremums->at(i-2).y  && ts_extremums->at(i).y > ts_extremums->at(i-3).y )
-                            && (ts_extremums->at(i-3).y < ts_extremums->at(i-2).y && ts_extremums->at(i-3).y < ts_extremums->at(i-1).y && ts_extremums->at(i-3).y < ts_extremums->at(i).y)
-                            && (ts_extremums->at(i-1).y < ts_extremums->at(i).y && ts_extremums->at(i-1).y < ts_extremums->at(i-2).y && ts_extremums->at(i-1).y > ts_extremums->at(i-3).y)
-                            && (ts_extremums->at(i-2).y < ts_extremums->at(i).y && ts_extremums->at(i-2).y > ts_extremums->at(i-1).y && ts_extremums->at(i-2).y > ts_extremums->at(i-3).y)
-                            ){
-                    ts_extremums->remove(i-2,2);
-                    if (i)
-                        i--;
-                    //qDebug()<<"Need remove middle second figure ";
-                }
-        }
+            }else if (  (ts_extremums->at(i).y > ts_extremums->at(i-1).y && ts_extremums->at(i).y > ts_extremums->at(i-2).y  && ts_extremums->at(i).y > ts_extremums->at(i-3).y )
+                        && (ts_extremums->at(i-3).y < ts_extremums->at(i-2).y && ts_extremums->at(i-3).y < ts_extremums->at(i-1).y && ts_extremums->at(i-3).y < ts_extremums->at(i).y)
+                        && (ts_extremums->at(i-1).y < ts_extremums->at(i).y && ts_extremums->at(i-1).y < ts_extremums->at(i-2).y && ts_extremums->at(i-1).y > ts_extremums->at(i-3).y)
+                        && (ts_extremums->at(i-2).y < ts_extremums->at(i).y && ts_extremums->at(i-2).y > ts_extremums->at(i-1).y && ts_extremums->at(i-2).y > ts_extremums->at(i-3).y)
+                        ){
+                ts_extremums->remove(i-2,2);
+                if (i)
+                    i--;
+                //qDebug()<<"Need remove middle second figure ";
+            }
     }
+}

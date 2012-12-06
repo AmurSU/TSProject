@@ -332,23 +332,23 @@ void TSController::calibrateVolume(){
         readerThread->setReadingType(ReadForVolVal);
         readerThread->startRead();
         cPlotingTimer.start(100);
-        //connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
-        //dui.progressBar->setVisible(true);
-        //dui.information->setText(tr("Идет калибровка. Подождите..."));
+        connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
+        dui.progressBar->setVisible(true);
+        dui.information->setText(tr("Идет калибровка. Подождите..."));
     }
 
-    /*if(d.exec()==1){
+    if(d.exec()==1){
         int *vol = curveBuffer->volume();
         tsanalitics ta;
         for(int i=0;i<curveBuffer->end();i++){
             ta.append(vol[i]);
-            f<<vol[i]<<endl;
+            //f<<vol[i]<<endl;
         }
         ta.findExtremums();
         ta.deleteBadExtremums();
         settings.setValue("volOutLtr",ta.getMin());
         settings.setValue("volInLtr",ta.getMax());
-        curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
+        curveBuffer->setVolumeConverts(3400,-3400);
         readerThread->stopRead();
         curveBuffer->clean();
         settings.sync();
@@ -362,10 +362,11 @@ void TSController::calibrateVolume(){
         ui->managmentBox->setEnabled(true);
         ui->startExam->setEnabled(true);
         ui->stopExam->setEnabled(true);
+        disconnect(&d,SLOT(accept()));
         initPaintDevices();
         plotNow();
     }
-    */
+
 }
 
 void TSController::calibrateTemperature()
@@ -385,6 +386,7 @@ void TSController::rejectColibration()
     plotNow();
     ui->managmentBox->setVisible(true);
     ui->managmentBox->setEnabled(true);
+
 }
 
 void TSController::initPaintDevices()
@@ -783,12 +785,15 @@ void TSController::openExam(QModelIndex ind)
     ui->managmentBox->setEnabled(true);
     plotNow();
     processDataParams();
+    qDebug()<<"TableWidget: "<<ui->resultsTable->width()<<" "<<ui->resultsTable->height();
+    qDebug()<<"Button: "<<ui->startExam->width()<<" "<<ui->startExam->height();
 }
 
 void TSController::resizeEvent(QResizeEvent *evt)
 {
     initPaintDevices();
     plotNow();
+
 }
 
 void TSController::scaleTempIn(int value)
@@ -995,7 +1000,7 @@ void TSController::processDataParams(){
     qtw->setColumnCount(2);
     qtw->setRowCount(13);
     qtw->verticalHeader()->setVisible(false);
-    qtw->setHorizontalHeaderLabels(QString(tr("Параметр; Значение")).split(";"));
+    qtw->setHorizontalHeaderLabels(QString(tr("Параметр;Значение")).split(";"));
     qtw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     tsanalitics* ga = new tsanalitics();
     tsanalitics* gao = new tsanalitics();
@@ -1065,7 +1070,7 @@ void TSController::processDataParams(){
     qtw->setItem(9,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume)))));
 
     MVL = ga->getMVL();
-    qtw->setItem(10,0,getQTableWidgetItem(tr("Максимальная вентиляция легких(л/мин)")));
+    qtw->setItem(10,0,getQTableWidgetItem(tr("Максимальная вентиляция легких(л)")));
     qtw->setItem(10,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MVL)))));
 
     ga->clear();
