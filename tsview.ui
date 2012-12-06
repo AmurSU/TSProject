@@ -27,12 +27,12 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="workArea" stretch="3,2">
+     <layout class="QHBoxLayout" name="workArea" stretch="10,1">
       <property name="spacing">
        <number>10</number>
       </property>
       <property name="sizeConstraint">
-       <enum>QLayout::SetMinimumSize</enum>
+       <enum>QLayout::SetNoConstraint</enum>
       </property>
       <property name="margin">
        <number>3</number>
@@ -1221,8 +1221,8 @@ p, li { white-space: pre-wrap; }
           <widget class="QTableWidget" name="resultsTable">
            <property name="minimumSize">
             <size>
-             <width>0</width>
-             <height>0</height>
+             <width>350</width>
+             <height>350</height>
             </size>
            </property>
            <property name="font">
