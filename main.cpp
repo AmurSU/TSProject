@@ -9,14 +9,18 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-try{
+//try{
     TSController* controller = new TSController;
 
 
-        controller->showMaximized();
-    }catch(TSController* controller){
-        qDebug()<<"Контролера сламалася";
-    }
+
+//        controller->showMaximized();
+//    }catch(TSController* controller){
+//        qDebug()<<"Контролера сламалася";
+//    }
+//    //assert(controller);
+    controller->showMaximized();
+
 
     return a.exec();
 }

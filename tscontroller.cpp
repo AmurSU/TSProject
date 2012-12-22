@@ -335,37 +335,41 @@ void TSController::calibrateVolume(){
         connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
         dui.progressBar->setVisible(true);
         dui.information->setText(tr("Идет калибровка. Подождите..."));
-   }
 
-    if(d.exec()==1){
-        int *vol = curveBuffer->volume();
-        tsanalitics ta;
-        for(int i=0;i<curveBuffer->end();i++){
-            ta.append(vol[i]);
-            //f<<vol[i]<<endl;
-        }
-        ta.findExtremums();
-        ta.deleteBadExtremums();
-        settings.setValue("volOutLtr",ta.getMin());
-        settings.setValue("volInLtr",ta.getMax());
-        curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
-        readerThread->stopRead();
-        curveBuffer->clean();
-        settings.sync();
-        dui.progressBar->setVisible(false);
-        dui.acceptButton->setVisible(true);
-        dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
     }
-    if(d.exec()==1){
-        ui->mainBox->setCurrentIndex(5);
-        ui->managmentBox->setVisible(true);
-        ui->managmentBox->setEnabled(true);
-        ui->startExam->setEnabled(true);
-        ui->stopExam->setEnabled(true);
-        disconnect(&d,SLOT(accept()));
-        initPaintDevices();
-        plotNow();
+
+
+
+
+if(d.exec()==1){
+    int *vol = curveBuffer->volume();
+    tsanalitics ta;
+    for(int i=0;i<curveBuffer->end();i++){
+        ta.append(vol[i]);
+        //f<<vol[i]<<endl;
     }
+    ta.findExtremums();
+    ta.deleteBadExtremums();
+    settings.setValue("volOutLtr",ta.getMin());
+    settings.setValue("volInLtr",ta.getMax());
+    curveBuffer->setVolumeConverts(3400,-3400);
+    readerThread->stopRead();
+    curveBuffer->clean();
+    settings.sync();
+    dui.progressBar->setVisible(false);
+    dui.acceptButton->setVisible(true);
+    dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
+}
+if(d.exec()==1){
+    ui->mainBox->setCurrentIndex(5);
+    ui->managmentBox->setVisible(true);
+    ui->managmentBox->setEnabled(true);
+    ui->startExam->setEnabled(true);
+    ui->stopExam->setEnabled(true);
+    disconnect(&d,SLOT(accept()));
+    initPaintDevices();
+    plotNow();
+}
 
 }
 
@@ -495,8 +499,8 @@ void TSController::plotNow()
 
 void TSController::plotCalibration(){
 
-//    int endIndex = curveBuffer->end();
-int endIndex = curveBuffer->getLenght();
+    //    int endIndex = curveBuffer->end();
+    int endIndex = curveBuffer->getLenght();
     if(endIndex<1200){
         pcVolume.fillRect(0,0,cW,cH,Qt::white);
         int h = cH/2;
