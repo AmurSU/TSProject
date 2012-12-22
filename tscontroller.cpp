@@ -335,41 +335,37 @@ void TSController::calibrateVolume(){
         connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
         dui.progressBar->setVisible(true);
         dui.information->setText(tr("Идет калибровка. Подождите..."));
-
+   }
+/*
+    if(d.exec()==1){
+        int *vol = curveBuffer->volume();
+        tsanalitics ta;
+        for(int i=0;i<curveBuffer->end();i++){
+            ta.append(vol[i]);
+            //f<<vol[i]<<endl;
+        }
+        ta.findExtremums();
+        ta.deleteBadExtremums();
+        settings.setValue("volOutLtr",ta.getMin());
+        settings.setValue("volInLtr",ta.getMax());
+        curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
+        readerThread->stopRead();
+        curveBuffer->clean();
+        settings.sync();
+        dui.progressBar->setVisible(false);
+        dui.acceptButton->setVisible(true);
+        dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
     }
-
-
-
-
-if(d.exec()==1){
-    int *vol = curveBuffer->volume();
-    tsanalitics ta;
-    for(int i=0;i<curveBuffer->end();i++){
-        ta.append(vol[i]);
-        //f<<vol[i]<<endl;
-    }
-    ta.findExtremums();
-    ta.deleteBadExtremums();
-    settings.setValue("volOutLtr",ta.getMin());
-    settings.setValue("volInLtr",ta.getMax());
-    curveBuffer->setVolumeConverts(3400,-3400);
-    readerThread->stopRead();
-    curveBuffer->clean();
-    settings.sync();
-    dui.progressBar->setVisible(false);
-    dui.acceptButton->setVisible(true);
-    dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
-}
-if(d.exec()==1){
-    ui->mainBox->setCurrentIndex(5);
-    ui->managmentBox->setVisible(true);
-    ui->managmentBox->setEnabled(true);
-    ui->startExam->setEnabled(true);
-    ui->stopExam->setEnabled(true);
-    disconnect(&d,SLOT(accept()));
-    initPaintDevices();
-    plotNow();
-}
+    if(d.exec()==1){
+        ui->mainBox->setCurrentIndex(5);
+        ui->managmentBox->setVisible(true);
+        ui->managmentBox->setEnabled(true);
+        ui->startExam->setEnabled(true);
+        ui->stopExam->setEnabled(true);
+        disconnect(&d,SLOT(accept()));
+        initPaintDevices();
+        plotNow();
+    }*/
 
 }
 
@@ -579,13 +575,14 @@ void TSController::startExam()
     horizontalStep = 1.0;
     initPaintDevices();
     plotingTimer.start(100);
-    QDialog *d = new QDialog(this);
+    QDialog *mvlDialog = new QDialog(this);
     volWidget = new Ui::TSVolSignalWidget();
-    volWidget->setupUi(d);
+    volWidget->setupUi(mvlDialog);
     volWidget->MVL->setText("50%");
-    d->setModal(false);
-    d->show();
+    mvlDialog->setModal(false);
+    mvlDialog->show();
     ui->startExam->setEnabled(false);
+    ui->horizontalScrollBar->setEnabled(false);
 }
 
 void TSController::stopExam()
@@ -629,6 +626,8 @@ void TSController::stopExam()
         ui->horizontalScrollBar->setEnabled(true);
     }
 
+    ui->horizontalScrollBar->setEnabled(true);
+    mvlDialog->close();
     recordingStarted = false;
 }
 
@@ -747,6 +746,8 @@ void TSController::createNewExam()
     qDebug()<<"height: "<<bcVolume.height()<<" width: "<<bcVolume.width();
     pcVolume.begin(&bcVolume);
     curveBuffer->clean();
+    curveBuffer->setEnd(0);
+    curveBuffer->setLenght(0);
     plotCalibration();
 }
 
@@ -927,20 +928,30 @@ void TSController::changeTempOutScrollValue(int value)
 
 bool TSController::eventFilter(QObject *obj, QEvent *e)
 {
+    //qDebug()<<"eventFilter";
+
     QMouseEvent *evt;
     if(e->type() == QEvent::MouseButtonPress) evt = static_cast<QMouseEvent*>(e);
     if(obj == ui->backPatientProfileButton && evt->button()==Qt::LeftButton)
     {
-        if(currentAction == CreatePatientProfileAction)
+        if(currentAction == CreatePatientProfileAction){
             ui->mainBox->setCurrentIndex(0);
-        if(currentAction == NoAction)
+            patientsModel->setFilter("");
+            patientsModel->select();
+        }
+        if(currentAction == NoAction){
             ui->mainBox->setCurrentIndex(2);
+            patientsModel->setFilter("");
+            patientsModel->select();
+        }
+        ui->horizontalScrollBar->setEnabled(false);
     }
     if(obj == ui->backPatientListButton && evt->button()==Qt::LeftButton)
     {
         ui->mainBox->setCurrentIndex(0);
         patientsModel->setFilter("");
         patientsModel->select();
+        ui->horizontalScrollBar->setEnabled(false);
     }
     if(obj == ui->backCallibrateButton && evt->button()==Qt::LeftButton)
     {
@@ -960,6 +971,7 @@ bool TSController::eventFilter(QObject *obj, QEvent *e)
         }
         curveBuffer->clean();
     }
+    //curveBuffer->clean();
     return QObject::eventFilter(obj,e);
 }
 
@@ -990,7 +1002,6 @@ QTableWidgetItem* TSController::getQTableWidgetItem(QVariant text){
     QTableWidgetItem *item = new QTableWidgetItem();
     item->setData(0,text);
     item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-
     return item;
 }
 
@@ -1019,9 +1030,10 @@ void TSController::processDataParams(){
     for(i=0;i<curveBuffer->getLenght();i++){
         ga->append(vo[i]);
     }
+    ga->approximate();
     ga->findExtremums();
-    ga->deleteBadExtremums();
-
+    ga->deleteBadExtremumsVolume();
+    //ga->printExtremums();
     int *ti = curveBuffer->tempIn();
     for(i=0;i<curveBuffer->getLenght();i++){
         gai->append(ti[i]);
@@ -1089,8 +1101,10 @@ void TSController::processDataParams(){
     gai->clear();
 
     AvgTempOut = gao->getMaxAvgs();
+    qDebug()<<"AvgTempOut"<<AvgTempOut;
     qtw->setItem(12,0,getQTableWidgetItem(tr("Средняя температура выдоха( 'C)")));
     qtw->setItem(12,1,getQTableWidgetItem(QString::number(curveBuffer->tempOutToDeg(AvgTempOut))));
+    qDebug()<<"curveBuffer->tempOutToDeg(AvgTempOut)"<<curveBuffer->tempOutToDeg(AvgTempOut);
 
     AvgTempInMinusAvgTempOut = AvgTempOut-AvgTempIn;
     qtw->setItem(13,0,getQTableWidgetItem(tr("Средняя Твдоха-Средняя Твыдоха( 'C)")));

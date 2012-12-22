@@ -62,14 +62,14 @@ int tsanalitics::getFrequency(){
             break;
         }
     }
-    qDebug()<<"fst="<<fst;
+    //qDebug()<<"fst="<<fst;
     for(i=ts_extremums->size()-1;i>0;i--){
         if(ts_extremums->at(i).type==-1){
             lst = ts_extremums->at(i).x;
             break;
         }
     }
-    qDebug()<<"lst="<<lst;
+    //qDebug()<<"lst="<<lst;
     //lst=ts_extremums->last().x;
     if(lst!=0 && fst!=0)
         return minc*6000/(lst-fst);
@@ -159,10 +159,10 @@ int tsanalitics::setupData(QVector<int> *row_d){
 }
 
 int tsanalitics::findExtremums(){
-    for (int i = 1; i < ts_row_data->size()-1; ++i) {
-        if( (ts_row_data->at(i-1)<=ts_row_data->at(i) && ts_row_data->at(i)>=ts_row_data->at(i+1) ) ||
-                (ts_row_data->at(i-1)>=ts_row_data->at(i) && ts_row_data->at(i)<=ts_row_data->at(i+1) ) ||
-                (ts_row_data->at(i-1)==ts_row_data->at(i) ) || ( ts_row_data->at(i)==ts_row_data->at(i+1) )
+    for (int i = 1; i < ts_row_data->size()-1; ++i) {/*||
+                (ts_row_data->at(i-1)==ts_row_data->at(i) ) || ( ts_row_data->at(i)==ts_row_data->at(i+1) )*/
+        if( (ts_row_data->at(i-1)<ts_row_data->at(i) && ts_row_data->at(i)>ts_row_data->at(i+1) ) ||
+                (ts_row_data->at(i-1)>ts_row_data->at(i) && ts_row_data->at(i)<ts_row_data->at(i+1) )
                 ){
             extremum *extr = new extremum;
             extr->y = ts_row_data->at(i);
@@ -170,7 +170,6 @@ int tsanalitics::findExtremums(){
             extr->x = i;
             if (ts_row_data->at(i-1)<ts_row_data->at(i) && ts_row_data->at(i)>ts_row_data->at(i+1)){
                 extr->type=1;
-
             }
             else{
                 extr->type=-1;
@@ -183,9 +182,15 @@ int tsanalitics::findExtremums(){
 int tsanalitics::deleteBadExtremums(){
     int i=0;
     int cntextr=ts_extremums->size();
+//    qDebug()<<"Bilo";
+//    printExtremums();
     deleteEqualSignExtremums();
+//    qDebug()<<"deleteEqualSignExtremums";
+//    printExtremums();
     deletePatternLightningExtremums();
-
+//    qDebug()<<"deletePatternLightningExtremums";
+//    printExtremums();
+//    qDebug()<<"No name";
     for (i=0;i<ts_extremums->size()-1;i++){
         if(ts_extremums->at(i+1).x-ts_extremums->at(i).x <50 && fabs(ts_extremums->at(i+1).y-ts_extremums->at(i).y)<600 ){
             if(ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==1){
@@ -207,8 +212,11 @@ int tsanalitics::deleteBadExtremums(){
             }
         }
     }
-
+//    printExtremums();
     deleteSimilarInMeaningExtremums();
+//    qDebug()<<"deleteSimilarInMeaningExtremums";
+//    printExtremums();
+//    qDebug()<<"end";
     /* FILE *out;
     out = fopen("out.csv","w");
     for(i=0;i<ts_extremums->size();i++){
@@ -223,24 +231,78 @@ int tsanalitics::deleteBadExtremums(){
     }
 }
 
+int tsanalitics::deleteBadExtremumsVolume()
+{
+    int i;
+    for(i=0;i<ts_extremums->size();i++){
+        if( ts_extremums->at(i).type==1 ){
+            ts_extremums->remove(i,1);
+            if(i>0)
+                i--;
+        }
+    }
+    int min=getMin();
+    for(i=0;i<ts_extremums->size();i++){
+        if( fabs(ts_extremums->at(i).y)<0.2*fabs(min) ){
+            ts_extremums->remove(i,1);
+            if(i>0)
+                i--;
+        }
+    }
+    printExtremums();
+}
+
+void tsanalitics::approximate()
+{
+    int i=0;
+    QVector<int> *df = new QVector<int>;
+    for(i=0;i<ts_row_data->size()-1;i++){
+        df->push_back(ts_row_data->at(i+1)-ts_row_data->at(i));
+//        qDebug()<<"df["<<i<<"]="<<df->at(i);
+    }
+    QVector<int> *ddf = new QVector<int>;
+    for(i=0;i<df->size()-1;i++){
+        ddf->push_back(df->at(i+1)-df->at(i));
+        //qDebug()<<"ddf["<<i<<"]="<<ddf->at(i);
+    }
+//    for(i=0;i<ts_row_data->size();i++){
+//        qDebug()<<"rd["<<i<<"]="<<ts_row_data->at(i);
+//    }
+    qDebug()<<df->size()<<"size -+------";
+    for(i=0;i<ddf->size();i++){
+
+        if(ddf->at(i)==0){
+            //qDebug()<<"i="<<i<<"ddf->size()"<<ddf->size();
+            ddf->remove(i,1);
+            ts_row_data->remove(i,1);
+            if(i>0)
+                i--;
+        }
+    }
+    for(i=0;i<ts_row_data->size();i++){
+        qDebug()<<"aftrd["<<i<<"]="<<ts_row_data->at(i);
+    }
+
+}
+
 int tsanalitics::getBreathingVolume(){
-    qDebug()<<"BLIAT--------------------------------------------------------------";
+    //qDebug()<<"BLIAT--------------------------------------------------------------";
     int i=0,sum_mn=0,k=0;
     QVector<int> exts;
     int max=-10000;
     for(i=0;i<ts_extremums->size();i++){
-        qDebug()<<"fuck"<<ts_extremums->at(i).y;
+        //qDebug()<<"fuck"<<ts_extremums->at(i).y;
         if(fabs(ts_extremums->at(i).y)>max)
             max=fabs(ts_extremums->at(i).y);
     }
     for( i=0;i<ts_extremums->size();i++){
         if(ts_extremums->at(i).type==-1){
             if( ts_extremums->at(i).y!=0 && fabs(ts_extremums->at(i).y)>max/2){
-//                if(fabs(fabs(ts_extremums->at(i).y)-max)<2000 && fabs(ts_extremums->at(i).y)<11000 && ts_extremums->at(i).y!=0 && fabs(ts_extremums->at(i).y)>600){
+                //                if(fabs(fabs(ts_extremums->at(i).y)-max)<2000 && fabs(ts_extremums->at(i).y)<11000 && ts_extremums->at(i).y!=0 && fabs(ts_extremums->at(i).y)>600){
                 sum_mn+=fabs(ts_extremums->at(i).y);
                 k++;
                 exts.append(fabs(ts_extremums->at(i).y));
-                qDebug()<<"ts_extremums->at(i).y"<<ts_extremums->at(i).y<<"sum_mn"<<sum_mn;
+                //qDebug()<<"ts_extremums->at(i).y"<<ts_extremums->at(i).y<<"sum_mn"<<sum_mn;
             }
         }
     }
@@ -269,11 +331,11 @@ int tsanalitics::getBreathingVolume(){
 
 int tsanalitics::getAvgInspiratorySpeed(){
     int i=0,sum=0,count=0;
-    qDebug()<<"FUCK getAvgInspiratorySpeed";
+    //qDebug()<<"FUCK getAvgInspiratorySpeed";
     for(i=0;i<ts_extremums->size()-1;i++){
         if( ts_extremums->at(i).type==-1 && ts_extremums->at(i+1).type==1 && ts_extremums->at(i+1).x-ts_extremums->at(i).x<300 &&ts_extremums->at(i+1).x-ts_extremums->at(i).x>30){
             sum+=(fabs(ts_extremums->at(i).y))/(ts_extremums->at(i+1).x-ts_extremums->at(i).x);
-            qDebug()<<sum;
+            //qDebug()<<sum;
             //                qDebug()<<"getAvgInspiratorySpeed "<<ts_extremums->at(i).y;
             //                qDebug()<<"ts_extremums->at(i).x "<<ts_extremums->at(i).x<<" "<<ts_extremums->at(i+1).x;
             count++;
@@ -407,6 +469,15 @@ int tsanalitics::getMin(){
 
 QVector<extremum> *tsanalitics::getExtremums(){
     return ts_extremums;
+}
+
+void tsanalitics::printExtremums()
+{
+    int i=0;
+    for(i=0;i<ts_extremums->size();i++){
+        qDebug()<<"type="<<ts_extremums->at(i).type<<" x="<<ts_extremums->at(i).x<<" y="<<ts_extremums->at(i).y;
+
+    }
 }
 
 int tsanalitics::fabs(int a){

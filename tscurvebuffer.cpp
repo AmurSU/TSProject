@@ -373,6 +373,7 @@ int TSCurveBuffer::getLenght()
 
 void TSCurveBuffer::clean(){
     ts_end=0;
+    lenght=0;
     ga_it->clear();
     ga_ot->clear();
     ga_vo->clear();
@@ -393,4 +394,7 @@ int TSCurveBuffer::setReference(QSettings *set)
         ts_tanTempIn = set->value("tanTempIn").toDouble();
         ts_tanTempOut = set->value("tanTempOut").toDouble();
     }
+}
+void TSCurveBuffer::setLenght(int l){
+    lenght=l;
 }

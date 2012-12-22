@@ -63,6 +63,7 @@ public:
     int getLenght();
     int lenght;
     void clean();
+    void setLenght(int l);
 signals:
     void changed(CurvesSegnments s);
     void overflowed();

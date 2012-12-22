@@ -74,6 +74,7 @@ protected:
     void openPrivateDB(QSqlRecord record);
 private:
     QWidget wpf;
+    QDialog *mvlDialog;
     QTableWidgetItem* getQTableWidgetItem(QVariant text);
     Ui::TSView *ui;
     Ui::MainWindow *w;
@@ -123,6 +124,7 @@ private:
     TSExaminations *examinationsModel;
     QSqlDatabase patientsConnection;
     QSqlDatabase examinationsConnection;
+    bool isInitialized;
 };
 
 #endif // TSVIEW_H

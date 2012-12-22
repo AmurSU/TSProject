@@ -28,6 +28,8 @@ public:
     int setupData(QVector<int> *row_d);
     int findExtremums();
     int deleteBadExtremums();
+    int deleteBadExtremumsVolume();
+    void approximate();
     int getBreathingVolume();
     int getAvgInspiratorySpeed();
     int getAvgExpiratorySpeed();
@@ -42,6 +44,7 @@ public:
     int getMax();
     int getMin();
     QVector<extremum>* getExtremums();
+    void printExtremums();
 private:
     int fabs(int a);
     void deleteEqualSignExtremums();
