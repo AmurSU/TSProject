@@ -1024,14 +1024,15 @@ void TSController::processDataParams(){
     tsanalitics* gao = new tsanalitics();
     tsanalitics* gai = new tsanalitics();
     int AvgExpirationSpeed=0, AvgInspirationSpeed=0, MaxExpirationSpeed=0, MaxInspirationSpeed=0, AvgExpirationTime=0, AvgInspirationTime=0,
-            AvgRoundTime=0, AvgTempIn=0, AvgTempOut=0, AvgTempInMinusAvgTempOut=0, InspirationFrequency=0, BreathingVolume=0, MVL=0;
+            AvgRoundTime=0, AvgTempIn=0, AvgTempOut=0, AvgTempInMinusAvgTempOut=0,  BreathingVolume=0, MVL=0;
+    float InspirationFrequency=0;
     int i=0;
     int *vo = curveBuffer->volume();
     for(i=0;i<curveBuffer->getLenght();i++){
         ga->append(vo[i]);
     }
     ga->approximate();
-    ga->findExtremums();
+    //ga->findExtremums();
     ga->deleteBadExtremumsVolume();
     //ga->printExtremums();
     int *ti = curveBuffer->tempIn();
@@ -1049,40 +1050,41 @@ void TSController::processDataParams(){
     gao->deleteBadExtremums();
 
     AvgExpirationSpeed = ga->getAvgExpiratorySpeed();
-    QVector<extremum> *v_vol = ga->getExtremums();
-    QVector<extremum> *v_ti = gai->getExtremums();
-    QVector<extremum> *v_to = gao->getExtremums();
+    qDebug()<<AvgExpirationSpeed;
+//    QVector<extremum> *v_vol = ga->getExtremums();
+//    QVector<extremum> *v_ti = gai->getExtremums();
+//    QVector<extremum> *v_to = gao->getExtremums();
 
     qtw->setItem(1,0,getQTableWidgetItem(tr("—редн€€ скорость выдоха(л/с)")));
-    qtw->setItem(1,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*AvgExpirationSpeed)))));
+    qtw->setItem(1,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(AvgExpirationSpeed)))));
 
-    AvgInspirationSpeed = ga->getAvgInspiratorySpeed();
-    qtw->setItem(2,0,getQTableWidgetItem(tr("—редн€€ скорость вдоха(л/с)")));
-    qtw->setItem(2,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*AvgInspirationSpeed)))));
+//    AvgInspirationSpeed = ga->getAvgInspiratorySpeed();
+//    qtw->setItem(2,0,getQTableWidgetItem(tr("—редн€€ скорость вдоха(л/с)")));
+//    qtw->setItem(2,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*AvgInspirationSpeed)))));
 
     MaxExpirationSpeed = ga->getMaxExpiratorySpeed();
     qtw->setItem(3,0,getQTableWidgetItem(tr("ћаксимальна€ скорость выдоха(л/с)")));
     qtw->setItem(3,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*MaxExpirationSpeed)))));
 
-    MaxInspirationSpeed = ga->getMaxInspiratorySpeed();
-    qtw->setItem(4,0,getQTableWidgetItem(tr("ћаксимальна€ скорость вдоха(л/с)")));
-    qtw->setItem(4,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*MaxInspirationSpeed)))));
+//    MaxInspirationSpeed = ga->getMaxInspiratorySpeed();
+//    qtw->setItem(4,0,getQTableWidgetItem(tr("ћаксимальна€ скорость вдоха(л/с)")));
+//    qtw->setItem(4,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*MaxInspirationSpeed)))));
 
     AvgExpirationTime = ga->getAvgExpiratoryTime();
     qtw->setItem(5,0,getQTableWidgetItem(tr("—реднее врем€ выдоха(с)")));
     qtw->setItem(5,1,getQTableWidgetItem((QString::number((float)AvgExpirationTime/100))));
 
-    AvgInspirationTime = ga->getAvgInspiratoryTime();
-    qtw->setItem(6,0,getQTableWidgetItem(tr("—реднее врем€ вдоха(с)")));
-    qtw->setItem(6,1,getQTableWidgetItem((QString::number((float)AvgInspirationTime/100))));
+//    AvgInspirationTime = ga->getAvgInspiratoryTime();
+//    qtw->setItem(6,0,getQTableWidgetItem(tr("—реднее врем€ вдоха(с)")));
+//    qtw->setItem(6,1,getQTableWidgetItem((QString::number((float)AvgInspirationTime/100))));
 
-    AvgRoundTime = AvgExpirationTime+AvgInspirationTime;
-    qtw->setItem(7,0,getQTableWidgetItem(tr("—редн€€ врем€ цикла(с)")));
-    qtw->setItem(7,1,getQTableWidgetItem((QString::number((float)AvgRoundTime/100))));
+//    AvgRoundTime = AvgExpirationTime+AvgInspirationTime;
+//    qtw->setItem(7,0,getQTableWidgetItem(tr("—редн€€ врем€ цикла(с)")));
+//    qtw->setItem(7,1,getQTableWidgetItem((QString::number((float)AvgRoundTime/100))));
 
     InspirationFrequency = ga->getFrequency();
     qtw->setItem(8,0,getQTableWidgetItem(tr("„астота дыхани€(ед/мин)")));
-    qtw->setItem(8,1,getQTableWidgetItem(InspirationFrequency));
+    qtw->setItem(8,1,getQTableWidgetItem((QString::number(InspirationFrequency))));
 
     BreathingVolume = ga->getBreathingVolume();
     qtw->setItem(9,0,getQTableWidgetItem(tr("ƒыхательный объем(л)")));

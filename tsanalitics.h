@@ -6,6 +6,9 @@
 struct extremum {
     int x, y, type;
 };
+struct exhalation {
+    int start, end, vol;
+};
 
 class tsanalitics : public QObject
 {
@@ -15,7 +18,7 @@ public:
     QVector<int> getMovingAverages(int Period);
     int getMaxAvgs();
     int getMinAvgs();
-    int getFrequency();
+    float getFrequency();
     float getAvgExpirationFlowRate();
     int getMaxsCount();
     int getMinsCount();
@@ -45,12 +48,16 @@ public:
     int getMin();
     QVector<extremum>* getExtremums();
     void printExtremums();
+    bool extrValid();
+
 private:
     int fabs(int a);
     void deleteEqualSignExtremums();
     void deleteSimilarInMeaningExtremums();
     void deletePatternLightningExtremums();
     QVector<extremum> *ts_extremums;
+    QVector<extremum> *ts_vol_exts;
+    QVector<exhalation> *ts_exhls;
     QVector<int> *ts_row_data;
 signals:
     
