@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     models/TSPatients.cpp \
     models/TSExaminations.cpp \
     tsanalitics.cpp \
-    inputs/tstableview.cpp
+    inputs/tstableview.cpp \
+    tstempanalitic.cpp
 
 HEADERS  += \
     tsmodel.h \
@@ -42,7 +43,9 @@ HEADERS  += \
     models/TSExaminations.h \
     tsanalitics.h \
     inputs/tstableview.h \
-    ui_tsprintview.h
+    ui_tsprintview.h \
+    tstempanalitic.h \
+    extremum.h
 
 LIBS += -L"dll/*.dll"
 FORMS    += \

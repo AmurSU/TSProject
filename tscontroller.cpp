@@ -28,6 +28,7 @@
 #include <QPrintDialog>
 #include <ui_tsprintview.h>
 #include <QPrintEngine>
+#include <tstempanalitic.h>
 using namespace std;
 
 
@@ -523,7 +524,6 @@ void TSController::plotCalibration(){
             j+=step;
         }
         ui->calibrateVolumeAnimation->setPixmap(bcVolume);
-        qDebug()<<endIndex;
     }
     else{
         cPlotingTimer.stop();
@@ -538,8 +538,8 @@ void TSController::plotCalibration(){
             ta.append(vol[i]);
 
         }
-        ta.findExtremums();
-        ta.deleteBadExtremums();
+        ta.approximate();
+
         settings.setValue("volOutLtr",ta.getMin());
         settings.setValue("volInLtr",ta.getMax());
         curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
@@ -1016,14 +1016,14 @@ void TSController::processDataParams(){
     qDebug()<<"this is result button !";
     QTableWidget *qtw = ui->resultsTable;
     qtw->setColumnCount(2);
-    qtw->setRowCount(13);
+    qtw->setRowCount(11);
     qtw->verticalHeader()->setVisible(false);
     qtw->setHorizontalHeaderLabels(QString(tr("ѕараметр;«начение")).split(";"));
     qtw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     tsanalitics* ga = new tsanalitics();
-    tsanalitics* gao = new tsanalitics();
-    tsanalitics* gai = new tsanalitics();
-    int AvgExpirationSpeed=0, AvgInspirationSpeed=0, MaxExpirationSpeed=0, MaxInspirationSpeed=0, AvgExpirationTime=0, AvgInspirationTime=0,
+    tstempanalitic* gao = new tstempanalitic();
+    tstempanalitic* gai = new tstempanalitic();
+    int AvgExpirationSpeed=0, MaxExpirationSpeed=0, AvgExpirationTime=0, AvgInspirationTime=0,
             AvgRoundTime=0, AvgTempIn=0, AvgTempOut=0, AvgTempInMinusAvgTempOut=0,  BreathingVolume=0, MVL=0;
     float InspirationFrequency=0;
     int i=0;
@@ -1032,9 +1032,7 @@ void TSController::processDataParams(){
         ga->append(vo[i]);
     }
     ga->approximate();
-    //ga->findExtremums();
-    ga->deleteBadExtremumsVolume();
-    //ga->printExtremums();
+
     int *ti = curveBuffer->tempIn();
     for(i=0;i<curveBuffer->getLenght();i++){
         gai->append(ti[i]);
@@ -1050,67 +1048,51 @@ void TSController::processDataParams(){
     gao->deleteBadExtremums();
 
     AvgExpirationSpeed = ga->getAvgExpiratorySpeed();
-    qDebug()<<AvgExpirationSpeed;
-//    QVector<extremum> *v_vol = ga->getExtremums();
-//    QVector<extremum> *v_ti = gai->getExtremums();
-//    QVector<extremum> *v_to = gao->getExtremums();
-
     qtw->setItem(1,0,getQTableWidgetItem(tr("—редн€€ скорость выдоха(л/с)")));
     qtw->setItem(1,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(AvgExpirationSpeed)))));
 
-//    AvgInspirationSpeed = ga->getAvgInspiratorySpeed();
-//    qtw->setItem(2,0,getQTableWidgetItem(tr("—редн€€ скорость вдоха(л/с)")));
-//    qtw->setItem(2,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*AvgInspirationSpeed)))));
-
     MaxExpirationSpeed = ga->getMaxExpiratorySpeed();
-    qtw->setItem(3,0,getQTableWidgetItem(tr("ћаксимальна€ скорость выдоха(л/с)")));
-    qtw->setItem(3,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*MaxExpirationSpeed)))));
-
-//    MaxInspirationSpeed = ga->getMaxInspiratorySpeed();
-//    qtw->setItem(4,0,getQTableWidgetItem(tr("ћаксимальна€ скорость вдоха(л/с)")));
-//    qtw->setItem(4,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*MaxInspirationSpeed)))));
+    qtw->setItem(2,0,getQTableWidgetItem(tr("ћаксимальна€ скорость выдоха(л/с)")));
+    qtw->setItem(2,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*MaxExpirationSpeed)))));
 
     AvgExpirationTime = ga->getAvgExpiratoryTime();
-    qtw->setItem(5,0,getQTableWidgetItem(tr("—реднее врем€ выдоха(с)")));
-    qtw->setItem(5,1,getQTableWidgetItem((QString::number((float)AvgExpirationTime/100))));
+    qtw->setItem(3,0,getQTableWidgetItem(tr("—реднее врем€ выдоха(с)")));
+    qtw->setItem(3,1,getQTableWidgetItem((QString::number((float)AvgExpirationTime/100))));
 
-//    AvgInspirationTime = ga->getAvgInspiratoryTime();
-//    qtw->setItem(6,0,getQTableWidgetItem(tr("—реднее врем€ вдоха(с)")));
-//    qtw->setItem(6,1,getQTableWidgetItem((QString::number((float)AvgInspirationTime/100))));
+    AvgInspirationTime = ga->getAvgInspiratoryTime();
+    qtw->setItem(4,0,getQTableWidgetItem(tr("—реднее врем€ вдоха(с)")));
+    qtw->setItem(4,1,getQTableWidgetItem((QString::number((float)AvgInspirationTime/100))));
 
-//    AvgRoundTime = AvgExpirationTime+AvgInspirationTime;
-//    qtw->setItem(7,0,getQTableWidgetItem(tr("—редн€€ врем€ цикла(с)")));
-//    qtw->setItem(7,1,getQTableWidgetItem((QString::number((float)AvgRoundTime/100))));
+    AvgRoundTime = AvgExpirationTime+AvgInspirationTime;
+    qtw->setItem(5,0,getQTableWidgetItem(tr("—редн€€ врем€ цикла(с)")));
+    qtw->setItem(5,1,getQTableWidgetItem((QString::number((float)AvgRoundTime/100))));
 
     InspirationFrequency = ga->getFrequency();
-    qtw->setItem(8,0,getQTableWidgetItem(tr("„астота дыхани€(ед/мин)")));
-    qtw->setItem(8,1,getQTableWidgetItem((QString::number(InspirationFrequency))));
+    qtw->setItem(6,0,getQTableWidgetItem(tr("„астота дыхани€(ед/мин)")));
+    qtw->setItem(6,1,getQTableWidgetItem((QString::number(InspirationFrequency))));
 
     BreathingVolume = ga->getBreathingVolume();
-    qtw->setItem(9,0,getQTableWidgetItem(tr("ƒыхательный объем(л)")));
-    qtw->setItem(9,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume)))));
+    qtw->setItem(7,0,getQTableWidgetItem(tr("ƒыхательный объем(л)")));
+    qtw->setItem(7,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume)))));
 
     MVL = ga->getMVL();
-    qtw->setItem(10,0,getQTableWidgetItem(tr("ћаксимальна€ вентил€ци€ легких(л)")));
-    qtw->setItem(10,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MVL)))));
+    qtw->setItem(8,0,getQTableWidgetItem(tr("ћаксимальна€ вентил€ци€ легких(л)")));
+    qtw->setItem(8,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MVL)))));
 
     ga->clear();
 
     AvgTempIn = gai->getMinAvgs();
-    qtw->setItem(11,0,getQTableWidgetItem(tr("—редн€€ температура вдоха( 'C)")));
-    qDebug()<<"AvgTempIn"<<AvgTempIn;
-    qtw->setItem(11,1,getQTableWidgetItem(QString::number(curveBuffer->tempInToDeg(AvgTempIn))));
+    qtw->setItem(9,0,getQTableWidgetItem(tr("—редн€€ температура вдоха( 'C)")));
+    qtw->setItem(9,1,getQTableWidgetItem(QString::number(curveBuffer->tempInToDeg(AvgTempIn))));
     gai->clear();
 
     AvgTempOut = gao->getMaxAvgs();
-    qDebug()<<"AvgTempOut"<<AvgTempOut;
-    qtw->setItem(12,0,getQTableWidgetItem(tr("—редн€€ температура выдоха( 'C)")));
-    qtw->setItem(12,1,getQTableWidgetItem(QString::number(curveBuffer->tempOutToDeg(AvgTempOut))));
-    qDebug()<<"curveBuffer->tempOutToDeg(AvgTempOut)"<<curveBuffer->tempOutToDeg(AvgTempOut);
+    qtw->setItem(10,0,getQTableWidgetItem(tr("—редн€€ температура выдоха( 'C)")));
+    qtw->setItem(10,1,getQTableWidgetItem(QString::number(curveBuffer->tempOutToDeg(AvgTempOut))));
 
     AvgTempInMinusAvgTempOut = AvgTempOut-AvgTempIn;
-    qtw->setItem(13,0,getQTableWidgetItem(tr("—редн€€ “вдоха-—редн€€ “выдоха( 'C)")));
-    qtw->setItem(13,1,getQTableWidgetItem(curveBuffer->tempOutToDeg(AvgTempOut)-curveBuffer->tempInToDeg(AvgTempIn)));
+    qtw->setItem(11,0,getQTableWidgetItem(tr("—редн€€ “вдоха-—редн€€ “выдоха( 'C)")));
+    qtw->setItem(11,1,getQTableWidgetItem(curveBuffer->tempOutToDeg(AvgTempOut)-curveBuffer->tempInToDeg(AvgTempIn)));
     qtw->removeRow(0);
 
     qtw->show();
@@ -1146,8 +1128,6 @@ void TSController::printReport()
     float listh=printer.widthMM()*printer.resolution()/25.4-60;
     float listw=printer.heightMM()*printer.resolution()/25.4-60;
     printer.setPageMargins(5,5,5,5,QPrinter::Millimeter);
-    qDebug()<<"listw"<<listw;
-    qDebug()<<"listh"<<listh;
     printer.setOrientation(QPrinter::Landscape);
     printer.setResolution(QPrinter::HighResolution);
     printer.setPaperSize(QPrinter::A4);
@@ -1163,7 +1143,7 @@ void TSController::printReport()
     pf.resultsTable->setHorizontalHeaderLabels(QString(tr("ѕараметр; «начение")).split(";"));
     pf.resultsTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     int i=0,j=0;
-    for(i=0;i<12;i++){
+    for(i=0;i<ui->resultsTable->rowCount();i++){
         for(j=0;j<2;j++){
             pf.resultsTable->setItem(i,j,getQTableWidgetItem(ui->resultsTable->item(i,j)->text()));
         }
@@ -1225,23 +1205,15 @@ void TSController::printReport()
     float tempOutK = 1;
     float tempInZ = h;
     float tempOutZ = h;
-    tempInAdaptive = (float)myH/
-            (tinInt[1]-tinInt[0]);
-    tempOutAdaptive = (float)myH/
-            (toutInt[1]-toutInt[0]);
+    tempInAdaptive = (float)myH/(tinInt[1]-tinInt[0]);
+    tempOutAdaptive = (float)myH/(toutInt[1]-toutInt[0]);
     volumeAdaptive = (float)myH/(volInt[1]-volInt[0]);
     tempInZ = h + ceil((float)(tinInt[1]+tinInt[0])*tempInAdaptive*tempInK/2);
     tempOutZ = h + ceil((float)(toutInt[1]+toutInt[0])*tempOutAdaptive*tempOutK/2);
     float volumeK =1;
 
     i=0;
-
     int k=ceil((float)curveBuffer->lenght/pf.gTempIn->width());
-    qDebug()<<"end index"<<curveBuffer->lenght;
-    qDebug()<<"end index"<<endIndex;
-    qDebug()<<"Curve end"<<curveBuffer->end();
-    qDebug()<<"!!!!!!!!!!!!!!!!!k="<<k;
-    qDebug()<<"pf.gTempIn->width()"<<pf.gTempIn->width();
     for(j=0;j<myW-35;j+=1)
     {
         if(i>=k*endIndex)break;
@@ -1257,9 +1229,7 @@ void TSController::printReport()
     pf.gVolume->setPixmap(pmVolume);
     pf.gTempIn->setPixmap(pmTempIn);
     pf.gTempOut->setPixmap(pmTempOut);
-
     pf.PatientName->setText(patientsModel->record(0).value("sname").toString()+" "+patientsModel->record(0).value("fname").toString());
-
 
     wpf.hide();
     if (dialog->exec() == QDialog::Accepted){

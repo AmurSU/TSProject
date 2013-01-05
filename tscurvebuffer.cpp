@@ -1,6 +1,7 @@
 #include "tscurvebuffer.h"
 #include <QDebug>
 #include <tsanalitics.h>
+#include <tstempanalitic.h>
 
 TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     QObject(parent)
@@ -17,7 +18,6 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     ts_volumePosConvert=1;
     ts_volumeNegConvert=-1;
     out_file=fopen("output.txt","w");
-    int i;
     max_v=-1100000;
     min_v=10000;
     /*for(i=0;i<3;i++){
@@ -38,8 +38,8 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     ts_vm_max=-100000;
     ts_period_for_count_avgs=50;*/
     volfile.open("volume.csv");
-    ga_it = new tsanalitics();
-    ga_ot = new tsanalitics();
+    ga_it = new tstempanalitic();
+    ga_ot = new tstempanalitic();
     ga_vo = new tsanalitics();
 }
 
@@ -99,8 +99,6 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     if(realtime){
         int num=500;
         if(ts_end%num==0){
-
-            int sum=0,i=0;
             ga_it->findExtremums();
             ga_it->deleteBadExtremums();
             AvgTempIn = ga_it->getMinAvgs();
@@ -113,8 +111,7 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
             ga_ot->clear();
             //qDebug()<<"AvgTempOut="<<AvgTempOut;
 
-            ga_vo->findExtremums();
-            ga_vo->deleteBadExtremums();
+            ga_vo->approximate();
             BreathingVolume = ga_vo->getBreathingVolume();
             /*BreathVolumes.append(BreathingVolume);
 
