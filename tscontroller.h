@@ -14,6 +14,7 @@
 #include "models/TSPatients.h"
 #include <QTableWidget>
 #include "ui_tsprintview.h"
+#include "tsusbdatareader.h"
 namespace Ui {
     class TSView;
     class TSProgressDialog;
@@ -125,6 +126,8 @@ private:
     QSqlDatabase patientsConnection;
     QSqlDatabase examinationsConnection;
     bool isInitialized;
+    TSUsbDataReader *rdr;
+    QThread *trd;
 };
 
 #endif // TSVIEW_H

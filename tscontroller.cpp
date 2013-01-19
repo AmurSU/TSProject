@@ -103,12 +103,18 @@ TSController::TSController(QWidget *parent) :
     connect(ui->patientsTableView,SIGNAL(deleteRequest(int)),this,SLOT(deletePatient(int)));
     connect(ui->examsTableView,SIGNAL(deleteRequest(int)),this,SLOT(deleteExam(int)));
     connect(ui->printButton,SIGNAL(clicked()),this,SLOT(printReport()));
+
+    //connect(rdr,SIGNAL(done()),this,SIGNAL())
+
     ui->resultsButton->setEnabled(true);
     ui->backPatientProfileButton->installEventFilter(this);
     ui->backPatientListButton->installEventFilter(this);
     ui->backCallibrateButton->installEventFilter(this);
     ui->backExamButton->installEventFilter(this);
-    this->processDataParams();
+    //this->processDataParams();
+    rdr= new TSUsbDataReader();
+    trd = new QThread();
+//    rdr->moveToThread(trd);
 }
 
 TSController::~TSController()
@@ -309,65 +315,66 @@ void TSController::calibrateVolume(){
     Ui::TSProgressDialog dui;
     dui.setupUi(&d);
     d.setWindowTitle(tr("Предупреждение"));
-    readerThread->setReadingType(ReadForVolZer);
-    readerThread->startRead();
+    //readerThread->setReadingType(ReadForVolZer);
+    //readerThread->startRead();
+    rdr->initDevice(curveBuffer);
+    rdr->setReadingType(ReadForVolZer);
+    connect(trd,SIGNAL(started()),rdr,SLOT(read()));
+    //connect()
+    qDebug()<<"Start reading zero level";
     dui.information->setText(tr("Идет подготовка..."));
     dui.acceptButton->setVisible(false);
-    connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
-    connect(readerThread,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
+    connect(rdr,SIGNAL(done()),&d,SLOT(accept()));
+    connect(rdr,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
     switch(d.exec()){
-    case 1:{
-        settings.setValue("volZero",curveBuffer->volumeColibration());
-        dui.information->setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
-        dui.progressBar->setVisible(false);
-        dui.acceptButton->setVisible(true);
-        break;
+        case 1:{
+            settings.setValue("volZero",curveBuffer->volumeColibration());
+            dui.information->setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
+            dui.progressBar->setVisible(false);
+            dui.acceptButton->setVisible(true);
+            break;
+        }
+        default: break;
     }
-    default: break;
-    }
+    qDebug()<<"End reading zero level";
     disconnect(&d,SLOT(accept()));
-    readerThread->stopRead();
-    if(d.exec()==1){
+  /*  if(d.exec()==1){
         dui.acceptButton->setVisible(false);
         connect(&cPlotingTimer,SIGNAL(timeout()),this,SLOT(plotCalibration()));
-        readerThread->setReadingType(ReadForVolVal);
-        readerThread->startRead();
+        rdr->setReadingType(ReadForVolZer);
+        rdr->read();
         cPlotingTimer.start(100);
-        connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
+        connect(rdr,SIGNAL(done()),&d,SLOT(accept()));
         dui.progressBar->setVisible(true);
         dui.information->setText(tr("Идет калибровка. Подождите..."));
-   }
-/*
-    if(d.exec()==1){
-        int *vol = curveBuffer->volume();
-        tsanalitics ta;
-        for(int i=0;i<curveBuffer->end();i++){
-            ta.append(vol[i]);
-            //f<<vol[i]<<endl;
-        }
-        ta.findExtremums();
-        ta.deleteBadExtremums();
-        settings.setValue("volOutLtr",ta.getMin());
-        settings.setValue("volInLtr",ta.getMax());
-        curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
-        readerThread->stopRead();
-        curveBuffer->clean();
-        settings.sync();
-        dui.progressBar->setVisible(false);
-        dui.acceptButton->setVisible(true);
-        dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
-    }
-    if(d.exec()==1){
-        ui->mainBox->setCurrentIndex(5);
-        ui->managmentBox->setVisible(true);
-        ui->managmentBox->setEnabled(true);
-        ui->startExam->setEnabled(true);
-        ui->stopExam->setEnabled(true);
-        disconnect(&d,SLOT(accept()));
-        initPaintDevices();
-        plotNow();
-    }*/
+   }*/
 
+//    dui.information->setText(tr("Идет подготовка..."));
+//    dui.acceptButton->setVisible(false);
+//    connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
+//    connect(readerThread,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
+//    switch(d.exec()){
+//        case 1:{
+//            settings.setValue("volZero",curveBuffer->volumeColibration());
+//            dui.information->setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
+//            dui.progressBar->setVisible(false);
+//            dui.acceptButton->setVisible(true);
+//            break;
+//        }
+//        default: break;
+//    }
+//    disconnect(&d,SLOT(accept()));
+//    readerThread->stopRead();
+//    if(d.exec()==1){
+//        dui.acceptButton->setVisible(false);
+//        connect(&cPlotingTimer,SIGNAL(timeout()),this,SLOT(plotCalibration()));
+//        readerThread->setReadingType(ReadForVolVal);
+//        readerThread->startRead();
+//        cPlotingTimer.start(100);
+//        connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
+//        dui.progressBar->setVisible(true);
+//        dui.information->setText(tr("Идет калибровка. Подождите..."));
+//   }
 }
 
 void TSController::calibrateTemperature()
@@ -1013,6 +1020,13 @@ void TSController::breakExam()
 
 void TSController::processDataParams(){
 
+    TSCurveBuffer *cb= new TSCurveBuffer;
+
+    readerThread->readd();
+    //TSUsb3000Reader *rdr= readerThread->getReader();
+    //rdr->read();
+    //rdr->initDevice(cb);
+    /*rdr->read();*/
     qDebug()<<"this is result button !";
     QTableWidget *qtw = ui->resultsTable;
     qtw->setColumnCount(2);

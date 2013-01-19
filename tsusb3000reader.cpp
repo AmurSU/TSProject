@@ -1,8 +1,14 @@
 #include "tsusb3000reader.h"
+#include <windows.h>
+#include <QTimer>
 
 TSUsb3000Reader::TSUsb3000Reader(QObject *parent) :
     QObject(parent)
 {
+    //IsThreadComplete=false;
+    DataStep = 1024*1024;
+    NBlockRead = 20;
+    DWORD Counter = 0x0;
 }
 bool TSUsb3000Reader::initDevice(TSCurveBuffer *_bf){
     buffer=_bf;
@@ -145,9 +151,6 @@ bool TSUsb3000Reader::initDevice(TSCurveBuffer *_bf){
 
     //emit сигнал о том что поток создан
 }
-void TSUsb3000Reader::setLastError(QString last_error){
-    this->LastError=last_error;
-}
 SHORT* TSUsb3000Reader::readData(){
     if (pModule->READ_KADR(AdcBuffer)) {
         //buffer->append(AdcBuffer[0],AdcBuffer[1],AdcBuffer[2]);
@@ -210,6 +213,168 @@ int TSUsb3000Reader::getQuietLevels(int *qlevels, int qtime){
     return 0;
 }
 
+DWORD TSUsb3000Reader::read()
+{
+    WORD i;    // номер запроса на сбор данных
+    WORD RequestNumber;    // идентификатор массива их двух событий
+    HANDLE ReadEvent[2];    // массив OVERLAPPED структур из двух элементов
+    OVERLAPPED ReadOv[2];
+    DWORD BytesTransferred[2];
+    DWORD TimeOut;
+
+    // остановим ввод данных и одновременно прочистим соответствующий канал bulk USB
+    //initDevice()
+    //pModule->STOP_READ();
+    //if(!pModule->STOP_READ()) {
+    //  ThreadErrorNumber = 0x6;
+    //IsThreadComplete = false;
+    //  return 0;
+    // }
+    /*
+    // создадим два события
+    ReadEvent[0] = CreateEvent(NULL, FALSE , FALSE, NULL);
+    memset(&ReadOv[0], 0, sizeof(OVERLAPPED)); ReadOv[0].hEvent = ReadEvent[0];
+    ReadEvent[1] = CreateEvent(NULL, FALSE , FALSE, NULL);
+    memset(&ReadOv[1], 0, sizeof(OVERLAPPED)); ReadOv[1].hEvent = ReadEvent[1];
+
+    // таймаут ввода данных
+    //	TimeOut = (DWORD)(DataStep/ReadRate + 1000);
+
+    // делаем предварительный запрос на ввод данных
+    RequestNumber = 0x0;
+    if(!pModule->ReadData(ReadBuffer, &DataStep, &BytesTransferred[RequestNumber], &ReadOv[RequestNumber]))
+        if(GetLastError() != ERROR_IO_PENDING) { CloseHandle(ReadEvent[0]); CloseHandle(ReadEvent[1]); ThreadErrorNumber = 0x2; IsThreadComplete = true; return 0; }
+
+    // теперь запускаем ввод данных
+    if(pModule->START_READ())
+    {
+        // цикл сбора данных
+        for(i = 0x1; i < NBlockRead; i++)
+        {
+            RequestNumber ^= 0x1;
+            // сделаем запрос на очередную порции данных
+            if(!pModule->ReadData(ReadBuffer + i*DataStep, &DataStep, &BytesTransferred[RequestNumber], &ReadOv[RequestNumber]))
+                if(GetLastError() != ERROR_IO_PENDING){
+                    ThreadErrorNumber = 0x2; break;
+                }
+
+            // ждём окончания операции сбора очередной порции данных
+            //if(!WaitingForRequestCompleted(&ReadOv[RequestNumber^0x1])) break;
+            if(WaitForSingleObject(ReadEvent[!RequestNumber], TimeOut) == WAIT_TIMEOUT){
+                ThreadErrorNumber = 0x3; break;
+            }
+
+            if(ThreadErrorNumber) break;
+            else if(kbhit()) { ThreadErrorNumber = 0x1; break; }
+            else Sleep(20);
+            Counter++;
+        }
+
+        // ждём окончания операции сбора последней порции данных
+        if(!ThreadErrorNumber)
+        {
+            RequestNumber ^= 0x1;
+            //            WaitingForRequestCompleted(&ReadOv[RequestNumber^0x1]);
+            if(WaitForSingleObject(ReadEvent[!RequestNumber], TimeOut) == WAIT_TIMEOUT)
+                ThreadErrorNumber = 0x3;
+            Counter++;
+        }
+    }
+    else { ThreadErrorNumber = 0x5; }
+
+    // остановим ввод данных
+    if(!pModule->STOP_READ()) ThreadErrorNumber = 0x6;
+    // если надо, то прервём незавершённый асинхронный запрос
+    if(!CancelIo(pModule->GetModuleHandle())) ThreadErrorNumber = 0x7;
+    // освободим все идентификаторы событий
+    for(i = 0x0; i < 0x2; i++) CloseHandle(ReadEvent[i]);
+    // небольшая задержка
+    Sleep(100);
+    // установим флажок окончания потока сбора данных
+    IsThreadComplete = true;
+    // теперь можно воходить из потока сбора данных
+*/
+    return 0;
+}
+
+void TSUsb3000Reader::setLastError(QString)
+{
+    ;
+}
+
+void TSUsb3000Reader::run()
+{
+    /*reader = new TSUsb3000Reader(this);
+    reader->initDevice(buffer);*/
+    /*QTimer tmr;
+    switch (readingType)
+    {
+    case ReadAll:
+    {
+        qDebug()<<"read all "<<this->ReadingStarted;
+        while(this->ReadingStarted)
+        {
+            SHORT* adc;
+            if ((adc=readData())!=0){
+                buffer->append(adc[0],adc[1],adc[2]);
+                tmr.singleShot(10,this);
+            }
+            else{
+                qDebug()<<"Get crashe";
+                tmr.singleShot(10);
+            }
+            delete adc;
+        }
+        break;
+    }
+    case ReadForVolZer:
+    {
+        int avg=0;
+        for(int i=0;i<300;i++)
+        {
+            SHORT* adc;
+            if ((adc=readData())!=0){
+                avg+=adc[0];
+                if(i%10)
+                    emit changeProgress(i/3);
+                tmr.singleShot(10);
+            }
+            else{
+                qDebug()<<"Get crashe";
+                tmr.singleShot(10);
+            }
+            delete adc;
+        }
+        avg/=300;
+        buffer->setVolumeColibration(avg,true);
+        break;
+    }
+    case ReadForVolVal:
+    {
+        buffer->setEnd(0);
+        for(int i=0;i<1200;i++)
+        {
+            SHORT* adc;
+            if ((adc=readData())!=0){
+                buffer->append(adc[0],0,0);
+                if(i%24)
+                    emit changeProgress(i/12);
+                tmr.singleShot(10);
+            }
+            else{
+                qDebug()<<"Get crashe";
+                tmr.singleShot(10);
+            }
+            delete adc;
+        }
+
+        break;
+    }
+    }
+    delete reader;
+    reader = 0;*/
+}
+
 int TSUsb3000Reader::calibtateVolume()
 {
     int avg=0;
@@ -230,4 +395,27 @@ int TSUsb3000Reader::calibtateVolume()
 TSUsb3000Reader::~TSUsb3000Reader()
 {
     qDebug()<<closeReader();
+}
+bool TSUsb3000Reader::WaitingForRequestCompleted(OVERLAPPED *ReadOv)
+{
+    DWORD ReadBytesTransferred;
+
+    while(true)
+    {
+        if(GetOverlappedResult(ModuleHandle, ReadOv, &ReadBytesTransferred, FALSE))
+            break;
+        else
+            if(GetLastError() !=  ERROR_IO_INCOMPLETE){
+                ThreadErrorNumber = 0x3;
+                return false;
+            }
+            else
+                if(kbhit()) {
+                    ThreadErrorNumber = 0x1;
+                    return false;
+                }
+                else
+                    Sleep(20);
+    }
+    return true;
 }

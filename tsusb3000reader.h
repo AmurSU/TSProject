@@ -24,9 +24,10 @@ public:
     bool closeReader();
     ~TSUsb3000Reader();
     int getQuietLevels(int *qlevels, int qtime);
-
+    DWORD read();
+    void setLastError(QString);
+    void run();
 private:
-    void setLastError(QString last_error);
     QString LastError;
     TSCurveBuffer *buffer;
     DWORD DllVersion;
@@ -42,8 +43,26 @@ private:
     const static double ReadRate = 1.0; // частота  ввода данных
     const static WORD MaxVirtualSoltsQuantity = 4;
     SHORT AdcBuffer[CHANNELS_QUANTITY]; // буфер данных для кадра отсчётов
-signals:
 
+
+    // номер ошибки при выполнении потока сбора данных
+    WORD ThreadErrorNumber;
+    // флажок завершения потоков ввода данных
+    bool IsThreadComplete;
+    //max возможное кол-во передаваемых отсчетов (кратное 32) для ф. ReadData и WriteData()
+    DWORD DataStep;
+    // столько блоков по DataStep отсчётов нужно собрать в файл
+    WORD NBlockRead;
+    // указатель на буфер для вводимых данных
+    SHORT	*ReadBuffer;
+    DWORD Counter;
+    // хэндл модуля
+    HANDLE ModuleHandle;
+    // номер ошибки при выполнении потока сбора данных
+    bool WaitingForRequestCompleted(OVERLAPPED *ReadOv);
+signals:
+    void done();
+    void changeProgress(int val);
 public slots:
 
 };

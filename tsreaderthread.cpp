@@ -1,21 +1,25 @@
 #include "tsreaderthread.h"
 #include "conio.h"
 
-TSReaderThread::TSReaderThread(TSCurveBuffer *b, QObject *parent) :QThread(parent){
+TSReaderThread::TSReaderThread(TSCurveBuffer *b, QObject *parent) :QObject(parent){
     buffer = b;
-    moveToThread(this);
-}
-void TSReaderThread::f1 (){
-    qDebug()<<"-----Thread is open for command----";
+    //connect(reader,SIGNAL(done()),this,SLOT(trd_done()));
+    //connect(reader,SIGNAL(changeProgress(int)),this,SLOT(trd_progress(int)));
+    //moveToThread(this);
 }
 void TSReaderThread::startRead (){
     ReadingStarted = true;
+    //TSUsb3000Reader *rdr= new  TSUsb3000Reader();
+    QThread *trd = new QThread();
+    reader->initDevice(buffer);
+    reader->moveToThread(trd);
+    //reader->read();
 
-    this->start();
+    //this->start();
 }
 void TSReaderThread::stopRead (){
     ReadingStarted=false;
-    this->terminate();
+    //this->terminate();
     if(reader!=0){
         //delete reader;
         reader = 0;
@@ -24,7 +28,7 @@ void TSReaderThread::stopRead (){
 
 
 void TSReaderThread::run(){
-    reader = new TSUsb3000Reader(this);
+/*    reader = new TSUsb3000Reader(this);
     reader->initDevice(buffer);
 
     switch (readingType)
@@ -94,7 +98,7 @@ void TSReaderThread::run(){
     delete reader;
     reader = 0;
     emit done();
-    exec();
+    exec();*/
 }
 
 void TSReaderThread::setReadingType(TSUsbReadingType type)
@@ -105,4 +109,24 @@ void TSReaderThread::setReadingType(TSUsbReadingType type)
 bool TSReaderThread::doWork()
 {
     return works;
+}
+
+void TSReaderThread::readd()
+{
+     reader->read();
+}
+
+TSUsb3000Reader *TSReaderThread::getReader()
+{
+    return reader;
+}
+
+void TSReaderThread::trd_done()
+{
+    emit done();
+}
+
+void TSReaderThread::trd_progress(int value)
+{
+    emit changeProgress(value);
 }

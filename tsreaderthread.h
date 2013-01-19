@@ -3,24 +3,26 @@
 
 #include <QThread>
 #include "tsusb3000reader.h"
+#include "extremum.h"
 
-enum TSUsbReadingType {ReadAll,ReadForVolZer,ReadForVolVal,ReadForTemp};
-
-class TSReaderThread : public QThread
+class TSReaderThread : public QObject
 {
     Q_OBJECT
 public:
     explicit TSReaderThread(TSCurveBuffer *b,QObject *parent = 0);
     void run();
-    void f1();
     void stopRead();
     void startRead();
     void setReadingType(TSUsbReadingType type);
     bool doWork();
+    void readd();
+    TSUsb3000Reader* getReader();
 signals:
     void done();
     void changeProgress(int value);
 public slots:
+    void trd_done();
+    void trd_progress(int value);
 private:
     TSCurveBuffer *buffer;
     bool ReadingStarted;
