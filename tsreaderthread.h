@@ -26,7 +26,7 @@ private:
     bool ReadingStarted;
     TSUsbReadingType readingType;
     bool works;
-    TSUsb3000Reader *reader;
+    //TSUsb3000Reader *reader;
 };
 
 #endif // TSREADERTHREAD_H

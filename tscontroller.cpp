@@ -308,25 +308,21 @@ void TSController::calibrateVolume(){
     QDialog d(this);
     Ui::TSProgressDialog dui;
     dui.setupUi(&d);
-    d.setWindowTitle(tr("Предупреждение"));
+    d.setWindowTitle(tr("I?aaoi?a?aaiea"));
     readerThread->setReadingType(ReadForVolZer);
     readerThread->startRead();
-    dui.information->setText(tr("Идет подготовка..."));
+    dui.information->setText(tr("Eaao iiaaioiaea..."));
     dui.acceptButton->setVisible(false);
     connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
     connect(readerThread,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
-    switch(d.exec()){
-    case 1:{
+    if(d.exec()==1){
         settings.setValue("volZero",curveBuffer->volumeColibration());
-        dui.information->setText(tr("Подготовка завершина.\nНажмите кнопку Ok и качайте шприцем."));
+        dui.information->setText(tr("Iiaaioiaea caaa?oeia.\nIa?ieoa eiiieo Ok e ea?aeoa oi?eoai."));
         dui.progressBar->setVisible(false);
         dui.acceptButton->setVisible(true);
-        break;
-    }
-    default: break;
     }
     disconnect(&d,SLOT(accept()));
-    readerThread->stopRead();
+    readerThread->terminate();
     if(d.exec()==1){
         dui.acceptButton->setVisible(false);
         connect(&cPlotingTimer,SIGNAL(timeout()),this,SLOT(plotCalibration()));
@@ -334,39 +330,39 @@ void TSController::calibrateVolume(){
         readerThread->startRead();
         cPlotingTimer.start(100);
         connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
+        //dui.acceptButton->setVisible(true);
         dui.progressBar->setVisible(true);
-        dui.information->setText(tr("Идет калибровка. Подождите..."));
-   }
-/*
+        dui.information->setText(tr("Eaao eaeea?iaea. Iiai?aeoa..."));
+    }
+    disconnect(&d,SLOT(accept()));
+    //readerThread->stopRead();
     if(d.exec()==1){
         int *vol = curveBuffer->volume();
         tsanalitics ta;
         for(int i=0;i<curveBuffer->end();i++){
             ta.append(vol[i]);
-            //f<<vol[i]<<endl;
         }
-        ta.findExtremums();
-        ta.deleteBadExtremums();
+        ta.approximate();
         settings.setValue("volOutLtr",ta.getMin());
         settings.setValue("volInLtr",ta.getMax());
         curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
         readerThread->stopRead();
-        curveBuffer->clean();
+        curveBuffer->setEnd(0);
         settings.sync();
         dui.progressBar->setVisible(false);
         dui.acceptButton->setVisible(true);
-        dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
+        dui.information->setText(tr("Eaeea?iaea oniaoii caaa?oaia.\nIa?ieoa IE aey i?iaie?aiey."));
     }
+    //Показать форму снятия показаний
     if(d.exec()==1){
         ui->mainBox->setCurrentIndex(5);
         ui->managmentBox->setVisible(true);
         ui->managmentBox->setEnabled(true);
         ui->startExam->setEnabled(true);
         ui->stopExam->setEnabled(true);
-        disconnect(&d,SLOT(accept()));
         initPaintDevices();
         plotNow();
-    }*/
+    }
 
 }
 

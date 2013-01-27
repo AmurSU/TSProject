@@ -162,6 +162,13 @@ SHORT* TSUsb3000Reader::readData(){
 bool TSUsb3000Reader::closeReader(){
     qDebug()<<"close Reader";
     if (pModule->CloseDevice()) {
+        if (pModule) {
+            // освободим интерфейс модуля
+            if (!pModule->ReleaseInstance()) printf(" ReleaseInstance() --> Bad\n");
+            else printf(" ReleaseInstance() --> OK\n");
+            // обнулим указатель на интерфейс модуля
+            pModule = NULL;
+        }
         return true;
     }
     else
@@ -229,5 +236,5 @@ int TSUsb3000Reader::calibtateVolume()
 
 TSUsb3000Reader::~TSUsb3000Reader()
 {
-    qDebug()<<closeReader();
+  closeReader();
 }

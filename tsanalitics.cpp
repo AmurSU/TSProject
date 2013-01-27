@@ -10,7 +10,7 @@ tsanalitics::tsanalitics(QObject *parent) :QObject(parent){
     QVector<exhalation> *exhls = new QVector<exhalation>;
     ts_exhls=exhls;
 }
-
+/*
 int tsanalitics::getMaxAvgs(){
     int i=0, sum = 0, cntr=0;
     for(i=0; i<ts_extremums->size();i++){
@@ -38,7 +38,7 @@ int tsanalitics::getMinAvgs(){
     else
         return sum/cntr;
 }
-
+*/
 float tsanalitics::getFrequency(){
     if(ts_exhls->size()>0)
         return 6000/((float)ts_exhls->last().end/(float)ts_exhls->size());
@@ -46,53 +46,7 @@ float tsanalitics::getFrequency(){
         return 0;
 }
 
-//int tsanalitics::getMaxsCount(){
-//    int i=0, cntr=0;
-//    for(i=0; i<ts_extremums->size();i++)
-//        if( ts_extremums->at(i).type == 1 )
-//            cntr++;
-//    return cntr;
-//}
 
-//int tsanalitics::getMinsCount(){
-//    int i=0, cntr=0;
-//    for(i=0; i<ts_extremums->size();i++)
-//        if( ts_extremums->at(i).type == -1 )
-//            cntr++;
-//    return cntr;
-//}
-
-//int tsanalitics::getMinMaxAvgTime(){
-//    int i=0, sum = 0, cntr=0;
-//    for(i=1; i<ts_extremums->size();i++){
-//        if( ts_extremums->at(i).type == -1 && ts_extremums->at(i-1).type == 1 ){
-//            sum += ts_extremums->at(i).x-ts_extremums->at(i-1).x;
-//            cntr++;
-//        }
-//    }
-//    if ( cntr == 0 )
-//        return 0;
-//    else
-//        return sum/cntr;
-//}
-
-//int tsanalitics::getMaxMinAvgTime(){
-//    int i=0, sum = 0, cntr=0;
-//    for(i=1; i<ts_extremums->size();i++){
-//        if( ts_extremums->at(i).type == 1 && ts_extremums->at(i-1).type == -1 ){
-//            sum += ts_extremums->at(i).x-ts_extremums->at(i-1).x;
-//            cntr++;
-//        }
-//    }
-//    if ( cntr == 0 )
-//        return 0;
-//    else
-//        return sum/cntr;
-//}
-
-//int tsanalitics::getTime(){
-//    return ts_row_data->size();
-//}
 
 
 int tsanalitics::getAvgExpiratoryTime(){
@@ -113,69 +67,54 @@ int tsanalitics::setupData(QVector<int> *row_d){
 void tsanalitics::approximate()
 {
     int i=0;
-    QVector<int> *df = new QVector<int>;
-    for(i=0;i<ts_row_data->size()-1;i++){
-        df->push_back(ts_row_data->at(i+1)-ts_row_data->at(i));
-    }
-    //    QVector<int> *ddf = new QVector<int>;
-    //    for(i=0;i<df->size()-1;i++){
-    //        ddf->push_back(df->at(i+1)-df->at(i));
-    //    }
-    //qDebug()<<ddf->size()<<"size -+------";
-    //    for(i=0;i<ddf->size();i++){
-    //        if(ddf->at(i)==0){
-    //            ddf->remove(i,1);
-    //            df->remove(i,1);
-    //            ts_row_data->remove(i,1);
-    //            if(i>0)
-    //                i--;
-    //        }
-    //    }
-
-    for(i=0;i<ts_row_data->size();i++){
-        qDebug()<<i<<"="<<ts_row_data->at(i);
-        extremum *extr = new extremum;
-        extr->y = ts_row_data->at(i);
-        extr->x = i;
-        ts_vol_exts->push_back(*extr);
-    }
-    for(i=0;i<ts_vol_exts->size()-1;i++){
-        if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i+1).y!=0){
-            if(ts_vol_exts->at(i+1).y<ts_vol_exts->at(i).y){
+    if(ts_row_data->size()!=0){
+        QVector<int> *df = new QVector<int>;
+        for(i=0;i<ts_row_data->size()-1;i++){
+            df->push_back(ts_row_data->at(i+1)-ts_row_data->at(i));
+        }
+        for(i=0;i<ts_row_data->size();i++){
+            qDebug()<<i<<"="<<ts_row_data->at(i);
+            extremum *extr = new extremum;
+            extr->y = ts_row_data->at(i);
+            extr->x = i;
+            ts_vol_exts->push_back(*extr);
+        }
+        for(i=0;i<ts_vol_exts->size()-1;i++){
+            if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i+1).y!=0){
+                if(ts_vol_exts->at(i+1).y<ts_vol_exts->at(i).y){
+                    ts_vol_exts->remove(i,1);
+                    if (i>0)
+                        i--;
+                }else{
+                    ts_vol_exts->remove(i+1,1);
+                }
+            }
+        }
+        for(i=0;i<ts_vol_exts->size();i++){//отсеиваем мелкие колебания
+            if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i).y>-100){
+                ts_vol_exts->remove(i,1);
+            }
+        }
+        for(i=0;i<ts_vol_exts->size()-1;i++){//убираем двойные нули
+            if(ts_vol_exts->at(i).y==0 && ts_vol_exts->at(i+1).y==0){
                 ts_vol_exts->remove(i,1);
                 if (i>0)
                     i--;
-            }else{
-                ts_vol_exts->remove(i+1,1);
             }
         }
-    }
-    for(i=0;i<ts_vol_exts->size();i++){//отсеиваем мелкие колебания
-        if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i).y>-100){
-            ts_vol_exts->remove(i,1);
+        qDebug()<<ts_vol_exts->size()<<"size -+------";
+        if(ts_vol_exts->size()>0){
+            for(i=1;i<ts_vol_exts->size()-1;i++){
+                if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i+1).y==0 && ts_vol_exts->at(i-1).y==0){
+                    qDebug()<<"fucking shirt";
+                    exhalation *ex = new exhalation;
+                    ex->start=ts_vol_exts->at(i-1).x;
+                    ex->end=ts_vol_exts->at(i).x;
+                    ex->vol=ts_vol_exts->at(i).y;
+                    ts_exhls->push_back(*ex);
+                }
+            }
         }
-    }
-    for(i=0;i<ts_vol_exts->size()-1;i++){//убираем двойные нули
-        if(ts_vol_exts->at(i).y==0 && ts_vol_exts->at(i+1).y==0){
-            ts_vol_exts->remove(i,1);
-            if (i>0)
-                i--;
-        }
-    }
-    qDebug()<<ts_vol_exts->size()<<"size -+------";
-
-    for(i=0;i<ts_vol_exts->size()-1;i++){
-        if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i+1).y==0 && ts_vol_exts->at(i-1).y==0){
-            exhalation *ex = new exhalation;
-            ex->start=ts_vol_exts->at(i-1).x;
-            ex->end=ts_vol_exts->at(i).x;
-            ex->vol=ts_vol_exts->at(i).y;
-            ts_exhls->push_back(*ex);
-        }
-    }
-    qDebug()<<ts_exhls->last().end;
-    for(i=0;i<ts_vol_exts->size();i++){
-        qDebug()<<"aftrd["<<ts_vol_exts->at(i).x<<"]="<<ts_vol_exts->at(i).y;
     }
 }
 
