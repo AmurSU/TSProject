@@ -71,6 +71,7 @@ protected:
     void initPaintDevices();
     void resizeEvent(QResizeEvent *evt);
     bool eventFilter(QObject *obj, QEvent *e);
+    void closeEvent(QCloseEvent *e);
     void openPrivateDB(QSqlRecord record);
 private:
     QWidget wpf;

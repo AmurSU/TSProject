@@ -17,27 +17,8 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     ts_volumeColibration = 0;
     ts_volumePosConvert=1;
     ts_volumeNegConvert=-1;
-    out_file=fopen("output.txt","w");
     max_v=-1100000;
     min_v=10000;
-    /*for(i=0;i<3;i++){
-        ts_max_lev[i]=-100000;
-        ts_min_lev[i]=1000000;
-    }
-    ts_up_sqc_cnt=0;
-    ts_up_sqc_max=-1000000;
-    ts_down_sqc_cnt=0;
-    ts_down_sqc_min=1000000;
-
-    ts_up_TempIn_sum=0;
-    ts_down_TempIn_sum=0;
-    ts_up_TempOut_sum=0;
-    ts_down_TempOut_sum=0;
-
-    ts_vm_up_lvl=ts_volumeColibration+2;
-    ts_vm_max=-100000;
-    ts_period_for_count_avgs=50;*/
-    volfile.open("volume.csv");
     ga_it = new tstempanalitic();
     ga_ot = new tstempanalitic();
     ga_vo = new tsanalitics();
@@ -103,27 +84,15 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
             ga_it->deleteBadExtremums();
             AvgTempIn = ga_it->getMinAvgs();
             ga_it->clear();
-            //qDebug()<<"AvgTempIn="<<AvgTempIn;
 
             ga_ot->findExtremums();
             ga_ot->deleteBadExtremums();
             AvgTempOut = ga_ot->getMaxAvgs();
             ga_ot->clear();
-            //qDebug()<<"AvgTempOut="<<AvgTempOut;
 
             ga_vo->approximate();
             BreathingVolume = ga_vo->getBreathingVolume();
-            /*BreathVolumes.append(BreathingVolume);
-
-            for(i=0;i<BreathVolumes.size();i++){
-                sum+=BreathVolumes.at(i);
-            }
-            BreathingVolume = (sum+BreathingVolume)/(i+1);*/
-
             InspirationFrequency = ga_vo->getFrequency();
-            //qDebug()<<"BreathingVolume"<<BreathingVolume;
-            //qDebug()<<"InspirationFrequency"<<InspirationFrequency;
-
             ga_vo->clear();
             emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);
         }
@@ -179,52 +148,9 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     emit changed(segs);
     ts_end++;
 }
-/*
-void TSCurveBuffer::findLevels(){
-    if(ts_end%ts_period_for_count_avgs+1){
-        ts_low_max_lev[0]=0;
-        ts_low_max_lev[1]=0;
-        ts_low_max_lev[2]=0;
-        ts_height_min_lev[0]=0;
-        ts_height_min_lev[1]=0;
-        ts_height_min_lev[2]=0;
-        ts_max_lev[0]=-1000000;
-        ts_max_lev[1]=-1000000;
-        ts_max_lev[2]=-1000000;
-        ts_min_lev[0]=1000000;
-        ts_min_lev[1]=1000000;
-        ts_min_lev[2]=1000000;
-    }
-    if(ts_end>40){
-        if(ts_volume[ts_end]>ts_max_lev[0])
-            ts_max_lev[0]=ts_volume[ts_end];
-        if(ts_tempIn[ts_end]>ts_max_lev[1])
-            ts_max_lev[1]=ts_tempIn[ts_end];
-        if(ts_tempOut[ts_end]>ts_max_lev[2])
-            ts_max_lev[2]=ts_tempOut[ts_end];
-
-        if(ts_volume[ts_end]<ts_min_lev[0])
-            ts_min_lev[0]=ts_volume[ts_end];
-        if(ts_tempIn[ts_end]<ts_min_lev[1])
-            ts_min_lev[1]=ts_tempIn[ts_end];
-        if(ts_tempOut[ts_end]<ts_min_lev[2])
-            ts_min_lev[2]=ts_tempOut[ts_end];
-        if (ts_end%40==0){
-            ts_low_max_lev[0]=ts_max_lev[0]-(ts_max_lev[0]-ts_min_lev[0])*0.3;
-            ts_low_max_lev[1]=ts_max_lev[1]-(ts_max_lev[1]-ts_min_lev[1])*0.3;
-            ts_low_max_lev[2]=ts_max_lev[2]-(ts_max_lev[2]-ts_min_lev[2])*0.3;
-
-            ts_height_min_lev[0]=ts_min_lev[0]+(ts_max_lev[0]-ts_min_lev[0])*0.3;
-            ts_height_min_lev[1]=ts_min_lev[0]+(ts_max_lev[1]-ts_min_lev[1])*0.3;
-            ts_height_min_lev[2]=ts_min_lev[0]+(ts_max_lev[2]-ts_min_lev[2])*0.3;
-            qDebug()<<ts_low_max_lev[0]<<ts_height_min_lev[0]<<ts_low_max_lev[1]<<ts_height_min_lev[1]<<ts_low_max_lev[2]<<ts_height_min_lev[2];
-        }
-    }
-}*/
 
 void TSCurveBuffer::setValues(int *vol, int *tin, int *tout, int n)
 {
-    //if(ts_end != -1)return;
     for(int i=0;i<n;i++)
     {
         append(vol[i],tin[i],tout[i],false);

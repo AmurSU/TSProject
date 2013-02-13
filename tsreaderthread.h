@@ -11,6 +11,7 @@ class TSReaderThread : public QThread
     Q_OBJECT
 public:
     explicit TSReaderThread(TSCurveBuffer *b,QObject *parent = 0);
+    ~TSReaderThread();
     void run();
     void f1();
     void stopRead();
@@ -26,7 +27,7 @@ private:
     bool ReadingStarted;
     TSUsbReadingType readingType;
     bool works;
-    //TSUsb3000Reader *reader;
+    TSUsb3000Reader *reader;
 };
 
 #endif // TSREADERTHREAD_H
