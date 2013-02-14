@@ -4,7 +4,6 @@
 #include <QThread>
 #include "tsusb3000reader.h"
 
-enum TSUsbReadingType {ReadAll,ReadForVolZer,ReadForVolVal,ReadForTemp};
 
 class TSReaderThread : public QThread
 {

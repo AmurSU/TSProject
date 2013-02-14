@@ -3,5 +3,7 @@
 struct extremum {
     int x, y, type;
 };
+
+enum TSUsbReadingType {ReadAll,ReadForVolZer,ReadForVolVal,ReadForTemp};
 #endif // EXTREMUM_H
 

@@ -14,6 +14,7 @@
 #include "models/TSPatients.h"
 #include <QTableWidget>
 #include "ui_tsprintview.h"
+#include "tsusbdatareader.h"
 namespace Ui {
     class TSView;
     class TSProgressDialog;
@@ -74,6 +75,9 @@ protected:
     void closeEvent(QCloseEvent *e);
     void openPrivateDB(QSqlRecord record);
 private:
+
+    TSUsbDataReader *_reader;
+    QThread *_thread;
     QWidget wpf;
     QDialog *mvlDialog;
     QTableWidgetItem* getQTableWidgetItem(QVariant text);

@@ -118,13 +118,13 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
                 ts_integral[ts_end] = 0.1*v + ts_integral[ts_end-1];
                 if( ts_end-maxc_v>1 && v>10){
                     ts_integral[ts_end]=0;
-                    qDebug()<<"Oh shit, we should obrezat this verhushka.";
+                    //qDebug()<<"Oh shit, we should obrezat this verhushka.";
                     max_v=-10000;
                     maxc_v=ts_end;
                 }else
                     if( ts_end-minc_v>1 && v<-10){
                         ts_integral[ts_end]=0;
-                        qDebug()<<"Oh shit, we should obrezat this nizushka.";
+                        //qDebug()<<"Oh shit, we should obrezat this nizushka.";
                         min_v=10000;
                         minc_v=ts_end;
                     }

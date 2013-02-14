@@ -318,22 +318,55 @@ void TSController::calibrateVolume(){
     d.setWindowTitle(tr("Предепреждение"));
     dui.information->setText(tr("Идет подготовка..."));
     dui.acceptButton->setVisible(false);
-    connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
+
+    TSUsbDataReader *reader = new TSUsbDataReader();
+    QThread *thread = new QThread();
+    connect(thread,SIGNAL(started()),reader,SLOT(doWork()));
+    connect(reader,SIGNAL(done()),&d,SLOT(accept()));
+    connect(reader,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
+    reader->setBuffer(curveBuffer);
+    reader->setReadingType(ReadForVolZer);
+    reader->moveToThread(thread);
+    thread->start();
+
+
+    /*connect(readerThread,SIGNAL(done()),&d,SLOT(accept()));
     connect(readerThread,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
     readerThread->setReadingType(ReadForVolZer);
-    readerThread->startRead();
+    readerThread->startRead();*/
     if(d.exec()==1){
         settings.setValue("volZero",curveBuffer->volumeColibration());
         dui.information->setText(tr("Подготовка завершена.\nНажмите ОК и качайте шприцем."));
         dui.progressBar->setVisible(false);
         dui.acceptButton->setVisible(true);
     }
-    readerThread->stopRead();
+    reader->stopRead();
+    Sleep(200);
+    thread->quit();
+    Sleep(200);
+    thread->disconnect(reader);
     disconnect(&d,SLOT(accept()));
+    delete thread;
+    thread = NULL;
+    delete reader;
+    reader=NULL;
+
     d.exec();
     connect(&cPlotingTimer,SIGNAL(timeout()),this,SLOT(plotCalibration()));
-    readerThread->setReadingType(ReadForVolVal);
-    readerThread->startRead();
+
+
+    _reader = new TSUsbDataReader();
+    _thread = new QThread();
+    connect(_thread,SIGNAL(started()),_reader,SLOT(doWork()));
+    connect(_reader,SIGNAL(done()),&d,SLOT(accept()));
+    connect(_reader,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
+    _reader->setBuffer(curveBuffer);
+    _reader->setReadingType(ReadForVolVal);
+    _reader->moveToThread(_thread);
+    _thread->start();
+
+    /*readerThread->setReadingType(ReadForVolVal);
+    readerThread->startRead();*/
     cPlotingTimer.start(100);
 }
 
@@ -514,8 +547,19 @@ void TSController::plotCalibration(){
         settings.setValue("volOutLtr",ta.getMin());
         settings.setValue("volInLtr",ta.getMax());
         curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
+
         qDebug()<<"reading is finished";
-        readerThread->stopRead();
+        //readerThread->stopRead();
+        _reader->stopRead();
+        Sleep(200);
+        _thread->quit();
+        Sleep(200);
+        _thread->disconnect(_reader);
+        delete _thread;
+        _thread = NULL;
+        delete _reader;
+        _reader=NULL;
+
         curveBuffer->clean();
         settings.sync();
         dui.progressBar->setVisible(false);
@@ -536,9 +580,19 @@ void TSController::plotCalibration(){
 void TSController::startExam()
 {
     //qDebug()<<"TSController::startExam";
-    readerThread->setReadingType(ReadAll);
+    _reader = new TSUsbDataReader();
+    _thread = new QThread();
+    connect(_thread,SIGNAL(started()),_reader,SLOT(doWork()));
+    //connect(reader,SIGNAL(done()),&d,SLOT(accept()));
+    //connect(reader,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
+    _reader->setBuffer(curveBuffer);
+    _reader->setReadingType(ReadAll);
+    _reader->moveToThread(_thread);
+    _thread->start();
+
+    //readerThread->setReadingType(ReadAll);
     recordingStarted = true;
-    readerThread->startRead();
+    //readerThread->startRead();
     tempInScaleRate = 1.0/5000;
     tempOutScaleRate = 1.0/5000;
     volumeScaleRate = 1.0/5000;
@@ -561,7 +615,18 @@ void TSController::stopExam()
     if(recordingStarted)
     {
         plotingTimer.stop();
-        readerThread->stopRead();
+//readerThread->stopRead();
+        _reader->stopRead();
+        Sleep(200);
+        _thread->quit();
+        Sleep(200);
+        _thread->disconnect(_reader);
+        delete _thread;
+        _thread = NULL;
+        delete _reader;
+        _reader=NULL;
+
+
         qDebug()<<"Stop exam";
         QSqlRecord record = examinationsModel->record();
         int n = curveBuffer->end();
@@ -595,11 +660,14 @@ void TSController::stopExam()
         if(!examinationsModel->insertRecord(-1,record))
             qDebug()<<"exam insertError";
         ui->horizontalScrollBar->setEnabled(true);
+
     }
 
     ui->horizontalScrollBar->setEnabled(true);
-    mvlDialog->close();
+    qDebug()<<"bbbbbbbbbbbbbbbbbbbb";
+    //mvlDialog->close();
     recordingStarted = false;
+
 }
 
 void TSController::openPatientList()
@@ -996,8 +1064,18 @@ QTableWidgetItem* TSController::getQTableWidgetItem(QVariant text){
 void TSController::breakExam()
 {
 //    qDebug()<<"TSController::breakExam";
+
     plotingTimer.stop();
-    readerThread->stopRead();
+    _reader->stopRead();
+    Sleep(200);
+    _thread->quit();
+    Sleep(200);
+    _thread->disconnect(_reader);
+    delete _thread;
+    _thread = NULL;
+    delete _reader;
+    _reader=NULL;
+    //readerThread->stopRead();
 }
 
 void TSController::processDataParams(){
@@ -1239,8 +1317,8 @@ float TSController::fabs(float a){
         return a;
 }
 void TSController::closeEvent(QCloseEvent *e){
-    readerThread->stopRead();
-    delete readerThread;
+    /*readerThread->stopRead();
+    delete readerThread;*/
     e->accept();
     //delete readerThread;
 }

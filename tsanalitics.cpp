@@ -1,7 +1,7 @@
 #include "tsanalitics.h"
 #include <QDebug>
 tsanalitics::tsanalitics(QObject *parent) :QObject(parent){
-    qDebug()<<"tsanalitics";
+    //qDebug()<<"tsanalitics";
     QVector<extremum> *extrem = new QVector<extremum>;
     ts_extremums=extrem;
     QVector<int> *row_d = new QVector<int>;
@@ -12,7 +12,7 @@ tsanalitics::tsanalitics(QObject *parent) :QObject(parent){
     ts_exhls=exhls;
 }
 float tsanalitics::getFrequency(){
-    qDebug()<<"getFrequency";
+    //qDebug()<<"getFrequency";
     if(ts_exhls->size()>0)
         return 6000/((float)ts_row_data->size()/(float)ts_exhls->size());
     else
@@ -23,7 +23,7 @@ float tsanalitics::getFrequency(){
 
 
 int tsanalitics::getAvgExpiratoryTime(){
-    qDebug()<<"getAvgExpiratoryTime";
+    //qDebug()<<"getAvgExpiratoryTime";
     int sum=0,i=0;
     for(i=0;i<ts_exhls->size();i++){
         sum+=ts_exhls->at(i).end-ts_exhls->at(i).start;
@@ -35,12 +35,12 @@ int tsanalitics::getAvgExpiratoryTime(){
 }
 
 int tsanalitics::setupData(QVector<int> *row_d){
-    qDebug()<<"setupData";
+    //qDebug()<<"setupData";
     ts_row_data=row_d;
 }
 
 void tsanalitics::approximate(){
-    qDebug()<<"approximate";
+    //qDebug()<<"approximate";
     int i=0;
     if(ts_row_data->size()!=0){
         QVector<int> *df = new QVector<int>;
@@ -48,7 +48,7 @@ void tsanalitics::approximate(){
             df->push_back(ts_row_data->at(i+1)-ts_row_data->at(i));
         }
         for(i=0;i<ts_row_data->size();i++){
-            qDebug()<<i<<"="<<ts_row_data->at(i);
+            //qDebug()<<i<<"="<<ts_row_data->at(i);
             extremum *extr = new extremum;
             extr->y = ts_row_data->at(i);
             extr->x = i;
@@ -79,11 +79,11 @@ void tsanalitics::approximate(){
                     i--;
             }
         }
-        qDebug()<<ts_vol_exts->size()<<"size -+------";
+        //qDebug()<<ts_vol_exts->size()<<"size -+------";
         if(ts_vol_exts->size()>0){
             for(i=1;i<ts_vol_exts->size()-1;i++){
                 if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i+1).y==0 && ts_vol_exts->at(i-1).y==0){
-                    qDebug()<<"fucking shirt";
+                    //qDebug()<<"fucking shirt";
                     exhalation *ex = new exhalation;
                     ex->start=ts_vol_exts->at(i-1).x;
                     ex->end=ts_vol_exts->at(i).x;
@@ -96,7 +96,7 @@ void tsanalitics::approximate(){
 }
 
 int tsanalitics::getBreathingVolume(){
-    qDebug()<<"getBreathingVolume";
+    //qDebug()<<"getBreathingVolume";
     int sum=0,i=0;
     for (i=0;i<ts_exhls->size();i++){
         sum+=fabs(ts_exhls->at(i).vol);
@@ -108,11 +108,11 @@ int tsanalitics::getBreathingVolume(){
 }
 
 int tsanalitics::getAvgExpiratorySpeed(){
-    qDebug()<<"getAvgExpiratorySpeed";
+    //qDebug()<<"getAvgExpiratorySpeed";
     int time=0,i=0,len=0;
     for(i=0;i<ts_exhls->size();i++){
         time+=ts_exhls->at(i).end-ts_exhls->at(i).start;
-        //qDebug()<<ts_exhls->at(i).end-ts_exhls->at(i).start;
+        ////qDebug()<<ts_exhls->at(i).end-ts_exhls->at(i).start;
         len+=ts_exhls->at(i).vol;
     }
     if (time==0)
@@ -122,7 +122,7 @@ int tsanalitics::getAvgExpiratorySpeed(){
 }
 
 int tsanalitics::getMaxExpiratorySpeed(){
-    qDebug()<<"getMaxExpiratorySpeed";
+    //qDebug()<<"getMaxExpiratorySpeed";
     int i=0;
     float speed=0,max=-1000000;
     for(i=0;i<ts_exhls->size();i++){
@@ -134,12 +134,12 @@ int tsanalitics::getMaxExpiratorySpeed(){
 }
 
 void tsanalitics::append(int n){
-    //qDebug()<<"append";
+    ////qDebug()<<"append";
     ts_row_data->push_back(n);
 }
 
 void tsanalitics::clear(){
-    qDebug()<<"clear";
+    //qDebug()<<"clear";
     ts_extremums->remove(0,ts_extremums->size());
     ts_extremums->clear();
     ts_vol_exts->remove(0,ts_extremums->size());
@@ -151,7 +151,7 @@ void tsanalitics::clear(){
 }
 
 int tsanalitics::getMVL(){
-    qDebug()<<"getMVL";
+    //qDebug()<<"getMVL";
     int sum=0,i=0;
     for (i=0;i<ts_exhls->size();i++){
         sum+=ts_exhls->at(i).vol;
@@ -163,14 +163,14 @@ int tsanalitics::getMVL(){
 }
 
 int tsanalitics::getMax(){
-    qDebug()<<"getMax";
+    //qDebug()<<"getMax";
     int i=0, max_index=0;
     for (i=0;i<ts_row_data->size();i++){
         if( ts_row_data->at(i)> ts_row_data->at(max_index) )
             max_index = i;
     }
     if ( ts_row_data->size()>0){//ts_row_data->size()<=max_index &&
-        //qDebug()<<"max_index"<<max_index<<" ts_row_data->at(max_index)"<<ts_row_data->at(max_index);
+        ////qDebug()<<"max_index"<<max_index<<" ts_row_data->at(max_index)"<<ts_row_data->at(max_index);
         return ts_row_data->at(max_index);
     }
     else
@@ -178,7 +178,7 @@ int tsanalitics::getMax(){
 }
 
 int tsanalitics::getMin(){
-    qDebug()<<"getMin";
+    //qDebug()<<"getMin";
     int i=0, min_index=0;
     for (i=0;i<ts_row_data->size();i++){
         if( ts_row_data->at(i)< ts_row_data->at(min_index) )
@@ -186,7 +186,7 @@ int tsanalitics::getMin(){
     }
 
     if(ts_row_data->size()>0 ){//&& ts_row_data->size()<= min_index
-        //qDebug()<<"min_index"<<min_index<<"ts_row_data->at(min_index)"<<ts_row_data->at(min_index);
+        ////qDebug()<<"min_index"<<min_index<<"ts_row_data->at(min_index)"<<ts_row_data->at(min_index);
         return ts_row_data->at(min_index);
     }
     else
@@ -194,7 +194,7 @@ int tsanalitics::getMin(){
 }
 
 int tsanalitics::fabs(int a){
-    qDebug()<<"fabs";
+    //qDebug()<<"fabs";
     if( a<0 )
         return -a;
     else
@@ -202,7 +202,7 @@ int tsanalitics::fabs(int a){
 }
 
 int tsanalitics::getAvgInspiratoryTime(){
-    qDebug()<<"getAvgInspiratoryTime";
+    //qDebug()<<"getAvgInspiratoryTime";
     int sum=0,i=0;
     for(i=0;i<ts_exhls->size()-1;i++){
         sum+=fabs(ts_exhls->at(i+1).end-ts_exhls->at(i).start);

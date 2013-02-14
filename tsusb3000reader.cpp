@@ -160,6 +160,9 @@ SHORT* TSUsb3000Reader::readData(){
     }
 }
 bool TSUsb3000Reader::closeReader(){
+    if(!pModule->STOP_READ()){
+        qDebug()<<"Can`t stop reading";
+    }
     qDebug()<<"close Reader";
     if (pModule->CloseDevice()) {
         if (pModule) {

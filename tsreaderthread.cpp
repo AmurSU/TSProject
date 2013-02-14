@@ -8,9 +8,6 @@ TSReaderThread::TSReaderThread(TSCurveBuffer *b, QObject *parent) :QThread(paren
 }
 
 
-void TSReaderThread::f1 (){
-    qDebug()<<"-----Thread is open for command----";
-}
 void TSReaderThread::startRead (){
     ReadingStarted = true;
     reader = new TSUsb3000Reader(this);
@@ -25,14 +22,18 @@ void TSReaderThread::stopRead (){
         //this->terminate();
     }
     qDebug()<<"RSF";
-    if (!this->wait()){
+//    if(reader!=0){
+//        delete reader;
+//        reader = 0;
+//    }
+ /*   if (!this->wait()){
         qDebug()<<"Waiting!!!!!!!!!";
         if(reader!=0){
             delete reader;
             reader = 0;
         }
         this->quit();
-    }
+    }*/
 
 
 }
@@ -73,6 +74,7 @@ void TSReaderThread::run(){
                 }
                 if ((adc=reader->readData())!=0){
                     avg+=adc[0];
+                    qDebug()<<"ReadForVolZer"<<adc[0];
                     if(i%10)
                         emit changeProgress(i/3);
                     msleep(10);
@@ -95,6 +97,7 @@ void TSReaderThread::run(){
                 }
                 SHORT* adc;
                 if ((adc=reader->readData())!=0){
+                    qDebug()<<"ReadForVolVal"<<adc[0];
                     buffer->append(adc[0],0,0);
                     if(i%24)
                         emit changeProgress(i/12);
@@ -111,10 +114,16 @@ void TSReaderThread::run(){
         }
     }
 
-
     /*if(reader!=0){
         delete reader;
     }*/
+    reader->closeReader();
+    qDebug()<<"Before deeting reader";
+   /* if(reader!=0){
+        delete reader;
+       // reader = 0;
+    }*/
+    qDebug()<<"A delete reader";
     emit done();
     qDebug()<<"WTF";
     ReadingStarted=true;
