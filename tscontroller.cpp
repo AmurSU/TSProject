@@ -599,7 +599,8 @@ void TSController::startExam()
     horizontalStep = 1.0;
     initPaintDevices();
     plotingTimer.start(100);
-    QDialog *mvlDialog = new QDialog(this);
+    //QDialog *mvlDialog = new QDialog(this);
+    mvlDialog = new QDialog(this);
     volWidget = new Ui::TSVolSignalWidget();
     volWidget->setupUi(mvlDialog);
     volWidget->MVL->setText("50%");
@@ -664,8 +665,8 @@ void TSController::stopExam()
     }
 
     ui->horizontalScrollBar->setEnabled(true);
-    qDebug()<<"bbbbbbbbbbbbbbbbbbbb";
-    //mvlDialog->close();
+    //qDebug()<<"bbbbbbbbbbbbbbbbbbbb";
+    mvlDialog->close();
     recordingStarted = false;
 
 }

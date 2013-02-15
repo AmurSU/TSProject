@@ -255,13 +255,13 @@ void TSUsbDataReader::doWork()
     this->read();
     //qDebug()<<"Before closeReader()";
     //this->closeReader();
-    qDebug()<<"DONEEEEEEEEEEEEEE";
+    qDebug()<<"DONE";
     emit done();
 }
 bool TSUsbDataReader::closeReader()
 {
     pModule->STOP_READ();
-    qDebug()<<"close Reader";
+    //qDebug()<<"close Reader";
     if (pModule) {
         // освободим интерфейс модуля
         if (!pModule->ReleaseInstance())
@@ -269,7 +269,7 @@ bool TSUsbDataReader::closeReader()
         else
             printf(" ReleaseInstance() --> OK\n");
         // обнулим указатель на интерфейс модуля
-        qDebug()<<"pModule = NULL";
+        //qDebug()<<"pModule = NULL";
         pModule = NULL;
         return true;
     }

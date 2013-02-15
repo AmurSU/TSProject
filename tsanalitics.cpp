@@ -79,7 +79,7 @@ void tsanalitics::approximate(){
                     i--;
             }
         }
-        //qDebug()<<ts_vol_exts->size()<<"size -+------";
+        qDebug()<<ts_vol_exts->size()<<"size -+------";
         if(ts_vol_exts->size()>0){
             for(i=1;i<ts_vol_exts->size()-1;i++){
                 if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i+1).y==0 && ts_vol_exts->at(i-1).y==0){

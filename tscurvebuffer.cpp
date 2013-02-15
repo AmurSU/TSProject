@@ -78,7 +78,7 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     ga_ot->append(ts_tempOut[ts_end-1]);
     ga_vo->append(ts_integral[ts_end-1]);
     if(realtime){
-        int num=500;
+        int num=300;
         if(ts_end%num==0){
             ga_it->findExtremums();
             ga_it->deleteBadExtremums();
