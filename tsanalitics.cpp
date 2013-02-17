@@ -42,9 +42,20 @@ int tsanalitics::setupData(QVector<int> *row_d){
 void tsanalitics::approximate(){
     //qDebug()<<"approximate";
     int i=0;
+    QVector<int> vec;
     if(ts_row_data->size()!=0){
         QVector<int> *df = new QVector<int>;
         for(i=0;i<ts_row_data->size()-1;i++){
+            if ( abs(ts_row_data->at(i))>5){
+                vec.push_back(i);
+            }else{
+                if(vec.size()>0){
+                    qDebug()<<"["<<vec.first()<<" "<<vec.last()<<"]="<<vec.size()<<" vol="<<ts_row_data->at(vec.last())<<" speed="
+                           <<ts_row_data->at(vec.last())/vec.size();
+                    vec.remove(0,vec.size());
+                    vec.clear();
+                }
+            }
             df->push_back(ts_row_data->at(i+1)-ts_row_data->at(i));
         }
         for(i=0;i<ts_row_data->size();i++){
@@ -68,7 +79,7 @@ void tsanalitics::approximate(){
             }
         }
         for(i=0;i<ts_vol_exts->size();i++){//отсеиваем мелкие колебания
-            if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i).y>-100){
+            if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i).y>-20){
                 ts_vol_exts->remove(i,1);
             }
         }
@@ -83,7 +94,6 @@ void tsanalitics::approximate(){
         if(ts_vol_exts->size()>0){
             for(i=1;i<ts_vol_exts->size()-1;i++){
                 if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i+1).y==0 && ts_vol_exts->at(i-1).y==0){
-                    //qDebug()<<"fucking shirt";
                     exhalation *ex = new exhalation;
                     ex->start=ts_vol_exts->at(i-1).x;
                     ex->end=ts_vol_exts->at(i).x;
@@ -112,25 +122,46 @@ int tsanalitics::getAvgExpiratorySpeed(){
     int time=0,i=0,len=0;
     for(i=0;i<ts_exhls->size();i++){
         time+=ts_exhls->at(i).end-ts_exhls->at(i).start;
-        ////qDebug()<<ts_exhls->at(i).end-ts_exhls->at(i).start;
+        qDebug()<<ts_exhls->at(i).end-ts_exhls->at(i).start<<" "<<ts_exhls->at(i).vol;
         len+=ts_exhls->at(i).vol;
     }
     if (time==0)
         return 0;
     else
-        return len*100/time;
+        return len/time;
 }
 
 int tsanalitics::getMaxExpiratorySpeed(){
     //qDebug()<<"getMaxExpiratorySpeed";
-    int i=0;
+    QVector<int> vec,spd;
+    int i=0,max=0;
+    for(i=0;i<ts_row_data->size();i++){
+        if ( abs(ts_row_data->at(i))>5){
+            vec.push_back(i);
+        }else{
+            if(vec.size()>0){
+                //qDebug()<<"["<<vec.first()<<" "<<vec.last()<<"]="<<vec.size()<<" vol="<<ts_row_data->at(vec.last())<<" speed="
+                //       <<ts_row_data->at(vec.last())/vec.size();
+                spd.append(ts_row_data->at(vec.last())/vec.size());
+                vec.remove(0,vec.size());
+                vec.clear();
+            }
+        }
+    }
+    for(i=0;i<spd.size();i++){
+        if (abs(spd.at(i))>abs(max))
+            max=spd.at(i);
+    }
+    qDebug()<<"max"<<max;
+    return max;
+  /*  int i=0;
     float speed=0,max=-1000000;
     for(i=0;i<ts_exhls->size();i++){
         speed=(float)ts_exhls->at(i).vol/(float)(ts_exhls->at(i).end-ts_exhls->at(i).start);
         if(speed>max)
             max=speed;
     }
-    return max;
+    return max;*/
 }
 
 void tsanalitics::append(int n){
@@ -151,15 +182,37 @@ void tsanalitics::clear(){
 }
 
 int tsanalitics::getMVL(){
+
+    QVector<int> vec,spd;
+    int i=0,max=0;
+    for(i=0;i<ts_row_data->size();i++){
+        if ( abs(ts_row_data->at(i))>5){
+            vec.push_back(i);
+        }else{
+            if(vec.size()>0){
+                //qDebug()<<"["<<vec.first()<<" "<<vec.last()<<"]="<<vec.size()<<" vol="<<ts_row_data->at(vec.last())<<" speed="
+                //       <<ts_row_data->at(vec.last())/vec.size();
+                spd.append(ts_row_data->at(vec.last())/vec.size());
+                max+=vec.last();
+                vec.remove(0,vec.size());
+                vec.clear();
+            }
+        }
+    }
+    return max;
+  /*  for(i=0;i<spd.size();i++){
+        if (abs(spd.at(i))>abs(max))
+            max=spd.at(i);
+    }*/
     //qDebug()<<"getMVL";
-    int sum=0,i=0;
+    /*int sum=0,i=0;
     for (i=0;i<ts_exhls->size();i++){
         sum+=ts_exhls->at(i).vol;
     }
     if(ts_exhls->size()>0)
         return sum;
     else
-        return 0;
+        return 0;*/
 }
 
 int tsanalitics::getMax(){

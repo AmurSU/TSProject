@@ -1121,7 +1121,7 @@ void TSController::processDataParams(){
 
     MaxExpirationSpeed = ga->getMaxExpiratorySpeed();
     qtw->setItem(2,0,getQTableWidgetItem(tr("Максимальная скорость выдоха(л/с)")));
-    qtw->setItem(2,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(100*MaxExpirationSpeed)))));
+    qtw->setItem(2,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MaxExpirationSpeed)))));
 
     AvgExpirationTime = ga->getAvgExpiratoryTime();
     qtw->setItem(3,0,getQTableWidgetItem(tr("Среднее время выдоха(с)")));
