@@ -65,3 +65,4 @@ RESOURCES += \
 
 OTHER_FILES += \
     db_structure.sql
+QMAKE_CXXFLAGS_RELEASE += -O3

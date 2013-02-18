@@ -109,6 +109,8 @@ TSController::TSController(QWidget *parent) :
     ui->backPatientListButton->installEventFilter(this);
     ui->backCallibrateButton->installEventFilter(this);
     ui->backExamButton->installEventFilter(this);
+    _reader=NULL;
+    _thread=NULL;
     this->processDataParams();
 }
 
@@ -499,7 +501,7 @@ void TSController::plotNow()
 }
 
 void TSController::plotCalibration(){
-   // qDebug()<<"TSController::plotCalibration";
+    // qDebug()<<"TSController::plotCalibration";
     //    int endIndex = curveBuffer->end();
     int endIndex = curveBuffer->getLenght();
     if(endIndex<1200){
@@ -616,7 +618,7 @@ void TSController::stopExam()
     if(recordingStarted)
     {
         plotingTimer.stop();
-//readerThread->stopRead();
+        //readerThread->stopRead();
         _reader->stopRead();
         Sleep(200);
         _thread->quit();
@@ -762,7 +764,7 @@ void TSController::showAverageData(int avgTempIn, int avgTempOut, int avgDO, int
 
 void TSController::completePatientId()
 {
-   // qDebug()<<"TSController::completePatientId";
+    // qDebug()<<"TSController::completePatientId";
     QString id;
     if(ui->sName->text().length()>0)
         id.append(ui->sName->text().toUpper().at(0));
@@ -776,7 +778,7 @@ void TSController::completePatientId()
 
 void TSController::scrollGraphics(int value)
 {
-   // qDebug()<<"TSController::scrollGraphics";
+    // qDebug()<<"TSController::scrollGraphics";
     curveBuffer->setEnd(W-35+value*horizontalStep*10);
     plotNow();
 }
@@ -799,7 +801,7 @@ void TSController::createNewExam()
 
 void TSController::openExam(QModelIndex ind)
 {
-   // qDebug()<<"TSController::openExam";
+    // qDebug()<<"TSController::openExam";
     QSqlRecord record = examinationsModel->record(ind.row());
     int volume[18000],tempin[18000], tempout[18000];
     int i;
@@ -915,7 +917,7 @@ void TSController::scaleTempOut(int value)
 
 void TSController::scaleVolume(int value)
 {
-   // qDebug()<<"TSController::scaleVolume";
+    // qDebug()<<"TSController::scaleVolume";
     value*=2;
     if(value<0)
     {
@@ -951,7 +953,7 @@ void TSController::scaleForHorizontal(int value)
 
 void TSController::changeScrollBarAfterScaling(int before, int after)
 {
-   // qDebug()<<"TSController::changeScrollBarAfterScaling";
+    // qDebug()<<"TSController::changeScrollBarAfterScaling";
     if(after%2)return;
     int val = ui->horizontalScrollBar->value();
     if(before>after)
@@ -1055,7 +1057,7 @@ void TSController::openPrivateDB(QSqlRecord record)
 }
 
 QTableWidgetItem* TSController::getQTableWidgetItem(QVariant text){
-//    qDebug()<<"TSController::getQTableWidgetItem";
+    //    qDebug()<<"TSController::getQTableWidgetItem";
     QTableWidgetItem *item = new QTableWidgetItem();
     item->setData(0,text);
     item->setFlags(item->flags() ^ Qt::ItemIsEditable);
@@ -1064,7 +1066,7 @@ QTableWidgetItem* TSController::getQTableWidgetItem(QVariant text){
 
 void TSController::breakExam()
 {
-//    qDebug()<<"TSController::breakExam";
+    //    qDebug()<<"TSController::breakExam";
 
     plotingTimer.stop();
     _reader->stopRead();
@@ -1080,7 +1082,7 @@ void TSController::breakExam()
 }
 
 void TSController::processDataParams(){
-//    qDebug()<<"TSController::processDataParams";
+    //    qDebug()<<"TSController::processDataParams";
     qDebug()<<"this is result button !";
     QTableWidget *qtw = ui->resultsTable;
     qtw->setColumnCount(2);
@@ -1117,11 +1119,11 @@ void TSController::processDataParams(){
 
     AvgExpirationSpeed = ga->getAvgExpiratorySpeed();
     qtw->setItem(1,0,getQTableWidgetItem(tr("Средняя скорость выдоха(л/с)")));
-    qtw->setItem(1,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(AvgExpirationSpeed)))));
+    qtw->setItem(1,1,getQTableWidgetItem(QString::number(100*fabs(curveBuffer->volToLtr(AvgExpirationSpeed)))));
 
     MaxExpirationSpeed = ga->getMaxExpiratorySpeed();
     qtw->setItem(2,0,getQTableWidgetItem(tr("Максимальная скорость выдоха(л/с)")));
-    qtw->setItem(2,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MaxExpirationSpeed)))));
+    qtw->setItem(2,1,getQTableWidgetItem(QString::number(100*fabs(curveBuffer->volToLtr(MaxExpirationSpeed)))));
 
     AvgExpirationTime = ga->getAvgExpiratoryTime();
     qtw->setItem(3,0,getQTableWidgetItem(tr("Среднее время выдоха(с)")));
@@ -1167,7 +1169,7 @@ void TSController::processDataParams(){
 }
 
 void TSController::deletePatient(int index){
-//    qDebug()<<"TSController::deletePatient";
+    //    qDebug()<<"TSController::deletePatient";
     QSqlRecord record = patientsModel->record(index);
     QString fileName = "privatedb\\";
     fileName.append(record.value("id").toString()+"_"
@@ -1183,13 +1185,13 @@ void TSController::deletePatient(int index){
 }
 
 void TSController::deleteExam(int index){
-//    qDebug()<<"TSController::deleteExam";
+    //    qDebug()<<"TSController::deleteExam";
     examinationsModel->removeRow(index);
 }
 
 void TSController::printReport()
 {
-//    qDebug()<<"TSController::printReport";
+    //    qDebug()<<"TSController::printReport";
     QPrinter printer;
     QPrintDialog *dialog = new QPrintDialog(&printer, this);
     dialog->setWindowTitle(tr("Предварительный просмотр"));
@@ -1311,7 +1313,7 @@ void TSController::printReport()
     }
 }
 float TSController::fabs(float a){
-//    qDebug()<<"TSController::fabs";
+    //    qDebug()<<"TSController::fabs";
     if(a<0)
         return -a;
     else
@@ -1320,6 +1322,20 @@ float TSController::fabs(float a){
 void TSController::closeEvent(QCloseEvent *e){
     /*readerThread->stopRead();
     delete readerThread;*/
+    if (_thread!=NULL){
+        if (_thread->isRunning()){
+            qDebug()<<"WTF";
+            _reader->stopRead();
+            Sleep(300);
+            _thread->quit();
+            Sleep(300);
+            _thread->disconnect(_reader);
+            delete _thread;
+            _thread = NULL;
+            delete _reader;
+            _reader=NULL;
+        }
+    }
     e->accept();
     //delete readerThread;
 }

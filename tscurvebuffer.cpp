@@ -78,8 +78,19 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
     ga_ot->append(ts_tempOut[ts_end-1]);
     ga_vo->append(ts_integral[ts_end-1]);
     if(realtime){
-        int num=300;
+        int num=800;
         if(ts_end%num==0){
+
+            //TSUsbDataReader *reader = new TSUsbDataReader();
+           /* QThread *thread = new QThread();
+            connect(thread,SIGNAL(started()),reader,SLOT(doWork()));
+            connect(reader,SIGNAL(done()),&d,SLOT(accept()));
+            connect(reader,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
+            reader->setBuffer(curveBuffer);
+            reader->setReadingType(ReadForVolZer);
+            reader->moveToThread(thread);
+            thread->start();
+            */
             ga_it->findExtremums();
             ga_it->deleteBadExtremums();
             AvgTempIn = ga_it->getMinAvgs();
