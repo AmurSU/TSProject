@@ -316,7 +316,10 @@ void TSController::calibrateVolume(){
     QSettings settings("settings.ini",QSettings::IniFormat);
     QDialog d(this);
     Ui::TSProgressDialog dui;
+    d.setWindowFlags(Qt::SubWindow);
     dui.setupUi(&d);
+
+            //controller->setWindowFlags(Qt::WindowTitleHint | Qt::WindowMinimizeButtonHint|Qt::SubWindow);
     d.setWindowTitle(tr("Предепреждение"));
     dui.information->setText(tr("Идет подготовка..."));
     dui.acceptButton->setVisible(false);
@@ -383,6 +386,7 @@ void TSController::rejectColibration()
     QSettings settings("settings.ini",QSettings::IniFormat);
     curveBuffer->setVolumeColibration(settings.value("volZero").toInt(),false);
     qDebug()<<"volColibr: "<<curveBuffer->volumeColibration();
+    qDebug()<<"setVolumeConverts rejectColibration "<<settings.value("volInLtr").toInt()<<" "<<settings.value("volOutLtr").toInt();
     curveBuffer->setVolumeConverts(settings.value("volInLtr").toInt(),
                                    settings.value("volOutLtr").toInt());
     ui->mainBox->setCurrentIndex(5);
@@ -548,6 +552,7 @@ void TSController::plotCalibration(){
         qDebug()<<"get min "<<ta.getMin()<<" ; get max "<<ta.getMax();
         settings.setValue("volOutLtr",ta.getMin());
         settings.setValue("volInLtr",ta.getMax());
+        qDebug()<<"setVolumeConverts plotCalibration "<<ta.getMin()<<" "<<ta.getMax();
         curveBuffer->setVolumeConverts(ta.getMax(),ta.getMin());
 
         qDebug()<<"reading is finished";
@@ -667,7 +672,6 @@ void TSController::stopExam()
     }
 
     ui->horizontalScrollBar->setEnabled(true);
-    //qDebug()<<"bbbbbbbbbbbbbbbbbbbb";
     mvlDialog->close();
     recordingStarted = false;
 
@@ -748,15 +752,12 @@ void TSController::openPatientProfile(QModelIndex ind)
 void TSController::showAverageData(int avgTempIn, int avgTempOut, int avgDO, int avgCHD)
 {
     //qDebug()<<"TSController::showAverageData";
-    ui->volumeInfoLabel->setText(tr("ДО=")+QString::number(
-                                     curveBuffer->volToLtr(avgDO),'g',2)
+    ui->volumeInfoLabel->setText(tr("ДО=")+QString::number(curveBuffer->volToLtr(avgDO),'g',2)
                                  +tr(" Л\nЧД=")+QString::number(avgCHD));
-    ui->tinInfoLabel->setText("Tin="+QString::number(
-                                  curveBuffer->tempInToDeg(avgTempIn),'g',2)+" 'C");
-    ui->toutInfolabel->setText("Tout="+QString::number(
-                                   curveBuffer->tempInToDeg(avgTempOut),'g',2)+" 'C");
-    int mvl = patientsModel->record(0).value("mvl").toDouble()*100/
-            (curveBuffer->volToLtr(avgDO)*avgCHD);
+    ui->tinInfoLabel->setText("Tin="+QString::number(curveBuffer->tempInToDeg(avgTempIn),'g',2)+" 'C");
+    ui->toutInfolabel->setText("Tout="+QString::number(curveBuffer->tempInToDeg(avgTempOut),'g',2)+" 'C");
+    //int mvl = patientsModel->record(0).value("mvl").toDouble()*100/(curveBuffer->volToLtr(avgDO)*avgCHD);
+    int mvl = (curveBuffer->volToLtr(avgDO)*avgCHD)*100/patientsModel->record(0).value("mvl").toDouble();
     if(recordingStarted&&curveBuffer->end()>500)
         volWidget->MVL->setText(QString::number(mvl)+"%");
 }
@@ -823,8 +824,11 @@ void TSController::openExam(QModelIndex ind)
     curveBuffer->setValues(volume,tempin,tempout,list.count());
     curveBuffer->setVolumeColibration(record.value("volZero").toInt(),false);
 
-    curveBuffer->setVolumeConverts(record.value("volOut").toInt(),
-                                   record.value("volIn").toInt());
+    qDebug()<<"setVolumeConverts openExam "<<record.value("volOut").toInt()<<" "<<record.value("volIn").toInt();
+   /* curveBuffer->setVolumeConverts(record.value("volOut").toInt(),
+                                   record.value("volIn").toInt());*///перепутано
+    curveBuffer->setVolumeConverts(record.value("volIn").toInt(),
+                                   record.value("volOut").toInt());
     ui->startExam->setEnabled(false);
     ui->stopExam->setEnabled(false);
     ui->mainBox->setCurrentIndex(5);
@@ -1142,6 +1146,7 @@ void TSController::processDataParams(){
     qtw->setItem(6,1,getQTableWidgetItem((QString::number(InspirationFrequency))));
 
     BreathingVolume = ga->getBreathingVolume();
+    qDebug()<<"BreathingVolume"<<BreathingVolume;
     qtw->setItem(7,0,getQTableWidgetItem(tr("Дыхательный объем(л)")));
     qtw->setItem(7,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume)))));
 

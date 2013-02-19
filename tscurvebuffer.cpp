@@ -6,6 +6,7 @@
 TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     QObject(parent)
 {
+
     lenght=0;
     ts_end = -1;
     ts_monoInterval_in[0].end=0;
@@ -104,7 +105,8 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
             ga_vo->approximate();
             BreathingVolume = ga_vo->getBreathingVolume();
             InspirationFrequency = ga_vo->getFrequency();
-            ga_vo->clear();
+            qDebug()<<"BreathingVolume="<<BreathingVolume<<" InspirationFrequency="<<InspirationFrequency;
+            //ga_vo->clear();
             emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);
         }
     }
@@ -127,7 +129,8 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         {
             if(realtime){
                 ts_integral[ts_end] = 0.1*v + ts_integral[ts_end-1];
-                if( ts_end-maxc_v>1 && v>10){
+                //¬ќзможно это нужно заккоментировать раз мы используем клапана
+                /*if( ts_end-maxc_v>1 && v>10){
                     ts_integral[ts_end]=0;
                     //qDebug()<<"Oh shit, we should obrezat this verhushka.";
                     max_v=-10000;
@@ -138,7 +141,7 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
                         //qDebug()<<"Oh shit, we should obrezat this nizushka.";
                         min_v=10000;
                         minc_v=ts_end;
-                    }
+                    }*/
             }
             else
                 ts_integral[ts_end] = v;
@@ -280,6 +283,9 @@ QVector<int> TSCurveBuffer::volumeConverts(){
 
 float TSCurveBuffer::volToLtr(int vol)
 {
+    if (vol==0)
+        return 0;
+    qDebug()<<"vol="<<vol<<" ts_volumeNegConvert="<<ts_volumeNegConvert;
     if(vol<0)
     {
         return (float)vol/ts_volumeNegConvert;

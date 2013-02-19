@@ -56,8 +56,8 @@ void tsanalitics::approximate(){
                 vec.push_back(i);
             }else{
                 if(vec.size()>15){
-                    qDebug()<<"["<<vec.first()<<" "<<vec.last()<<"]="<<vec.size()<<" vol="<<ts_row_data->at(vec.last())<<" speed="
-                           <<ts_row_data->at(vec.last())/vec.size();
+                    /*qDebug()<<"["<<vec.first()<<" "<<vec.last()<<"]="<<vec.size()<<" vol="<<ts_row_data->at(vec.last())<<" speed="
+                           <<ts_row_data->at(vec.last())/vec.size();*/
                     vec.remove(0,vec.size());
                     vec.clear();
                 }
@@ -113,6 +113,31 @@ void tsanalitics::approximate(){
 
 int tsanalitics::getBreathingVolume(){
     //qDebug()<<"getBreathingVolume";
+    QVector<int> vec,spd;
+    int i=0,max=0,k=0;
+    for(i=0;i<ts_row_data->size();i++){
+        if ( abs(ts_row_data->at(i))>5){
+            vec.push_back(i);
+        }else{
+            if(vec.size()>15){
+                /*qDebug()<<"["<<vec.first()<<" "<<vec.last()<<"]="<<vec.size()<<" vol="<<ts_row_data->at(vec.last())<<" speed="
+                      <<ts_row_data->at(vec.last())/vec.size();*/
+                //spd.append(ts_row_data->at(vec.last())/vec.size());
+                max+=ts_row_data->at(vec.last());
+                //qDebug()<<"max="<<max<<" k="<<k;
+                k++;
+            }
+            vec.remove(0,vec.size());
+            vec.clear();
+        }
+    }
+    if (k>0){
+        return max/k;
+    }
+    else
+        return 1;
+    /*
+
     int sum=0,i=0;
     for (i=0;i<ts_exhls->size();i++){
         sum+=fabs(ts_exhls->at(i).vol);
@@ -120,7 +145,7 @@ int tsanalitics::getBreathingVolume(){
     if(ts_exhls->size()>0)
         return sum/ts_exhls->size();
     else
-        return 0;
+        return 0;*/
 }
 
 int tsanalitics::getAvgExpiratorySpeed(){
@@ -160,7 +185,6 @@ int tsanalitics::getMaxExpiratorySpeed(){
         if (abs(spd.at(i))>abs(max))
             max=spd.at(i);
     }
-    qDebug()<<"max"<<max;
     return max;
     /*  int i=0;
     float speed=0,max=-1000000;
@@ -190,21 +214,20 @@ void tsanalitics::clear(){
 }
 
 int tsanalitics::getMVL(){
-
-    QVector<int> vec,spd;
+    QVector<int> vec;
     int i=0,max=0;
     for(i=0;i<ts_row_data->size();i++){
         if ( abs(ts_row_data->at(i))>5){
             vec.push_back(i);
         }else{
-            if(vec.size()>0){
+            if(vec.size()>15){
                 //qDebug()<<"["<<vec.first()<<" "<<vec.last()<<"]="<<vec.size()<<" vol="<<ts_row_data->at(vec.last())<<" speed="
                 //       <<ts_row_data->at(vec.last())/vec.size();
-                spd.append(ts_row_data->at(vec.last())/vec.size());
-                max+=vec.last();
-                vec.remove(0,vec.size());
-                vec.clear();
+                //spd.append(ts_row_data->at(vec.last())/vec.size());
+                max+=ts_row_data->at(vec.last());
             }
+            vec.remove(0,vec.size());
+            vec.clear();
         }
     }
     return max;
