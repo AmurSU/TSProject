@@ -27,17 +27,14 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="workArea" stretch="10,1">
-      <property name="spacing">
-       <number>10</number>
-      </property>
+     <layout class="QGridLayout" name="workArea">
       <property name="sizeConstraint">
-       <enum>QLayout::SetNoConstraint</enum>
+       <enum>QLayout::SetDefaultConstraint</enum>
       </property>
       <property name="margin">
        <number>3</number>
       </property>
-      <item>
+      <item row="1" column="0">
        <widget class="QStackedWidget" name="mainBox">
         <property name="contextMenuPolicy">
          <enum>Qt::NoContextMenu</enum>
@@ -58,7 +55,7 @@
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>5</number>
         </property>
         <widget class="QWidget" name="start">
          <property name="styleSheet">
@@ -67,7 +64,7 @@
 	background-color: rgb(251, 255, 169);
 }</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout" rowstretch="3,1,1,1,1,1,1,1,5" columnstretch="1,1,1,1" columnminimumwidth="0,0,0,0">
+         <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0,0">
           <item row="4" column="1">
            <widget class="QPushButton" name="createButton">
             <property name="font">
@@ -89,7 +86,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Выберите если пацтент пришел впервые и ранее
+             <string>Выберите если пациент пришел впервые и ранее
 процедура не проводилась </string>
             </property>
            </widget>
@@ -98,6 +95,9 @@
            <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -112,6 +112,9 @@
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
               <width>40</width>
@@ -119,21 +122,6 @@
              </size>
             </property>
            </spacer>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="startLabel">
-            <property name="font">
-             <font>
-              <pointsize>20</pointsize>
-              <weight>75</weight>
-              <italic>false</italic>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Начало работы</string>
-            </property>
-           </widget>
           </item>
           <item row="6" column="1">
            <widget class="QPushButton" name="openButton">
@@ -179,6 +167,65 @@
             </property>
            </spacer>
           </item>
+          <item row="9" column="1">
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="7" column="2">
+           <spacer name="verticalSpacer_9">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="8" column="2">
+           <widget class="QLabel" name="openLabel_2">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <italic>true</italic>
+             </font>
+            </property>
+            <property name="text">
+             <string>Выход из программы</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QPushButton" name="closeButton_2">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Выход</string>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="2">
            <spacer name="verticalSpacer_4">
             <property name="orientation">
@@ -200,26 +247,31 @@
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>40</height>
+              <height>20</height>
              </size>
             </property>
            </spacer>
           </item>
-          <item row="8" column="1">
-           <spacer name="verticalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
+          <item row="1" column="2">
+           <widget class="QLabel" name="startLabel">
+            <property name="font">
+             <font>
+              <pointsize>20</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
+            <property name="text">
+             <string>Начало работы</string>
             </property>
-           </spacer>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -567,7 +619,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Для обзора имеющихся исследований пациента, или созданий нового исследования,
+             <string>Для обзора имеющихся исследований пациента, или создания нового исследования,
 ввыберите имя пациента из списка и дважды кликните на нем.
 
 ФИО пациента или его ID номер</string>
@@ -980,7 +1032,7 @@ p, li { white-space: pre-wrap; }
         </widget>
        </widget>
       </item>
-      <item>
+      <item row="1" column="1">
        <widget class="QFrame" name="managmentBox">
         <property name="enabled">
          <bool>false</bool>
@@ -1235,6 +1287,35 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </item>
+      <item row="0" column="0">
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>2</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="1">
+       <spacer name="managmentSpaser">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>2</width>
+          <height>2</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
      </layout>
     </item>
    </layout>
@@ -1268,7 +1349,24 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>closeButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>TSView</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>113</x>
+     <y>439</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
  <slots>
   <slot>f1()</slot>
  </slots>

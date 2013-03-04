@@ -316,7 +316,7 @@ void TSController::calibrateVolume(){
     QSettings settings("settings.ini",QSettings::IniFormat);
     QDialog d(this);
     Ui::TSProgressDialog dui;
-    d.setWindowFlags(Qt::SubWindow);
+    //d.setWindowFlags(Qt::SubWindow);
     dui.setupUi(&d);
 
             //controller->setWindowFlags(Qt::WindowTitleHint | Qt::WindowMinimizeButtonHint|Qt::SubWindow);
@@ -390,8 +390,10 @@ void TSController::rejectColibration()
     curveBuffer->setVolumeConverts(settings.value("volInLtr").toInt(),
                                    settings.value("volOutLtr").toInt());
     ui->mainBox->setCurrentIndex(5);
+    curveBuffer->setEnd(0);
     initPaintDevices();
     plotNow();
+    ui->managmentSpaser->setGeometry(QRect(0,0,350,2));
     ui->managmentBox->setVisible(true);
     ui->managmentBox->setEnabled(true);
 
@@ -574,10 +576,12 @@ void TSController::plotCalibration(){
         dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
         if(d.exec()==1){
             ui->mainBox->setCurrentIndex(5);
+            ui->managmentSpaser->setGeometry(QRect(0,0,350,2));
             ui->managmentBox->setVisible(true);
             ui->managmentBox->setEnabled(true);
             ui->startExam->setEnabled(true);
             ui->stopExam->setEnabled(true);
+            curveBuffer->setEnd(0);
             initPaintDevices();
             plotNow();
         }
@@ -841,6 +845,7 @@ void TSController::openExam(QModelIndex ind)
     tempOutScaleRate = 1.0/5000;
     volumeScaleRate = 4.0/5000;
     horizontalStep = 1.0;
+    ui->managmentSpaser->setGeometry(QRect(0,0,350,2));
     ui->managmentBox->setVisible(true);
     ui->managmentBox->setEnabled(true);
     plotNow();
@@ -1023,11 +1028,13 @@ bool TSController::eventFilter(QObject *obj, QEvent *e)
     {
         if(!openUser){
             ui->mainBox->setCurrentIndex(4);
+            ui->managmentSpaser->setGeometry(QRect(0,0,2,2));
             ui->managmentBox->setVisible(false);
         }
         else{
             qDebug()<<examinationsModel->filter();
             ui->mainBox->setCurrentIndex(3);
+            ui->managmentSpaser->setGeometry(QRect(0,0,2,2));
             ui->managmentBox->setVisible(false);
         }
         curveBuffer->clean();
@@ -1090,7 +1097,7 @@ void TSController::processDataParams(){
     qDebug()<<"this is result button !";
     QTableWidget *qtw = ui->resultsTable;
     qtw->setColumnCount(2);
-    qtw->setRowCount(11);
+    qtw->setRowCount(12);
     qtw->verticalHeader()->setVisible(false);
     qtw->setHorizontalHeaderLabels(QString(tr("Параметр;Значение")).split(";"));
     qtw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
@@ -1150,24 +1157,28 @@ void TSController::processDataParams(){
     qtw->setItem(7,0,getQTableWidgetItem(tr("Дыхательный объем(л)")));
     qtw->setItem(7,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume)))));
 
+
+    qtw->setItem(8,0,getQTableWidgetItem(tr("Минутная вентиляция легких(л)")));
+    qtw->setItem(8,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume))*InspirationFrequency)));
+
     MVL = ga->getMVL();
-    qtw->setItem(8,0,getQTableWidgetItem(tr("Максимальная вентиляция легких(л)")));
-    qtw->setItem(8,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MVL)))));
+    qtw->setItem(9,0,getQTableWidgetItem(tr("Полная вентиляция легких(л)")));
+    qtw->setItem(9,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MVL)))));
 
     ga->clear();
 
     AvgTempIn = gai->getMinAvgs();
-    qtw->setItem(9,0,getQTableWidgetItem(tr("Средняя температура вдоха( 'C)")));
-    qtw->setItem(9,1,getQTableWidgetItem(QString::number(curveBuffer->tempInToDeg(AvgTempIn))));
+    qtw->setItem(10,0,getQTableWidgetItem(tr("Средняя температура вдоха( 'C)")));
+    qtw->setItem(10,1,getQTableWidgetItem(QString::number(curveBuffer->tempInToDeg(AvgTempIn))));
     gai->clear();
 
     AvgTempOut = gao->getMaxAvgs();
-    qtw->setItem(10,0,getQTableWidgetItem(tr("Средняя температура выдоха( 'C)")));
-    qtw->setItem(10,1,getQTableWidgetItem(QString::number(curveBuffer->tempOutToDeg(AvgTempOut))));
+    qtw->setItem(11,0,getQTableWidgetItem(tr("Средняя температура выдоха( 'C)")));
+    qtw->setItem(11,1,getQTableWidgetItem(QString::number(curveBuffer->tempOutToDeg(AvgTempOut))));
 
     AvgTempInMinusAvgTempOut = AvgTempOut-AvgTempIn;
-    qtw->setItem(11,0,getQTableWidgetItem(tr("Средняя Твдоха-Средняя Твыдоха( 'C)")));
-    qtw->setItem(11,1,getQTableWidgetItem(curveBuffer->tempOutToDeg(AvgTempOut)-curveBuffer->tempInToDeg(AvgTempIn)));
+    qtw->setItem(12,0,getQTableWidgetItem(tr("Средняя Твдоха-Средняя Твыдоха( 'C)")));
+    qtw->setItem(12,1,getQTableWidgetItem(curveBuffer->tempOutToDeg(AvgTempOut)-curveBuffer->tempInToDeg(AvgTempIn)));
     qtw->removeRow(0);
 
     qtw->show();
