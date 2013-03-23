@@ -312,6 +312,7 @@ int TSCurveBuffer::getLenght()
 }
 
 void TSCurveBuffer::clean(){
+    setEnd(0);
     ts_end=0;
     lenght=0;
     ga_it->clear();

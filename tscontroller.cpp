@@ -177,7 +177,7 @@ void TSController::savePatientProfile()
     qDebug()<<"TSController::savePatientProfile";
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("Ошибка"));
-    msgBox.setText(tr("Неправельный ввод данных."));
+    msgBox.setText(tr("Неправильный ввод данных."));
     QSqlRecord record;
     record = patientsModel->record();
     record.setValue("sname",ui->sName->text().toUpper());
@@ -320,7 +320,7 @@ void TSController::calibrateVolume(){
     dui.setupUi(&d);
 
             //controller->setWindowFlags(Qt::WindowTitleHint | Qt::WindowMinimizeButtonHint|Qt::SubWindow);
-    d.setWindowTitle(tr("Предепреждение"));
+    d.setWindowTitle(tr("Предупреждение"));
     dui.information->setText(tr("Идет подготовка..."));
     dui.acceptButton->setVisible(false);
 
@@ -391,6 +391,8 @@ void TSController::rejectColibration()
                                    settings.value("volOutLtr").toInt());
     ui->mainBox->setCurrentIndex(5);
     curveBuffer->setEnd(0);
+    ui->startExam->setEnabled(true);
+    ui->stopExam->setEnabled(true);
     initPaintDevices();
     plotNow();
     ui->managmentSpaser->setGeometry(QRect(0,0,350,2));
@@ -526,7 +528,13 @@ void TSController::plotCalibration(){
         for(i=10;i<cW;i+=10){
             pcVolume.drawLine(i,0,i,cH);
         }
-        float K = (float)h/2000;
+        if(endIndex>50){
+            for(int i=endIndex-50;i<endIndex;i++){
+                if(abs(volume[i])>maxcVol) maxcVol = abs(volume[i]);
+            }
+        }
+
+        float K = (float)(h-10)/maxcVol;
         step = ceil((float)1200/cW);
         pcVolume.setPen(QColor(0,0,0));
         int j=0;
@@ -585,11 +593,14 @@ void TSController::plotCalibration(){
             initPaintDevices();
             plotNow();
         }
+        curveBuffer->setEnd(0);
+        maxcVol = 0;
     }
 }
 
 void TSController::startExam()
 {
+    curveBuffer->clean();
     //qDebug()<<"TSController::startExam";
     _reader = new TSUsbDataReader();
     _thread = new QThread();
@@ -784,7 +795,8 @@ void TSController::completePatientId()
 void TSController::scrollGraphics(int value)
 {
     // qDebug()<<"TSController::scrollGraphics";
-    curveBuffer->setEnd(W-35+value*horizontalStep*10);
+    if(curveBuffer->end() != 0)
+        curveBuffer->setEnd(W-35+value*horizontalStep*10);
     plotNow();
 }
 
@@ -801,6 +813,7 @@ void TSController::createNewExam()
     curveBuffer->clean();
     curveBuffer->setEnd(0);
     curveBuffer->setLenght(0);
+    maxcVol = 0;
     plotCalibration();
 }
 
@@ -1162,7 +1175,7 @@ void TSController::processDataParams(){
     qtw->setItem(8,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume))*InspirationFrequency)));
 
     MVL = ga->getMVL();
-    qtw->setItem(9,0,getQTableWidgetItem(tr("Полная вентиляция легких(л)")));
+    qtw->setItem(9,0,getQTableWidgetItem(tr("Суммарная вентиляция легких(л)")));
     qtw->setItem(9,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MVL)))));
 
     ga->clear();

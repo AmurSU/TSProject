@@ -22,7 +22,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Термоспрометр</string>
+   <string>Термоспирометрия</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -73,7 +73,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Новый пациент</string>
+             <string>Новый Пациент</string>
             </property>
            </widget>
           </item>
@@ -86,7 +86,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Выберите если пациент пришел впервые и ранее
+             <string>Выберите если пациент пришел впервые или ранее
 процедура не проводилась </string>
             </property>
            </widget>
@@ -133,7 +133,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Выбрать пациента</string>
+             <string>Выбрать Пациента</string>
             </property>
            </widget>
           </item>
@@ -146,7 +146,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Выберите если пациент пришел повторно и ранее
+             <string>Выберите если пациент пришел повторно или ранее
 процедура проводилась </string>
             </property>
            </widget>
@@ -620,7 +620,7 @@
             </property>
             <property name="text">
              <string>Для обзора имеющихся исследований пациента, или создания нового исследования,
-ввыберите имя пациента из списка и дважды кликните на нем.
+выберите имя пациента из списка и дважды кликните на нем.
 
 ФИО пациента или его ID номер</string>
             </property>

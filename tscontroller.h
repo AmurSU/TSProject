@@ -122,6 +122,7 @@ private:
     int* tempOutInterval;
     float tempOutAdaptive;
     float volumeAdaptive;
+    int maxcVol;
     //Тред для чтения
     TSReaderThread *readerThread;
     //модели
