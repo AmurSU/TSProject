@@ -1,15 +1,19 @@
 #include "tsanalitics.h"
 #include <QDebug>
 tsanalitics::tsanalitics(QObject *parent) :QObject(parent){
-    //qDebug()<<"tsanalitics";
-    QVector<extremum> *extrem = new QVector<extremum>;
-    ts_extremums=extrem;
-    QVector<int> *row_d = new QVector<int>;
-    ts_row_data = row_d;
-    QVector<extremum> *v_extrem = new QVector<extremum>;
-    ts_vol_exts=v_extrem;
-    QVector<exhalation> *exhls = new QVector<exhalation>;
-    ts_exhls=exhls;
+    ts_extremums = new QVector<extremum>;
+    ts_row_data = new QVector<int>;
+    ts_vol_exts = new QVector<extremum>;
+    ts_exhls = new QVector<exhalation>;
+    qDebug()<<"Analitic is init";
+}
+
+tsanalitics::~tsanalitics()
+{
+    delete ts_extremums;
+    delete ts_vol_exts;
+    delete ts_exhls;
+    delete ts_row_data;
 }
 float tsanalitics::getFrequency(){
     //qDebug()<<"getFrequency";
@@ -36,7 +40,7 @@ int tsanalitics::getAvgExpiratoryTime(){
 
 int tsanalitics::setupData(QVector<int> *row_d){
     //qDebug()<<"setupData";
-    ts_row_data=row_d;
+    ts_row_data = row_d;
 }
 
 void tsanalitics::approximate(){
@@ -197,8 +201,19 @@ int tsanalitics::getMaxExpiratorySpeed(){
 }
 
 void tsanalitics::append(int n){
-    ////qDebug()<<"append";
-    ts_row_data->push_back(n);
+    qDebug()<<"append "<<n;
+    int k = n;
+    try{
+        //n= ts_row_data->size();
+        //ts_row_data[n] = k;
+        ts_row_data->append(10);
+        //ts_row_data->push_back(k);
+    }
+    catch(...){
+        qDebug()<<"Push bach error";
+    }
+
+    qDebug()<<"End appending";
 }
 
 void tsanalitics::clear(){

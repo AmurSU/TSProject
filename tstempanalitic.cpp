@@ -1,10 +1,13 @@
 #include "tstempanalitic.h"
 #include <QDebug>
 tstempanalitic::tstempanalitic(QObject *parent) :QObject(parent){
-    QVector<extremum> *extrem = new QVector<extremum>;
-    ts_extremums=extrem;
-    QVector<int> *row_d = new QVector<int>;
-    ts_row_data = row_d;
+    ts_extremums = new QVector<extremum>;
+    ts_row_data = new QVector<int>;
+}
+
+tstempanalitic::~tstempanalitic(){
+    delete ts_extremums;
+    delete ts_row_data;
 }
 
 int tstempanalitic::getMaxAvgs(){

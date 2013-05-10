@@ -23,6 +23,11 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
     ga_it = new tstempanalitic();
     ga_ot = new tstempanalitic();
     ga_vo = new tsanalitics();
+    rcalc = new tsrealcalc();
+}
+
+TSCurveBuffer::~TSCurveBuffer(){
+    //delete rcalc;
 }
 
 int TSCurveBuffer::end()
@@ -75,23 +80,42 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         if(tO<=ts_minTempOut) ts_minTempOut=tO;
         if(tO>ts_maxTempOut) ts_maxTempOut=tO;
     }
-    ga_it->append(ts_tempIn[ts_end-1]);
+    /*ga_it->append(ts_tempIn[ts_end-1]);
     ga_ot->append(ts_tempOut[ts_end-1]);
     ga_vo->append(ts_integral[ts_end-1]);
-    if(realtime){
-        int num=800;
-        if(ts_end%num==0){
+*/
+    //if(realtime){
+    //qDebug()<<"wtf";
+        int num=300;
 
-            //TSUsbDataReader *reader = new TSUsbDataReader();
-           /* QThread *thread = new QThread();
+    /*    if (ts_end-2>0){
+            qDebug()<<"ts_end-1="<<ts_end-1<<ts_tempIn[ts_end-1]<<" "<<ts_tempOut[ts_end-1]<<" "<<ts_integral[ts_end-1];
+            rcalc->append(ts_tempIn[ts_end-1],ts_tempOut[ts_end-1],ts_integral[ts_end-1]);
+        }*/
+        if(ts_end%num==0 && ts_end-1>0){
+            ;
+           // rcalc->process();
+            /*TSUsbDataReader *reader = new TSUsbDataReader();
+            QThread *thread = new QThread();
             connect(thread,SIGNAL(started()),reader,SLOT(doWork()));
             connect(reader,SIGNAL(done()),&d,SLOT(accept()));
             connect(reader,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
             reader->setBuffer(curveBuffer);
             reader->setReadingType(ReadForVolZer);
             reader->moveToThread(thread);
-            thread->start();
-            */
+            thread->start();*/
+
+         /*   qDebug()<<"Start count temp";
+            QThread* trd = new QThread();
+
+            rcalc->moveToThread(trd);
+            connect(trd,SIGNAL(started()),rcalc,SLOT(process()));
+            connect(rcalc,SIGNAL(updateAverageData(int,int,int,int)),this,SLOT(updateAvData(int,int,int,int)));
+            connect(rcalc,SIGNAL(finished()),trd,SLOT(quit()));
+            connect(rcalc,SIGNAL(finished()),rcalc,SLOT(deleteLater()));
+            connect(trd,SIGNAL(finished()),trd,SLOT(deleteLater()));
+            trd->start();**/
+/*
             ga_it->findExtremums();
             ga_it->deleteBadExtremums();
             AvgTempIn = ga_it->getMinAvgs();
@@ -107,9 +131,9 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
             InspirationFrequency = ga_vo->getFrequency();
             qDebug()<<"BreathingVolume="<<BreathingVolume<<" InspirationFrequency="<<InspirationFrequency;
             //ga_vo->clear();
-            emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);
+            emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);*/
         }
-    }
+    //}
     v -= ts_volumeColibration;
     CurvesSegnments segs;
     if(ts_end>0)
@@ -338,4 +362,8 @@ int TSCurveBuffer::setReference(QSettings *set)
 }
 void TSCurveBuffer::setLenght(int l){
     lenght=l;
+}
+
+void TSCurveBuffer::updateAvData(int avgTempIn, int avgTempOut, int avgDo, int ChD){
+    emit updateAverageData(avgTempIn,avgTempOut,avgDo,ChD);
 }

@@ -13,6 +13,7 @@ class tsanalitics : public QObject
     Q_OBJECT
 public:
     explicit tsanalitics(QObject *parent = 0);
+    ~tsanalitics();
     QVector<int> getMovingAverages(int Period);
     int getMaxAvgs();
     int getMinAvgs();

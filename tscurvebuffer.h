@@ -9,6 +9,8 @@
 #include <QVector>
 #include <tsanalitics.h>
 #include <tstempanalitic.h>
+#include <QThread>
+#include "tsrealcalc.h"
 using namespace std;
 
 #define VOLTAGE_RATE    0.61
@@ -34,6 +36,7 @@ class TSCurveBuffer : public QObject
     Q_OBJECT
 public:
     explicit TSCurveBuffer(QObject *parent = 0);
+    ~TSCurveBuffer();
     int end();
     CurvesSegnments lastSegments();
     int* tempIn();
@@ -70,7 +73,9 @@ signals:
     void overflowed();
     void updateAverageData(int avgTempIn, int avgTempOut, int avgDo, int ChD);
 public slots:
+    void updateAvData(int avgTempIn, int avgTempOut, int avgDo, int ChD);
 private:
+    tsrealcalc* rcalc;
     int ts_volume[18000];
     int ts_tempIn[18000];
     int ts_tempOut[18000];

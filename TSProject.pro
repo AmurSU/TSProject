@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     tsanalitics.cpp \
     inputs/tstableview.cpp \
     tstempanalitic.cpp \
-    tsusbdatareader.cpp
+    tsusbdatareader.cpp \
+    tsrealcalc.cpp
 
 HEADERS  += \
     tsmodel.h \
@@ -47,7 +48,8 @@ HEADERS  += \
     ui_tsprintview.h \
     tstempanalitic.h \
     extremum.h \
-    tsusbdatareader.h
+    tsusbdatareader.h \
+    tsrealcalc.h
 
 LIBS += -L"dll/*.dll"
 FORMS    += \

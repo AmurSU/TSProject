@@ -1193,7 +1193,9 @@ void TSController::processDataParams(){
     qtw->setItem(12,0,getQTableWidgetItem(tr("—редн€€ “вдоха-—редн€€ “выдоха( 'C)")));
     qtw->setItem(12,1,getQTableWidgetItem(curveBuffer->tempOutToDeg(AvgTempOut)-curveBuffer->tempInToDeg(AvgTempIn)));
     qtw->removeRow(0);
-
+    delete gai;
+    delete ga;
+    delete gao;
     qtw->show();
 }
 

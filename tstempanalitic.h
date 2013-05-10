@@ -8,6 +8,7 @@ class tstempanalitic : public QObject
     Q_OBJECT
 public:
     explicit tstempanalitic(QObject *parent = 0);
+    ~tstempanalitic();
     int setupData(QVector<int> *row_d);
     void append(int n);
     int findExtremums();
