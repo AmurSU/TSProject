@@ -27,7 +27,10 @@ TSCurveBuffer::TSCurveBuffer(QObject *parent) :
 }
 
 TSCurveBuffer::~TSCurveBuffer(){
-    //delete rcalc;
+    delete rcalc;
+    delete ga_it;
+    delete ga_ot;
+    delete ga_vo;
 }
 
 int TSCurveBuffer::end()
@@ -80,18 +83,18 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime)
         if(tO<=ts_minTempOut) ts_minTempOut=tO;
         if(tO>ts_maxTempOut) ts_maxTempOut=tO;
     }
-    /*ga_it->append(ts_tempIn[ts_end-1]);
+    ga_it->append(ts_tempIn[ts_end-1]);
     ga_ot->append(ts_tempOut[ts_end-1]);
     ga_vo->append(ts_integral[ts_end-1]);
-*/
+
     //if(realtime){
     //qDebug()<<"wtf";
         int num=300;
 
-    /*    if (ts_end-2>0){
+        if (ts_end-4>0){
             qDebug()<<"ts_end-1="<<ts_end-1<<ts_tempIn[ts_end-1]<<" "<<ts_tempOut[ts_end-1]<<" "<<ts_integral[ts_end-1];
-            rcalc->append(ts_tempIn[ts_end-1],ts_tempOut[ts_end-1],ts_integral[ts_end-1]);
-        }*/
+            //rcalc->append(ts_tempIn[ts_end-1],ts_tempOut[ts_end-1],ts_integral[ts_end-1]);
+        }
         if(ts_end%num==0 && ts_end-1>0){
             ;
            // rcalc->process();
