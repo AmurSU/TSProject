@@ -40,3 +40,7 @@ desktop.ini
 # Editors temporary files 
 *~
 *.db
+vc100.pdb
+TSProject.pro.user.*
+out.csv
+volume.csv

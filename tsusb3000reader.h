@@ -39,7 +39,7 @@ private:
     RTUSB3000::FLASH fi; // структура информации в ППЗУ модуля
     RTUSB3000::INPUT_PARS ip; // структура параметров работы АЦП
     const static WORD CHANNELS_QUANTITY = 0x4; // кол-во опрашиваемых каналов модуля
-    const static double ReadRate = 1.0; // частота  ввода данных
+    double ReadRate; // частота  ввода данных
     const static WORD MaxVirtualSoltsQuantity = 4;
     SHORT AdcBuffer[CHANNELS_QUANTITY]; // буфер данных для кадра отсчётов
 signals:

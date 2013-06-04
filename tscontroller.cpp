@@ -1166,7 +1166,6 @@ void TSController::processDataParams(){
     qtw->setItem(6,1,getQTableWidgetItem((QString::number(InspirationFrequency))));
 
     BreathingVolume = ga->getBreathingVolume();
-    qDebug()<<"BreathingVolume"<<BreathingVolume;
     qtw->setItem(7,0,getQTableWidgetItem(tr("ƒыхательный объем(л)")));
     qtw->setItem(7,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume)))));
 

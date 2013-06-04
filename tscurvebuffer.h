@@ -3,14 +3,13 @@
 
 #include <QObject>
 #include <QColor>
-#include <fstream>
 #include <QSettings>
 #include <tsanalitics.h>
 #include <QVector>
 #include <tsanalitics.h>
 #include <tstempanalitic.h>
 #include <QThread>
-#include "tsrealcalc.h"
+#include "tsrealcalcwrapper.h"
 using namespace std;
 
 #define VOLTAGE_RATE    0.61
@@ -26,13 +25,7 @@ struct CurvesSegnments
     int curTin,prevTin;
     int curTout,prevTout;
 };
-struct MonotonicityInterval
-{
-    int start,end,znak;
-};
-
-class TSCurveBuffer : public QObject
-{
+class TSCurveBuffer : public QObject{
     Q_OBJECT
 public:
     explicit TSCurveBuffer(QObject *parent = 0);
@@ -60,14 +53,13 @@ public:
     int setReference(QSettings *set);
     float tempInToDeg(int temp);
     float tempOutToDeg(int temp);
-    FILE* out_file;
+    int getLenght();
+    void clean();
+    void setLenght(int l);
     QColor volColor;
     QColor tinColor;
     QColor toutColor;
-    int getLenght();
     int lenght;
-    void clean();
-    void setLenght(int l);
 signals:
     void changed(CurvesSegnments s);
     void overflowed();
@@ -84,14 +76,10 @@ private:
     int ts_volumeColibration;
     int ts_screenLimit;
     int ts_startIndex;
-    MonotonicityInterval ts_monoInterval_in[1000];
     int ts_mi_in_cnt;
-    MonotonicityInterval ts_monoInterval_out[1000];
     int ts_mi_out_cnt;
     int ts_check;
-    void findLevels();
     int max_v,maxc_v,min_v,minc_v;
-
     int ts_minTempIn;
     int ts_maxTempIn;
     int ts_minTempOut;
@@ -105,13 +93,8 @@ private:
     int ts_tempInVolt;
     int ts_tempOutVolt;
     int ts_refTemp;
-    ofstream volfile;
-    int AvgTempIn,AvgTempOut,InspirationFrequency,BreathingVolume;
-    tstempanalitic *ga_it, *ga_ot;
-    tsanalitics *ga_vo;
-    int bv,bvo,dbv;
     QVector<int> BreathVolumes;
-
+    tsRealCalcWrapper paramcalc;
 };
 
 #endif // TSCURVEBUFFER_H

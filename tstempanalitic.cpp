@@ -84,6 +84,7 @@ int tstempanalitic::getMaxMinAvgTime(){
 
 int tstempanalitic::setupData(QVector<int> *row_d){
     ts_row_data=row_d;
+    return ts_row_data->size();
 }
 
 int tstempanalitic::findExtremums(){
@@ -105,20 +106,14 @@ int tstempanalitic::findExtremums(){
             ts_extremums->push_back(*extr);
         }
     }
+    return 0;
 }
 
 int tstempanalitic::deleteBadExtremums(){
     int i=0;
     int cntextr=ts_extremums->size();
-    //    qDebug()<<"Bilo";
-    //    printExtremums();
     deleteEqualSignExtremums();
-    //    qDebug()<<"deleteEqualSignExtremums";
-    //    printExtremums();
     deletePatternLightningExtremums();
-    //    qDebug()<<"deletePatternLightningExtremums";
-    //    printExtremums();
-    //    qDebug()<<"No name";
     for (i=0;i<ts_extremums->size()-1;i++){
         if(ts_extremums->at(i+1).x-ts_extremums->at(i).x <50 && fabs(ts_extremums->at(i+1).y-ts_extremums->at(i).y)<600 ){
             if(ts_extremums->at(i).type==1 && ts_extremums->at(i+1).type==1){
@@ -140,17 +135,7 @@ int tstempanalitic::deleteBadExtremums(){
             }
         }
     }
-    //    printExtremums();
     deleteSimilarInMeaningExtremums();
-    //    qDebug()<<"deleteSimilarInMeaningExtremums";
-    //    printExtremums();
-    //    qDebug()<<"end";
-    /* FILE *out;
-    out = fopen("out.csv","w");
-    for(i=0;i<ts_extremums->size();i++){
-        fprintf(out,"%d\n",ts_extremums->at(i).y);
-    }
-    fclose(out);*/
     if(ts_extremums->size()!=cntextr){
         return -1;
     }
@@ -178,6 +163,7 @@ int tstempanalitic::deleteBadExtremumsVolume()
         }
     }
     //printExtremums();
+    return 0;
 }
 
 void tstempanalitic::append(int n){

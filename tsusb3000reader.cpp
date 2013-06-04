@@ -3,6 +3,7 @@
 TSUsb3000Reader::TSUsb3000Reader(QObject *parent) :
     QObject(parent)
 {
+    ReadRate = 1;
 }
 bool TSUsb3000Reader::initDevice(TSCurveBuffer *_bf){
     buffer=_bf;

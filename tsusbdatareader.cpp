@@ -4,6 +4,7 @@
 TSUsbDataReader::TSUsbDataReader(QObject *parent) :
     QObject(parent)
 {
+    ReadRate = 1.0;
 }
 
 TSUsbDataReader::~TSUsbDataReader()

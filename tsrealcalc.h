@@ -6,8 +6,7 @@
 #include "tsanalitics.h"
 #include <QDebug>
 
-class tsrealcalc : public QObject
-{
+class tsrealcalc : public QObject{
     Q_OBJECT
 public:
     explicit tsrealcalc(QObject *parent = 0);
@@ -19,8 +18,8 @@ signals:
     void finished();
     void updateAverageData(int avgTempIn, int avgTempOut, int avgDo, int ChD);
 private:
-    tstempanalitic *ga_it, *ga_ot;
-    tsanalitics *ga_vo;
+    tstempanalitic ga_it, ga_ot;
+    tsanalitics ga_vo;
 };
 
 #endif // TSREALCALC_H
