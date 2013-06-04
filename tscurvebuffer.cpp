@@ -95,14 +95,15 @@ void TSCurveBuffer::append(int v, int tI, int tO, bool realtime){
     ts_tempIn[ts_end] = segs.curTin = tI;
     ts_tempOut[ts_end] = segs.curTout = tO;
     emit changed(segs);
-    /*if(realtime){
+    if(realtime){
         if ( ts_end > 0 ){
             paramcalc.addData(ts_tempIn[ts_end], ts_tempOut[ts_end], ts_volume[ts_end]);
-            if ( ts_end%100 == 0 )
+            if ( ts_end%50 == 0 ){
                 emit updateAverageData(paramcalc.getAvgTempIn(),paramcalc.getAvgTempOut(),paramcalc.getAvgInspirationVolume(),paramcalc.getInspirationFreqency());
-            //qDebug()<<"(paramcalc.getAvgTempIn()"<<paramcalc.getAvgTempIn()<<" paramcalc.getAvgTempOut()"<<paramcalc.getAvgTempOut()<<" paramcalc.getAvgInspirationVolume()"<<paramcalc.getAvgInspirationVolume();
+                qDebug()<<"(paramcalc.getAvgTempIn()"<<paramcalc.getAvgTempIn()<<" paramcalc.getAvgTempOut()"<<paramcalc.getAvgTempOut()<<" paramcalc.getAvgInspirationVolume()"<<paramcalc.getAvgInspirationVolume();
+            }
         }
-    }*/
+    }
     ts_end++;
 }
 

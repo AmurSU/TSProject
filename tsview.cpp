@@ -128,8 +128,8 @@ void TSView::showNewResearchDialog(TSPatientProfileModel *model)
     patientProfileUi->inameEdit->bindWithString(&model->iname);
     patientProfileUi->ageEdit->bindWithString(&model->age);
     QStringList list;
-    list.append(tr("РњСѓР¶СЃРєРѕР№"));
-    list.append(tr("Р–РµРЅСЃРєРёР№"));
+    list.append(tr("Мужской"));
+    list.append(tr("Женский"));
     patientProfileUi->genderComboBox->clear();
     patientProfileUi->genderComboBox->addItems(list);
     patientProfileUi->genderComboBox->bindWithString(&model->gender);
@@ -149,8 +149,8 @@ void TSView::showEditPatientProfileDialog(TSPatientProfileModel *model)
     patientProfileUi->inameEdit->bindWithString(&model->iname);
     patientProfileUi->ageEdit->bindWithString(&model->age);
     QStringList list;
-    list.append(tr("РњСѓР¶СЃРєРѕР№"));
-    list.append(tr("Р–РµРЅСЃРєРёР№"));
+    list.append(tr("Мужской"));
+    list.append(tr("Женский"));
     patientProfileUi->genderComboBox->clear();
     patientProfileUi->genderComboBox->addItems(list);
     patientProfileUi->genderComboBox->bindWithString(&model->gender);
@@ -221,7 +221,7 @@ void TSView::showModelMessage(QString mess)
 {
     message.setStandardButtons(QMessageBox::NoButton);
     message.setText(mess);
-    message.setWindowTitle(tr("РЎРѕРѕР±С‰РµРЅРёРµ"));
+    message.setWindowTitle(tr("Сообщение"));
     message.show();
 }
 

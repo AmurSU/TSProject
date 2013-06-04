@@ -87,7 +87,7 @@ private:
     QRegExp nameRegExp;
     QRegExp intRegExp;
     bool openUser;
-    //Р’СЃРµ РґР»СЏ СЂРёСЃРѕРІР°РЅРёСЏ
+    //Все для рисования
     TSCurveBuffer* curveBuffer;
     QTimer plotingTimer;
     QTimer cPlotingTimer;
@@ -122,9 +122,9 @@ private:
     float tempOutAdaptive;
     float volumeAdaptive;
     int maxcVol;
-    //РўСЂРµРґ РґР»СЏ С‡С‚РµРЅРёСЏ
+    //Тред для чтения
     TSReaderThread *readerThread;
-    //РјРѕРґРµР»Рё
+    //модели
     TSPatients *patientsModel;
     TSExaminations *examinationsModel;
     QSqlDatabase patientsConnection;

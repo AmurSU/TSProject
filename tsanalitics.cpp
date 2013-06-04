@@ -78,12 +78,12 @@ void tsanalitics::approximate(){
                 }
             }
         }
-        for(i=0;i<ts_vol_exts->size();i++){//–æ—Ç—Å–µ–∏–≤–∞–µ–º –º–µ–ª–∫–∏–µ –∫–æ–ª–µ–±–∞–Ω–∏—è
+        for(i=0;i<ts_vol_exts->size();i++){//ÓÚÒÂË‚‡ÂÏ ÏÂÎÍËÂ ÍÓÎÂ·‡ÌËˇ
             if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i).y>-20){
                 ts_vol_exts->remove(i,1);
             }
         }
-        for(i=0;i<ts_vol_exts->size()-1;i++){//—É–±–∏—Ä–∞–µ–º –¥–≤–æ–π–Ω—ã–µ –Ω—É–ª–∏
+        for(i=0;i<ts_vol_exts->size()-1;i++){//Û·Ë‡ÂÏ ‰‚ÓÈÌ˚Â ÌÛÎË
             if(ts_vol_exts->at(i).y==0 && ts_vol_exts->at(i+1).y==0){
                 ts_vol_exts->remove(i,1);
                 if (i>0)

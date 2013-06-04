@@ -52,6 +52,6 @@ void tsRealCalcWrapper::calc(){
 void tsRealCalcWrapper::getAverageData(int avgTempIn, int avgTempOut, int avgDo, int inspFreq){
     AvgTempIn = avgTempIn;
     AvgTempOut = avgTempOut;
-    AvgDo = avgDo;
-    InspFreq = inspFreq;
+    AvgDo = abs(avgDo);
+    InspFreq = abs(inspFreq);
 }

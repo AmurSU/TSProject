@@ -66,8 +66,8 @@ TSController::TSController(QWidget *parent) :
     if(!patientsConnection.open())
     {
         QMessageBox msgBox(this);
-        msgBox.setWindowTitle(tr("ÐžÑˆÐ¸Ð±ÐºÐ°"));
-        msgBox.setText(tr("ÐŸÑ€Ð¾Ð¸Ð·Ð¾ÑˆÐ»Ð° Ð¾ÑˆÐ¸Ð±ÐºÐ°.\nÐžÐ±Ñ€Ð°Ñ‚Ð¸Ñ‚ÐµÑÑŒ Ðº Ñ€Ð°Ð·Ñ€Ð°Ð±Ð¾Ñ‚Ñ‡Ð¸ÐºÐ°Ð¼.\nÐšÐ¾Ð´: 00001.\nÐŸÑ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ð° Ð±ÑƒÐ´ÐµÑ‚ Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð°."));
+        msgBox.setWindowTitle(tr("Îøèáêà"));
+        msgBox.setText(tr("Ïðîèçîøëà îøèáêà.\nÎáðàòèòåñü ê ðàçðàáîò÷èêàì.\nÊîä: 00001.\nÏðîãðàììà áóäåò çàâåðøåíà."));
         msgBox.exec();
         QApplication::exit(0);
     }
@@ -159,7 +159,7 @@ void TSController::editPatientProfile()
         QStringList d = record.value("birth_date").toString().split("-");
         QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
         ui->date->setText(date);
-        if(record.value("gender").toString()==tr("Ð¼"))
+        if(record.value("gender").toString()==tr("ì"))
             ui->mGenderRadio->setChecked(true);
         else
             ui->fGenderRadio->setChecked(true);
@@ -175,8 +175,8 @@ void TSController::savePatientProfile()
 {
     qDebug()<<"TSController::savePatientProfile";
     QMessageBox msgBox(this);
-    msgBox.setWindowTitle(tr("ÐžÑˆÐ¸Ð±ÐºÐ°"));
-    msgBox.setText(tr("ÐÐµÐ¿Ñ€Ð°Ð²Ð¸Ð»ÑŒÐ½Ñ‹Ð¹ Ð²Ð²Ð¾Ð´ Ð´Ð°Ð½Ð½Ñ‹Ñ…."));
+    msgBox.setWindowTitle(tr("Îøèáêà"));
+    msgBox.setText(tr("Íåïðàâèëüíûé ââîä äàííûõ."));
     QSqlRecord record;
     record = patientsModel->record();
     record.setValue("sname",ui->sName->text().toUpper());
@@ -186,8 +186,8 @@ void TSController::savePatientProfile()
     record.setValue("mvl",ui->mvl->text().toUpper());
     switch(ui->mGenderRadio->isChecked())
     {
-    case 0: {record.setValue("genger",tr("Ð¶")); break;}
-    case 1: {record.setValue("genger",tr("Ð¶")); break;}
+    case 0: {record.setValue("genger",tr("æ")); break;}
+    case 1: {record.setValue("genger",tr("æ")); break;}
     }
     QStringList d = ui->date->text().split("-");
     QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
@@ -197,7 +197,7 @@ void TSController::savePatientProfile()
     string = ui->sName->text().toUpper();
     if(TSValidationTools::isNameString(string)==false)
     {
-        msgBox.setInformativeText(tr("ÐŸÐ¾Ð»Ðµ Ñ„Ð°Ð¼Ð¸Ð»Ð¸Ñ Ð½Ðµ Ð´Ð¾Ð»Ð¶Ð½Ð¾ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ð½Ð¸Ñ‡ÐµÐ³Ð¾ ÐºÑ€Ð¾Ð¼Ðµ Ð±ÑƒÐºÐ² Ñ€ÑƒÑÑÐºÐ¾Ð³Ð¾ Ð°Ð»Ñ„Ð°Ð²Ð¸Ñ‚Ð°"));
+        msgBox.setInformativeText(tr("Ïîëå ôàìèëèÿ íå äîëæíî ñîäåðæàòü íè÷åãî êðîìå áóêâ ðóññêîãî àëôàâèòà"));
         msgBox.exec();
         return;
     }
@@ -206,7 +206,7 @@ void TSController::savePatientProfile()
     string = ui->fName->text().toUpper();
     if(TSValidationTools::isNameString(string)==false)
     {
-        msgBox.setInformativeText(tr("ÐŸÐ¾Ð»Ðµ Ð¸Ð¼Ñ Ð½Ðµ Ð´Ð¾Ð»Ð¶Ð½Ð¾ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ð½Ð¸Ñ‡ÐµÐ³Ð¾ ÐºÑ€Ð¾Ð¼Ðµ Ð±ÑƒÐºÐ² Ñ€ÑƒÑÑÐºÐ¾Ð³Ð¾ Ð°Ð»Ñ„Ð°Ð²Ð¸Ñ‚Ð°"));
+        msgBox.setInformativeText(tr("Ïîëå èìÿ íå äîëæíî ñîäåðæàòü íè÷åãî êðîìå áóêâ ðóññêîãî àëôàâèòà"));
         msgBox.exec();
         return;
     }
@@ -215,7 +215,7 @@ void TSController::savePatientProfile()
     string = ui->fdName->text().toUpper();
     if(TSValidationTools::isNameString(string)==false)
     {
-        msgBox.setInformativeText(tr("ÐŸÐ¾Ð»Ðµ Ð¾Ñ‚Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð½Ðµ Ð´Ð¾Ð»Ð¶Ð½Ð° ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ð½Ð¸Ñ‡ÐµÐ³Ð¾ ÐºÑ€Ð¾Ð¼Ðµ Ð±ÑƒÐºÐ² Ñ€ÑƒÑÑÐºÐ¾Ð³Ð¾ Ð°Ð»Ñ„Ð°Ð²Ð¸Ñ‚Ð°"));
+        msgBox.setInformativeText(tr("Ïîëå îò÷åñòâî íå äîëæíà ñîäåðæàòü íè÷åãî êðîìå áóêâ ðóññêîãî àëôàâèòà"));
         msgBox.exec();
         return;
     }
@@ -224,16 +224,16 @@ void TSController::savePatientProfile()
     string = ui->mvl->text().toUpper();
     if(TSValidationTools::isInt(string)==false)
     {
-        msgBox.setInformativeText(tr("ÐŸÐ¾Ð»Ðµ ÐœÐ’Ð› Ð´Ð¾Ð»Ð¶Ð½Ð¾ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ñ†ÐµÐ»Ð¾Ðµ Ñ‡Ð¸ÑÐ»Ð¾"));
+        msgBox.setInformativeText(tr("Ïîëå ÌÂË äîëæíî ñîäåðæàòü öåëîå ÷èñëî"));
         msgBox.exec();
         return;
     }
     else
         record.setValue("mvl",string);
     if(ui->mGenderRadio->isChecked())
-        record.setValue("gender",tr("Ð¼"));
+        record.setValue("gender",tr("ì"));
     if(ui->fGenderRadio->isChecked())
-        record.setValue("gender",tr("Ð¶"));
+        record.setValue("gender",tr("æ"));
     QStringList d = ui->date->text().split("-");
     QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
     record.setValue("birth_date",date);
@@ -258,7 +258,7 @@ void TSController::savePatientProfile()
             qDebug()<<q.lastError().text();
         }
         patientsModel->setFilter("id="+record.value("id").toString());
-        ui->patientPageLabel->setText(tr("ÐŸÐ°Ñ†Ð¸ÐµÐ½Ñ‚: ")+record.value("sname").toString()+" "
+        ui->patientPageLabel->setText(tr("Ïàöèåíò: ")+record.value("sname").toString()+" "
                                       +record.value("fname").toString()+" "+record.value("fdname").toString());
         examinationsModel = new TSExaminations(examinationsConnection);
         ui->examsTableView->setModel(examinationsModel);
@@ -319,8 +319,8 @@ void TSController::calibrateVolume(){
     dui.setupUi(&d);
 
             //controller->setWindowFlags(Qt::WindowTitleHint | Qt::WindowMinimizeButtonHint|Qt::SubWindow);
-    d.setWindowTitle(tr("ÐŸÑ€ÐµÐ´ÑƒÐ¿Ñ€ÐµÐ¶Ð´ÐµÐ½Ð¸Ðµ"));
-    dui.information->setText(tr("Ð˜Ð´ÐµÑ‚ Ð¿Ð¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²ÐºÐ°..."));
+    d.setWindowTitle(tr("Ïðåäóïðåæäåíèå"));
+    dui.information->setText(tr("Èäåò ïîäãîòîâêà..."));
     dui.acceptButton->setVisible(false);
 
     TSUsbDataReader *reader = new TSUsbDataReader();
@@ -340,7 +340,7 @@ void TSController::calibrateVolume(){
     readerThread->startRead();*/
     if(d.exec()==1){
         settings.setValue("volZero",curveBuffer->volumeColibration());
-        dui.information->setText(tr("ÐŸÐ¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²ÐºÐ° Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð°.\nÐÐ°Ð¶Ð¼Ð¸Ñ‚Ðµ ÐžÐš Ð¸ ÐºÐ°Ñ‡Ð°Ð¹Ñ‚Ðµ ÑˆÐ¿Ñ€Ð¸Ñ†ÐµÐ¼."));
+        dui.information->setText(tr("Ïîäãîòîâêà çàâåðøåíà.\nÍàæìèòå ÎÊ è êà÷àéòå øïðèöåì."));
         dui.progressBar->setVisible(false);
         dui.acceptButton->setVisible(true);
     }
@@ -368,9 +368,6 @@ void TSController::calibrateVolume(){
     _reader->setReadingType(ReadForVolVal);
     _reader->moveToThread(_thread);
     _thread->start();
-
-    /*readerThread->setReadingType(ReadForVolVal);
-    readerThread->startRead();*/
     cPlotingTimer.start(100);
 }
 
@@ -550,7 +547,7 @@ void TSController::plotCalibration(){
         QDialog d(this);
         Ui::TSProgressDialog dui;
         dui.setupUi(&d);
-        d.setWindowTitle(tr("ÐŸÑ€ÐµÐ´ÑƒÐ¿Ñ€ÐµÐ¶Ð´ÐµÐ½Ð¸Ðµ"));
+        d.setWindowTitle(tr("Ïðåäóïðåæäåíèå"));
         int *vol = curveBuffer->volume();
         tsanalitics ta;
         qDebug()<<"curvebuff end "<<curveBuffer->end();
@@ -580,7 +577,7 @@ void TSController::plotCalibration(){
         settings.sync();
         dui.progressBar->setVisible(false);
         dui.acceptButton->setVisible(true);
-        dui.information->setText(tr("ÐšÐ°Ð»Ð¸Ð±Ñ€Ð¾Ð²ÐºÐ° ÑƒÑÐ¿ÐµÑˆÐ½Ð¾ Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð°.\nÐÐ°Ð¶Ð¼Ð¸Ñ‚Ðµ ÐžÐš Ð´Ð»Ñ Ð¿Ñ€Ð¾Ð´Ð¾Ð»Ð¶ÐµÐ½Ð¸Ñ."));
+        dui.information->setText(tr("Êàëèáðîâêà óñïåøíî çàâåðøåíà.\nÍàæìèòå ÎÊ äëÿ ïðîäîëæåíèÿ."));
         if(d.exec()==1){
             ui->mainBox->setCurrentIndex(5);
             ui->managmentSpaser->setGeometry(QRect(0,0,350,2));
@@ -731,7 +728,7 @@ void TSController::openPatientProfile(QModelIndex ind)
         record = patientsModel->record(ind.row());
     }
 
-    ui->patientPageLabel->setText(tr("ÐŸÐ°Ñ†Ð¸ÐµÐ½Ñ‚: ")+record.value("sname").toString()+" "+record.value("fname").toString()+
+    ui->patientPageLabel->setText(tr("Ïàöèåíò: ")+record.value("sname").toString()+" "+record.value("fname").toString()+
                                   " "+record.value("fdname").toString());
     openPrivateDB(record);
     /*
@@ -742,8 +739,8 @@ void TSController::openPatientProfile(QModelIndex ind)
     if(!examinationsConnection.open()||!d.exists())
     {
         QMessageBox msg(this);
-        msg.setWindowTitle(tr("ÐžÑˆÐ¸Ð±ÐºÐ°"));
-        msg.setText(tr("ÐŸÑ€Ð¾Ð¸Ð·Ð¾ÑˆÐ»Ð° Ð¿Ð¾Ñ‚ÐµÑ€Ñ Ð´Ð°Ð½Ð½Ñ‹Ñ….\nÐ’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚Ðµ Ð²Ð¾ÑÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ðµ."));
+        msg.setWindowTitle(tr("Îøèáêà"));
+        msg.setText(tr("Ïðîèçîøëà ïîòåðÿ äàííûõ.\nÂûïîëíèòå âîññòàíîâëåíèå."));
         msg.exec();
         ui->mainBox->setCurrentIndex(0);
         return;
@@ -765,8 +762,8 @@ void TSController::openPatientProfile(QModelIndex ind)
 void TSController::showAverageData(int avgTempIn, int avgTempOut, int avgDO, int avgCHD)
 {
     //qDebug()<<"TSController::showAverageData";
-    ui->volumeInfoLabel->setText(tr("Ð”Ðž=")+QString::number(curveBuffer->volToLtr(avgDO),'g',2)
-                                 +tr(" Ð›\nÐ§Ð”=")+QString::number(avgCHD));
+    ui->volumeInfoLabel->setText(tr("ÄÎ=")+QString::number(curveBuffer->volToLtr(avgDO),'g',2)
+                                 +tr(" Ë\n×Ä=")+QString::number(avgCHD));
     ui->tinInfoLabel->setText("Tin="+QString::number(curveBuffer->tempInToDeg(avgTempIn),'g',2)+" 'C");
     ui->toutInfolabel->setText("Tout="+QString::number(curveBuffer->tempInToDeg(avgTempOut),'g',2)+" 'C");
     //int mvl = patientsModel->record(0).value("mvl").toDouble()*100/(curveBuffer->volToLtr(avgDO)*avgCHD);
@@ -840,7 +837,7 @@ void TSController::openExam(QModelIndex ind)
 
     qDebug()<<"setVolumeConverts openExam "<<record.value("volOut").toInt()<<" "<<record.value("volIn").toInt();
    /* curveBuffer->setVolumeConverts(record.value("volOut").toInt(),
-                                   record.value("volIn").toInt());*///Ð¿ÐµÑ€ÐµÐ¿ÑƒÑ‚Ð°Ð½Ð¾
+                                   record.value("volIn").toInt());*///ïåðåïóòàíî
     curveBuffer->setVolumeConverts(record.value("volIn").toInt(),
                                    record.value("volOut").toInt());
     ui->startExam->setEnabled(false);
@@ -1069,8 +1066,8 @@ void TSController::openPrivateDB(QSqlRecord record)
     {
         qDebug()<<examinationsConnection.lastError().text();
         QMessageBox msgBox(this);
-        msgBox.setWindowTitle(tr("ÐžÑˆÐ¸Ð±ÐºÐ°"));
-        msgBox.setText(tr("ÐŸÑ€Ð¾Ð¸Ð·Ð¾ÑˆÐ»Ð° Ð¾ÑˆÐ¸Ð±ÐºÐ°. ÐžÐ±Ñ€Ð°Ñ‚Ð¸Ñ‚ÐµÑÑŒ Ðº Ñ€Ð°Ð·Ñ€Ð°Ð±Ð¾Ñ‚Ñ‡Ð¸ÐºÐ°Ð¼. ÐšÐ¾Ð´: 00002"));
+        msgBox.setWindowTitle(tr("Îøèáêà"));
+        msgBox.setText(tr("Ïðîèçîøëà îøèáêà. Îáðàòèòåñü ê ðàçðàáîò÷èêàì. Êîä: 00002"));
         msgBox.exec();
         ui->mainBox->setCurrentIndex(0);
         return;
@@ -1109,7 +1106,7 @@ void TSController::processDataParams(){
     qtw->setColumnCount(2);
     qtw->setRowCount(12);
     qtw->verticalHeader()->setVisible(false);
-    qtw->setHorizontalHeaderLabels(QString(tr("ÐŸÐ°Ñ€Ð°Ð¼ÐµÑ‚Ñ€;Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ")).split(";"));
+    qtw->setHorizontalHeaderLabels(QString(tr("Ïàðàìåòð;Çíà÷åíèå")).split(";"));
     qtw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     tsanalitics* ga = new tsanalitics();
     tstempanalitic* gao = new tstempanalitic();
@@ -1139,54 +1136,54 @@ void TSController::processDataParams(){
     gao->deleteBadExtremums();
 
     AvgExpirationSpeed = ga->getAvgExpiratorySpeed();
-    qtw->setItem(1,0,getQTableWidgetItem(tr("Ð¡Ñ€ÐµÐ´Ð½ÑÑ ÑÐºÐ¾Ñ€Ð¾ÑÑ‚ÑŒ Ð²Ñ‹Ð´Ð¾Ñ…Ð°(Ð»/Ñ)")));
+    qtw->setItem(1,0,getQTableWidgetItem(tr("Ñðåäíÿÿ ñêîðîñòü âûäîõà(ë/ñ)")));
     qtw->setItem(1,1,getQTableWidgetItem(QString::number(100*fabs(curveBuffer->volToLtr(AvgExpirationSpeed)))));
 
     MaxExpirationSpeed = ga->getMaxExpiratorySpeed();
-    qtw->setItem(2,0,getQTableWidgetItem(tr("ÐœÐ°ÐºÑÐ¸Ð¼Ð°Ð»ÑŒÐ½Ð°Ñ ÑÐºÐ¾Ñ€Ð¾ÑÑ‚ÑŒ Ð²Ñ‹Ð´Ð¾Ñ…Ð°(Ð»/Ñ)")));
+    qtw->setItem(2,0,getQTableWidgetItem(tr("Ìàêñèìàëüíàÿ ñêîðîñòü âûäîõà(ë/ñ)")));
     qtw->setItem(2,1,getQTableWidgetItem(QString::number(100*fabs(curveBuffer->volToLtr(MaxExpirationSpeed)))));
 
     AvgExpirationTime = ga->getAvgExpiratoryTime();
-    qtw->setItem(3,0,getQTableWidgetItem(tr("Ð¡Ñ€ÐµÐ´Ð½ÐµÐµ Ð²Ñ€ÐµÐ¼Ñ Ð²Ñ‹Ð´Ð¾Ñ…Ð°(Ñ)")));
+    qtw->setItem(3,0,getQTableWidgetItem(tr("Ñðåäíåå âðåìÿ âûäîõà(ñ)")));
     qtw->setItem(3,1,getQTableWidgetItem((QString::number((float)AvgExpirationTime/100))));
 
     AvgInspirationTime = ga->getAvgInspiratoryTime();
-    qtw->setItem(4,0,getQTableWidgetItem(tr("Ð¡Ñ€ÐµÐ´Ð½ÐµÐµ Ð²Ñ€ÐµÐ¼Ñ Ð²Ð´Ð¾Ñ…Ð°(Ñ)")));
+    qtw->setItem(4,0,getQTableWidgetItem(tr("Ñðåäíåå âðåìÿ âäîõà(ñ)")));
     qtw->setItem(4,1,getQTableWidgetItem((QString::number((float)AvgInspirationTime/100))));
 
     AvgRoundTime = AvgExpirationTime+AvgInspirationTime;
-    qtw->setItem(5,0,getQTableWidgetItem(tr("Ð¡Ñ€ÐµÐ´Ð½ÑÑ Ð²Ñ€ÐµÐ¼Ñ Ñ†Ð¸ÐºÐ»Ð°(Ñ)")));
+    qtw->setItem(5,0,getQTableWidgetItem(tr("Ñðåäíÿÿ âðåìÿ öèêëà(ñ)")));
     qtw->setItem(5,1,getQTableWidgetItem((QString::number((float)AvgRoundTime/100))));
 
     InspirationFrequency = ga->getFrequency();
-    qtw->setItem(6,0,getQTableWidgetItem(tr("Ð§Ð°ÑÑ‚Ð¾Ñ‚Ð° Ð´Ñ‹Ñ…Ð°Ð½Ð¸Ñ(ÐµÐ´/Ð¼Ð¸Ð½)")));
+    qtw->setItem(6,0,getQTableWidgetItem(tr("×àñòîòà äûõàíèÿ(åä/ìèí)")));
     qtw->setItem(6,1,getQTableWidgetItem((QString::number(InspirationFrequency))));
 
     BreathingVolume = ga->getBreathingVolume();
-    qtw->setItem(7,0,getQTableWidgetItem(tr("Ð”Ñ‹Ñ…Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ Ð¾Ð±ÑŠÐµÐ¼(Ð»)")));
+    qtw->setItem(7,0,getQTableWidgetItem(tr("Äûõàòåëüíûé îáúåì(ë)")));
     qtw->setItem(7,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume)))));
 
 
-    qtw->setItem(8,0,getQTableWidgetItem(tr("ÐœÐ¸Ð½ÑƒÑ‚Ð½Ð°Ñ Ð²ÐµÐ½Ñ‚Ð¸Ð»ÑÑ†Ð¸Ñ Ð»ÐµÐ³ÐºÐ¸Ñ…(Ð»)")));
+    qtw->setItem(8,0,getQTableWidgetItem(tr("Ìèíóòíàÿ âåíòèëÿöèÿ ëåãêèõ(ë)")));
     qtw->setItem(8,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume))*InspirationFrequency)));
 
     MVL = ga->getMVL();
-    qtw->setItem(9,0,getQTableWidgetItem(tr("Ð¡ÑƒÐ¼Ð¼Ð°Ñ€Ð½Ð°Ñ Ð²ÐµÐ½Ñ‚Ð¸Ð»ÑÑ†Ð¸Ñ Ð»ÐµÐ³ÐºÐ¸Ñ…(Ð»)")));
+    qtw->setItem(9,0,getQTableWidgetItem(tr("Ñóììàðíàÿ âåíòèëÿöèÿ ëåãêèõ(ë)")));
     qtw->setItem(9,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MVL)))));
 
     ga->clear();
 
     AvgTempIn = gai->getMinAvgs();
-    qtw->setItem(10,0,getQTableWidgetItem(tr("Ð¡Ñ€ÐµÐ´Ð½ÑÑ Ñ‚ÐµÐ¼Ð¿ÐµÑ€Ð°Ñ‚ÑƒÑ€Ð° Ð²Ð´Ð¾Ñ…Ð°( 'C)")));
+    qtw->setItem(10,0,getQTableWidgetItem(tr("Ñðåäíÿÿ òåìïåðàòóðà âäîõà( 'C)")));
     qtw->setItem(10,1,getQTableWidgetItem(QString::number(curveBuffer->tempInToDeg(AvgTempIn))));
     gai->clear();
 
     AvgTempOut = gao->getMaxAvgs();
-    qtw->setItem(11,0,getQTableWidgetItem(tr("Ð¡Ñ€ÐµÐ´Ð½ÑÑ Ñ‚ÐµÐ¼Ð¿ÐµÑ€Ð°Ñ‚ÑƒÑ€Ð° Ð²Ñ‹Ð´Ð¾Ñ…Ð°( 'C)")));
+    qtw->setItem(11,0,getQTableWidgetItem(tr("Ñðåäíÿÿ òåìïåðàòóðà âûäîõà( 'C)")));
     qtw->setItem(11,1,getQTableWidgetItem(QString::number(curveBuffer->tempOutToDeg(AvgTempOut))));
 
     AvgTempInMinusAvgTempOut = AvgTempOut-AvgTempIn;
-    qtw->setItem(12,0,getQTableWidgetItem(tr("Ð¡Ñ€ÐµÐ´Ð½ÑÑ Ð¢Ð²Ð´Ð¾Ñ…Ð°-Ð¡Ñ€ÐµÐ´Ð½ÑÑ Ð¢Ð²Ñ‹Ð´Ð¾Ñ…Ð°( 'C)")));
+    qtw->setItem(12,0,getQTableWidgetItem(tr("Ñðåäíÿÿ Òâäîõà-Ñðåäíÿÿ Òâûäîõà( 'C)")));
     qtw->setItem(12,1,getQTableWidgetItem(curveBuffer->tempOutToDeg(AvgTempOut)-curveBuffer->tempInToDeg(AvgTempIn)));
     qtw->removeRow(0);
     delete gai;
@@ -1221,7 +1218,7 @@ void TSController::printReport()
     //    qDebug()<<"TSController::printReport";
     QPrinter printer;
     QPrintDialog *dialog = new QPrintDialog(&printer, this);
-    dialog->setWindowTitle(tr("ÐŸÑ€ÐµÐ´Ð²Ð°Ñ€Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ Ð¿Ñ€Ð¾ÑÐ¼Ð¾Ñ‚Ñ€"));
+    dialog->setWindowTitle(tr("Ïðåäâàðèòåëüíûé ïðîñìîòð"));
 
     int endIndex=curveBuffer->lenght;
 
@@ -1240,7 +1237,7 @@ void TSController::printReport()
     pf.resultsTable->setRowCount(13);
     pf.resultsTable->setColumnCount(2);
     pf.resultsTable->verticalHeader()->setVisible(false);
-    pf.resultsTable->setHorizontalHeaderLabels(QString(tr("ÐŸÐ°Ñ€Ð°Ð¼ÐµÑ‚Ñ€; Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ")).split(";"));
+    pf.resultsTable->setHorizontalHeaderLabels(QString(tr("Ïàðàìåòð; Çíà÷åíèå")).split(";"));
     pf.resultsTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     int i=0,j=0;
     for(i=0;i<ui->resultsTable->rowCount();i++){

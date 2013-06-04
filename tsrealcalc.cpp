@@ -14,9 +14,6 @@ void tsrealcalc::append(int in_temp = 0, int out_temp = 0, int volume = 0 ){
 
 void tsrealcalc::process(){
     int AvgTempIn,AvgTempOut,InspirationFrequency=0,BreathingVolume=0;
-    int k;
-    for(int i=0;i<1000000;i++)
-        k=i;
     ga_it.findExtremums();
     ga_it.deleteBadExtremums();
     AvgTempIn = ga_it.getMinAvgs();
