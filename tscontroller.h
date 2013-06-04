@@ -8,7 +8,6 @@
 #include <QPainter>
 #include <QTimer>
 #include <tsreaderthread.h>
-#include <tsusb3000reader.h>
 #include <QRegExp>
 #include "models/TSExaminations.h"
 #include "models/TSPatients.h"
@@ -88,7 +87,7 @@ private:
     QRegExp nameRegExp;
     QRegExp intRegExp;
     bool openUser;
-    //Все для рисования
+    //Р’СЃРµ РґР»СЏ СЂРёСЃРѕРІР°РЅРёСЏ
     TSCurveBuffer* curveBuffer;
     QTimer plotingTimer;
     QTimer cPlotingTimer;
@@ -123,9 +122,9 @@ private:
     float tempOutAdaptive;
     float volumeAdaptive;
     int maxcVol;
-    //Тред для чтения
+    //РўСЂРµРґ РґР»СЏ С‡С‚РµРЅРёСЏ
     TSReaderThread *readerThread;
-    //модели
+    //РјРѕРґРµР»Рё
     TSPatients *patientsModel;
     TSExaminations *examinationsModel;
     QSqlDatabase patientsConnection;

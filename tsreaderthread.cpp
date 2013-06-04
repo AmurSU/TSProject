@@ -15,27 +15,8 @@ void TSReaderThread::startRead (){
     this->start();
 }
 void TSReaderThread::stopRead (){
-    if(ReadingStarted){
+    if(ReadingStarted)
         ReadingStarted=false;
-        //reader->closeReader();
-
-        //this->terminate();
-    }
-    qDebug()<<"RSF";
-//    if(reader!=0){
-//        delete reader;
-//        reader = 0;
-//    }
- /*   if (!this->wait()){
-        qDebug()<<"Waiting!!!!!!!!!";
-        if(reader!=0){
-            delete reader;
-            reader = 0;
-        }
-        this->quit();
-    }*/
-
-
 }
 
 
@@ -48,8 +29,6 @@ void TSReaderThread::run(){
             SHORT* adc;
             while(this->ReadingStarted)
             {
-
-
                 if ((adc=reader->readData())!=0){
                     qDebug()<<adc[0];
                     buffer->append(adc[0],adc[1],adc[2]);
@@ -113,16 +92,7 @@ void TSReaderThread::run(){
             break;
         }
     }
-
-    /*if(reader!=0){
-        delete reader;
-    }*/
     reader->closeReader();
-    qDebug()<<"Before deeting reader";
-   /* if(reader!=0){
-        delete reader;
-       // reader = 0;
-    }*/
     qDebug()<<"A delete reader";
     emit done();
     qDebug()<<"WTF";
@@ -130,13 +100,11 @@ void TSReaderThread::run(){
     exec();
 }
 
-void TSReaderThread::setReadingType(TSUsbReadingType type)
-{
+void TSReaderThread::setReadingType(TSUsbReadingType type){
     readingType = type;
 }
 
-bool TSReaderThread::doWork()
-{
+bool TSReaderThread::doWork(){
     return works;
 }
 TSReaderThread::~TSReaderThread(){

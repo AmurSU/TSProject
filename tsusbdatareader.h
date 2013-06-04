@@ -2,8 +2,6 @@
 #define TSUSBDATAREADER_H
 
 #include <QObject>
-#include <stdlib.h>
-#include <conio.h>
 #include "QLibrary"
 #include "Rtusbapi.h"
 #include "QDebug"

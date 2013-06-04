@@ -12,8 +12,6 @@ TEMPLATE = app
 SOURCES += main.cpp\
     tsmodel.cpp \
     tscurvebuffer.cpp \
-    tsusb3000reader.cpp \
-    tsreaderthread.cpp \
     inputs/tslineedit.cpp \
     inputs/tscombobox.cpp \
     tscontroller.cpp \
@@ -25,15 +23,13 @@ SOURCES += main.cpp\
     tsanalitics.cpp \
     inputs/tstableview.cpp \
     tstempanalitic.cpp \
-    tsusbdatareader.cpp \
     tsrealcalc.cpp \
-    tsrealcalcwrapper.cpp
+    tsrealcalcwrapper.cpp \
+    tsusbdatareader.cpp
 
 HEADERS  += \
     tsmodel.h \
     tscurvebuffer.h \
-    tsusb3000reader.h \
-    tsreaderthread.h \
     inputs/tslineedit.h \
     inputs/tscombobox.h \
     ts_types.h \
@@ -49,9 +45,9 @@ HEADERS  += \
     ui_tsprintview.h \
     tstempanalitic.h \
     extremum.h \
-    tsusbdatareader.h \
     tsrealcalc.h \
-    tsrealcalcwrapper.h
+    tsrealcalcwrapper.h \
+    tsusbdatareader.h
 
 LIBS += -L"dll/*.dll"
 FORMS    += \

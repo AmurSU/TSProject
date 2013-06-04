@@ -4,9 +4,6 @@
 #include <QObject>
 
 #include <QtCore/QThread>
-#include <stdio.h>
-#include <stdlib.h>
-#include <conio.h>
 #include "QLibrary"
 #include "Rtusbapi.h"
 #include "QDebug"

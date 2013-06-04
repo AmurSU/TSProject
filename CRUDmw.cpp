@@ -16,7 +16,7 @@ QSqlDatabase MainWindow::dbConnect()
         qDebug()<<"Connected to database";
     } else {
         QMessageBox msg;
-        msg.setText("Не удалось подсоединится к базе данных. Проверьте права доступа.");
+        msg.setText("РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕРґСЃРѕРµРґРёРЅРёС‚СЃСЏ Рє Р±Р°Р·Рµ РґР°РЅРЅС‹С…. РџСЂРѕРІРµСЂСЊС‚Рµ РїСЂР°РІР° РґРѕСЃС‚СѓРїР°.");
         msg.show();
         qDebug()<<"Not connected to database";
        }
@@ -39,14 +39,14 @@ MainWindow::MainWindow(QWidget *parent) :
     patientsModel->setEditStrategy(QSqlTableModel::OnRowChange);
     patientsModel->select();    
     patientsModel->setHeaderData(0, Qt::Horizontal, QString("ID"));
-    patientsModel->setHeaderData(1, Qt::Horizontal, QString("Код"));
-    patientsModel->setHeaderData(2, Qt::Horizontal, QString("Фамилия"));
-    patientsModel->setHeaderData(3, Qt::Horizontal, QString("Имя"));
-    patientsModel->setHeaderData(4, Qt::Horizontal, QString("� ождение"));
-    patientsModel->setHeaderData(5, Qt::Horizontal, QString("� ост"));
-    patientsModel->setHeaderData(6, Qt::Horizontal, QString("Вес"));
-    patientsModel->setHeaderData(7, Qt::Horizontal, QString("Пол"));
-    patientsModel->setHeaderData(8, Qt::Horizontal, QString("Курит?"));
+    patientsModel->setHeaderData(1, Qt::Horizontal, QString("РљРѕРґ"));
+    patientsModel->setHeaderData(2, Qt::Horizontal, QString("Р¤Р°РјРёР»РёСЏ"));
+    patientsModel->setHeaderData(3, Qt::Horizontal, QString("РРјСЏ"));
+    patientsModel->setHeaderData(4, Qt::Horizontal, QString("Р РѕР¶РґРµРЅРёРµ"));
+    patientsModel->setHeaderData(5, Qt::Horizontal, QString("Р РѕСЃС‚"));
+    patientsModel->setHeaderData(6, Qt::Horizontal, QString("Р’РµСЃ"));
+    patientsModel->setHeaderData(7, Qt::Horizontal, QString("РџРѕР»"));
+    patientsModel->setHeaderData(8, Qt::Horizontal, QString("РљСѓСЂРёС‚?"));
     ui->patientsView->setModel(patientsModel);
     ui->patientsView->setColumnHidden(0,true);
     ui->patientsView->setColumnHidden(5,true);
@@ -95,15 +95,15 @@ void MainWindow::on_rowOfPTDoubleClicked(QModelIndex ind)
     }
     qDebug()<<"Filter payments by account "<<examsModel->filter();
     examsModel->setHeaderData(0, Qt::Horizontal, QString("ID"));
-    examsModel->setHeaderData(1, Qt::Horizontal, QString("Код"));
-    examsModel->setHeaderData(2, Qt::Horizontal, QString("Дата"));
-    examsModel->setHeaderData(3, Qt::Horizontal, QString("Показания"));
-    examsModel->setHeaderData(4, Qt::Horizontal, QString("Диагноз"));
-    examsModel->setHeaderData(5, Qt::Horizontal, QString("Медсестра"));
-    examsModel->setHeaderData(6, Qt::Horizontal, QString("Врач"));
-    examsModel->setHeaderData(7, Qt::Horizontal, QString("t вдох"));
-    examsModel->setHeaderData(8, Qt::Horizontal, QString("t выдох"));
-    examsModel->setHeaderData(9, Qt::Horizontal, QString("Объём"));
+    examsModel->setHeaderData(1, Qt::Horizontal, QString("РљРѕРґ"));
+    examsModel->setHeaderData(2, Qt::Horizontal, QString("Р”Р°С‚Р°"));
+    examsModel->setHeaderData(3, Qt::Horizontal, QString("РџРѕРєР°Р·Р°РЅРёСЏ"));
+    examsModel->setHeaderData(4, Qt::Horizontal, QString("Р”РёР°РіРЅРѕР·"));
+    examsModel->setHeaderData(5, Qt::Horizontal, QString("РњРµРґСЃРµСЃС‚СЂР°"));
+    examsModel->setHeaderData(6, Qt::Horizontal, QString("Р’СЂР°С‡"));
+    examsModel->setHeaderData(7, Qt::Horizontal, QString("t РІРґРѕС…"));
+    examsModel->setHeaderData(8, Qt::Horizontal, QString("t РІС‹РґРѕС…"));
+    examsModel->setHeaderData(9, Qt::Horizontal, QString("РћР±СЉС‘Рј"));
     ui->examsView->setModel(examsModel);
     ui->examsView->setColumnHidden(0,true);
     ui->examsView->setColumnHidden(1,true);
