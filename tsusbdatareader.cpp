@@ -262,7 +262,6 @@ void TSUsbDataReader::read()
             if ( pModule ){
                 if ((adc=readData())!=NULL){
                     buffer->append(adc[0],0,0);
-                    //printf("%d %d %d\n",adc[0],adc[1],adc[2]);
                     if(i%24)
                         emit changeProgress(i/12);
                     startTimer(10);
@@ -282,31 +281,29 @@ void TSUsbDataReader::read()
 SHORT *TSUsbDataReader::readData()
 {
     try{
-        if (pModule->READ_KADR(AdcBuffer)) {
-            return AdcBuffer;
+        if ( pModule ){
+            if (pModule->READ_KADR(AdcBuffer)) {
+                return AdcBuffer;
+            }
+            else
+            {
+                this->setLastError("Can`t read from device");
+                return NULL;
+            }
         }
-        else
-        {
-            this->setLastError("Can`t read from device");
-            return NULL;
-        }
+        return NULL;
     }catch(...){
         qDebug()<<"reading wrong";
     }
 }
 
-void TSUsbDataReader::stopRead()
-{
+void TSUsbDataReader::stopRead(){
     ReadingStarted=false;
 }
 
-void TSUsbDataReader::doWork()
-{
+void TSUsbDataReader::doWork(){
     if ( this->initDevice() )
         this->read();
-    //qDebug()<<"Before closeReader()";
-    //this->closeReader();
-    qDebug()<<"DONE";
     emit done();
 }
 bool TSUsbDataReader::closeReader()
@@ -326,10 +323,6 @@ bool TSUsbDataReader::closeReader()
     }
 }
 
-void TSUsbDataReader::endWork()
-{
-    printf("endWork()");
-}
 
 void TSUsbDataReader::TerminateApplication(char *ErrorString, bool TerminationFlag){
     // подчищаем интерфейс модуля

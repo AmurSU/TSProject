@@ -199,7 +199,6 @@ QVector<int> TSCurveBuffer::volumeConverts(){
 float TSCurveBuffer::volToLtr(int vol){
     if (vol==0)
         return 0;
-    //qDebug()<<"vol="<<vol<<" ts_volumeNegConvert="<<ts_volumeNegConvert;
     if(vol<0)
         return (float)vol/ts_volumeNegConvert;
     else

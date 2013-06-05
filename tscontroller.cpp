@@ -32,8 +32,7 @@
 using namespace std;
 
 
-TSController::TSController(QWidget *parent) :
-    QMainWindow(parent),ui(new Ui::TSView)
+TSController::TSController(QWidget *parent):QMainWindow(parent),ui(new Ui::TSView)
 {
     qDebug()<<"TSController::TSController";
     QTextCodec::setCodecForTr(QTextCodec::codecForName("CP-1251"));
@@ -592,6 +591,7 @@ void TSController::plotCalibration(){
         curveBuffer->setEnd(0);
         maxcVol = 0;
     }
+
 }
 
 void TSController::startExam()
@@ -601,6 +601,7 @@ void TSController::startExam()
     _reader = new TSUsbDataReader();
     _thread = new QThread();
     connect(_thread,SIGNAL(started()),_reader,SLOT(doWork()));
+    //connect(_thread,SIGNAL(finished()),this,SLOT(stopExam());
     //connect(reader,SIGNAL(done()),&d,SLOT(accept()));
     //connect(reader,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
     _reader->setBuffer(curveBuffer);
@@ -794,9 +795,9 @@ void TSController::scrollGraphics(int value)
     plotNow();
 }
 
-void TSController::createNewExam()
-{
-    //qDebug()<<"TSController::createNewExam";
+void TSController::createNewExam(){
+    pcVolume.end();
+    qDebug()<<"TSController::createNewExam";
     ui->mainBox->setCurrentIndex(4);
     cH = ui->calibrateVolumeAnimation->height();
     cW = ui->calibrateVolumeAnimation->width();

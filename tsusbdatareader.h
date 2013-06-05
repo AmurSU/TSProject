@@ -26,7 +26,6 @@ signals:
     void done();
     void changeProgress(int val);
 public slots:
-    void endWork();
     void doWork();
 private:
     TSCurveBuffer *buffer;

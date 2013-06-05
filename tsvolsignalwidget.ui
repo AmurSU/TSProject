@@ -43,7 +43,7 @@
       <bool>false</bool>
      </property>
      <property name="text">
-      <string>50%</string>
+      <string>0%</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
