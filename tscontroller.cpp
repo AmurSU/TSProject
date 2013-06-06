@@ -796,7 +796,7 @@ void TSController::scrollGraphics(int value)
 }
 
 void TSController::createNewExam(){
-    pcVolume.end();
+    //pcVolume.end();
     qDebug()<<"TSController::createNewExam";
     ui->mainBox->setCurrentIndex(4);
     cH = ui->calibrateVolumeAnimation->height();
