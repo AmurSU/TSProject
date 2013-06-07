@@ -29,6 +29,7 @@
 #include <ui_tsprintview.h>
 #include <QPrintEngine>
 #include <tstempanalitic.h>
+#include <QMessageBox>
 using namespace std;
 
 
@@ -317,7 +318,7 @@ void TSController::calibrateVolume(){
     //d.setWindowFlags(Qt::SubWindow);
     dui.setupUi(&d);
 
-            //controller->setWindowFlags(Qt::WindowTitleHint | Qt::WindowMinimizeButtonHint|Qt::SubWindow);
+    //controller->setWindowFlags(Qt::WindowTitleHint | Qt::WindowMinimizeButtonHint|Qt::SubWindow);
     d.setWindowTitle(tr("Предупреждение"));
     dui.information->setText(tr("Идет подготовка..."));
     dui.acceptButton->setVisible(false);
@@ -485,11 +486,11 @@ void TSController::plotNow()
     {
         if(i+startIndex>=k*endIndex)break;
         pVolume.drawLine(j,h-volumeK*volumeAdaptive*volume[i+startIndex]
-                         ,j+1,h-volumeK*volumeAdaptive*volume[i+startIndex+k]);
+                ,j+1,h-volumeK*volumeAdaptive*volume[i+startIndex+k]);
         pTempIn.drawLine(j,tempInZ-tempInK*tempInAdaptive*tempIn[i+startIndex]
-                         ,j+1,tempInZ-tempInK*tempInAdaptive*tempIn[i+startIndex+k]);
+                ,j+1,tempInZ-tempInK*tempInAdaptive*tempIn[i+startIndex+k]);
         pTempOut.drawLine(j,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex]
-                          ,j+1,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex+k]);
+                ,j+1,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i+startIndex+k]);
         i+=k;
     }
     ui->gVolume->setPixmap(bVolume);
@@ -590,18 +591,27 @@ void TSController::plotCalibration(){
         }
         curveBuffer->setEnd(0);
         maxcVol = 0;
+        ui->volumeInfoLabel->setVisible(false);
+        ui->tinInfoLabel->setVisible(false);
+        ui->toutInfolabel->setVisible(false);
     }
 
 }
 
 void TSController::startExam()
 {
+    ui->volumeInfoLabel->setText(tr("ДО=0")
+                                 +tr(" Л\nЧД=0"));
+    ui->tinInfoLabel->setText("Tin=0 'C");
+    ui->toutInfolabel->setText("Tout=0 'C");
+    ui->volumeInfoLabel->setVisible(true);
+    ui->tinInfoLabel->setVisible(true);
+    ui->toutInfolabel->setVisible(true);
     curveBuffer->clean();
-    //qDebug()<<"TSController::startExam";
     _reader = new TSUsbDataReader();
     _thread = new QThread();
     connect(_thread,SIGNAL(started()),_reader,SLOT(doWork()));
-    //connect(_thread,SIGNAL(finished()),this,SLOT(stopExam());
+    connect(_thread,SIGNAL(finished()),this,SLOT(stopExam()));
     //connect(reader,SIGNAL(done()),&d,SLOT(accept()));
     //connect(reader,SIGNAL(changeProgress(int)),dui.progressBar,SLOT(setValue(int)));
     _reader->setBuffer(curveBuffer);
@@ -622,7 +632,7 @@ void TSController::startExam()
     mvlDialog = new QDialog(this);
     volWidget = new Ui::TSVolSignalWidget();
     volWidget->setupUi(mvlDialog);
-    volWidget->MVL->setText("50%");
+    volWidget->MVL->setText("0%");
     mvlDialog->setModal(false);
     mvlDialog->show();
     ui->startExam->setEnabled(false);
@@ -796,20 +806,33 @@ void TSController::scrollGraphics(int value)
 }
 
 void TSController::createNewExam(){
-    //pcVolume.end();
-    qDebug()<<"TSController::createNewExam";
-    ui->mainBox->setCurrentIndex(4);
-    cH = ui->calibrateVolumeAnimation->height();
-    cW = ui->calibrateVolumeAnimation->width();
-    qDebug()<<"height: "<<cH<<" width: "<<cW;
-    bcVolume = QPixmap(cW,cH);
-    qDebug()<<"height: "<<bcVolume.height()<<" width: "<<bcVolume.width();
-    pcVolume.begin(&bcVolume);
-    curveBuffer->clean();
-    curveBuffer->setEnd(0);
-    curveBuffer->setLenght(0);
-    maxcVol = 0;
-    plotCalibration();
+    TSUsbDataReader usbdatareader;
+    if ( usbdatareader.isReady() == true ){
+        if ( pcVolume.isActive() )
+            pcVolume.end();
+        qDebug()<<"TSController::createNewExam";
+        ui->mainBox->setCurrentIndex(4);
+        cH = ui->calibrateVolumeAnimation->height();
+        cW = ui->calibrateVolumeAnimation->width();
+        qDebug()<<"height: "<<cH<<" width: "<<cW;
+        bcVolume = QPixmap(cW,cH);
+        qDebug()<<"height: "<<bcVolume.height()<<" width: "<<bcVolume.width();
+        pcVolume.begin(&bcVolume);
+        curveBuffer->clean();
+        curveBuffer->setEnd(0);
+        curveBuffer->setLenght(0);
+        maxcVol = 0;
+        plotCalibration();
+    }else{
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Внимание"));
+        msgBox.setText(tr("Ошибка"));
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setInformativeText(tr("Прибор не подключен, или не установлен драйвер"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.exec();
+    }
 }
 
 void TSController::openExam(QModelIndex ind)
@@ -837,7 +860,7 @@ void TSController::openExam(QModelIndex ind)
     curveBuffer->setVolumeColibration(record.value("volZero").toInt(),false);
 
     qDebug()<<"setVolumeConverts openExam "<<record.value("volOut").toInt()<<" "<<record.value("volIn").toInt();
-   /* curveBuffer->setVolumeConverts(record.value("volOut").toInt(),
+    /* curveBuffer->setVolumeConverts(record.value("volOut").toInt(),
                                    record.value("volIn").toInt());*///перепутано
     curveBuffer->setVolumeConverts(record.value("volIn").toInt(),
                                    record.value("volOut").toInt());
@@ -1317,7 +1340,7 @@ void TSController::printReport()
         if(i>=k*endIndex)break;
         prVolume.drawLine(
                     j,h-volumeK*volumeAdaptive*volume[i],j+1,h-volumeK*volumeAdaptive*volume[i+k]
-                    );
+                );
         prTempIn.drawLine(j,tempInZ-tempInK*tempInAdaptive*tempIn[i]
                           ,j+1,tempInZ-tempInK*tempInAdaptive*tempIn[i+k]);
         prTempOut.drawLine(j,tempOutZ-tempOutK*tempOutAdaptive*tempOut[i]

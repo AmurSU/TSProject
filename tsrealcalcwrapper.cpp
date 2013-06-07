@@ -12,8 +12,23 @@ void tsRealCalcWrapper::addData(int tempIn = 0, int tempOut = 0, int volume = 0)
     TempIn.append(tempIn);
     TempOut.append(tempOut);
     Volume.append(volume);
-    if ( TempIn.size()%CALC_PERIOD == 0 )
+    if ( TempIn.size()%CALC_PERIOD == 0 &&  TempIn.size()>0)
         calc();
+   /* if ( TempIn.size()>500 ){
+        TempIn.remove(0,1);
+        TempOut.remove(0,1);
+        Volume.remove(0,1);
+    }*/
+}
+
+void tsRealCalcWrapper::reset(){
+    AvgTempIn = 0;
+    AvgTempOut = 0;
+    AvgDo = 0;
+    InspFreq = 0;
+    TempIn.clear();
+    TempOut.clear();
+    Volume.clear();
 }
 
 int tsRealCalcWrapper::getAvgTempIn(){
@@ -52,6 +67,6 @@ void tsRealCalcWrapper::calc(){
 void tsRealCalcWrapper::getAverageData(int avgTempIn, int avgTempOut, int avgDo, int inspFreq){
     AvgTempIn = avgTempIn;
     AvgTempOut = avgTempOut;
-    AvgDo = abs(avgDo);
-    InspFreq = abs(inspFreq);
+    AvgDo = avgDo;
+    InspFreq = inspFreq;
 }

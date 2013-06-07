@@ -12,6 +12,7 @@ class tsRealCalcWrapper : public QObject
 public:
     explicit tsRealCalcWrapper(QObject *parent = 0);
     void addData(int tempIn, int tempOut, int volume);
+    void reset();
     int getAvgTempIn();
     int getAvgTempOut();
     int getAvgInspirationVolume();
@@ -23,7 +24,7 @@ private:
     int AvgTempOut;
     int AvgDo;
     int InspFreq;
-    static const int CALC_PERIOD = 100;
+    static const int CALC_PERIOD = 60;
     void calc();
     QVector<int> TempIn, TempOut, Volume;
 };

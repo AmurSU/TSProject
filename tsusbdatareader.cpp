@@ -8,15 +8,16 @@ TSUsbDataReader::~TSUsbDataReader(){
 }
 
 bool TSUsbDataReader::initDevice(){
+       try{
     //buffer=_bf;
-    char ModuleName[10]; // РЅР°Р·РІР°РЅРёРµ РјРѕРґСѓР»СЏ
-    BYTE UsbSpeed; // СЃРєРѕСЂРѕСЃС‚СЊ СЂР°Р±РѕС‚С‹ С€РёРЅС‹ USB
-    char ModuleSerialNumber[9]; // СЃРµСЂРёР№РЅС‹Р№ РЅРѕРјРµСЂ РјРѕРґСѓР»СЏ
-    char AvrVersion[5]; // РІРµСЂСЃРёСЏ РґСЂР°Р№РІРµСЂР° AVR
-    RTUSB3000::DSP_INFO di; // СЃС‚СЂСѓРєС‚СѓСЂР°, СЃРѕРґРµСЂР¶Р°С‰Р°СЏ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РІРµСЂСЃРёРё РґСЂР°Р№РІРµСЂР° DSP
-    RTUSB3000::FLASH fi; // СЃС‚СЂСѓРєС‚СѓСЂР° РёРЅС„РѕСЂРјР°С†РёРё РІ РџРџР—РЈ РјРѕРґСѓР»СЏ
-    RTUSB3000::INPUT_PARS ip; // СЃС‚СЂСѓРєС‚СѓСЂР° РїР°СЂР°РјРµС‚СЂРѕРІ СЂР°Р±РѕС‚С‹ РђР¦Рџ
-    double ReadRate = 1.0; // С‡Р°СЃС‚РѕС‚Р°  РІРІРѕРґР° РґР°РЅРЅС‹С…
+    char ModuleName[10]; // название модуля
+    BYTE UsbSpeed; // скорость работы шины USB
+    char ModuleSerialNumber[9]; // серийный номер модуля
+    char AvrVersion[5]; // версия драйвера AVR
+    RTUSB3000::DSP_INFO di; // структура, содержащая информацию о версии драйвера DSP
+    RTUSB3000::FLASH fi; // структура информации в ППЗУ модуля
+    RTUSB3000::INPUT_PARS ip; // структура параметров работы АЦП
+    double ReadRate = 1.0; // частота  ввода данных
     const static WORD MaxVirtualSoltsQuantity = 4;
     typedef DWORD(*GetDllVersion)();
     typedef LPVOID(*CreateInstance)(PCHAR const);
@@ -29,7 +30,7 @@ bool TSUsbDataReader::initDevice(){
         }
         else{
             qDebug() << "Dll version isn`t correct";
-            printf("Dll version isn`t correct");
+            qDebug("Dll version isn`t correct");
             return false;
         }
     }
@@ -46,162 +47,171 @@ bool TSUsbDataReader::initDevice(){
         }
     }
     WORD i;
-    // РїСЂРѕРІРµСЂРёРј РІРµСЂСЃРёСЋ РёСЃРїРѕР»СЊР·СѓРµРјРѕР№ Р±РёР±Р»РёРѕС‚РµРєРё Rtusbapi.dll
+    // проверим версию используемой библиотеки Rtusbapi.dll
     if ((DllVersion = RtGetDllVersion()) != CURRENT_VERSION_RTUSBAPI) {
+        qDebug() << "Rtusbapi.dll Version --> bad";
         char String[128];
         sprintf(String, " Rtusbapi.dll Version Error!!!\n   Current: %1u.%1u. Required: %1u.%1u",
                 DllVersion >> 0x10, DllVersion & 0xFFFF,
                 CURRENT_VERSION_RTUSBAPI >> 0x10, CURRENT_VERSION_RTUSBAPI & 0xFFFF);
         return false;
-    } else
-        printf(" Rtusbapi.dll Version --> OK\n");
+    } else{
+        qDebug(" Rtusbapi.dll Version --> OK\n");
+        qDebug() << "Rtusbapi.dll Version --> ok";
+    }
 
-    // РїРѕР»СѓС‡РёРј СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РёРЅС‚РµСЂС„РµР№СЃ РјРѕРґСѓР»СЏ USB3000
+    // получим указатель на интерфейс модуля USB3000
     pModule = static_cast<IRTUSB3000 *> (RtCreateInstance("usb3000"));
     if (!pModule){
-        printf(" Module Interface --> Bad\n");
+        qDebug(" Module Interface --> Bad\n");
         return false;
     }
     else
-        printf(" Module Interface --> OK\n");
+        qDebug(" Module Interface --> OK\n");
 
-    // РїРѕРїСЂРѕР±СѓРµРј РѕР±РЅР°СЂСѓР¶РёС‚СЊ РјРѕРґСѓР»СЊ USB3000 РІ РїРµСЂРІС‹С… 127 РІРёСЂС‚СѓР°Р»СЊРЅС‹С… СЃР»РѕС‚Р°С…
+    // попробуем обнаружить модуль USB3000 в первых 127 виртуальных слотах
     for (i = 0x0; i < MaxVirtualSoltsQuantity; i++) if (pModule->OpenDevice(i)) break;
-    // С‡С‚Рѕ-РЅРёР±СѓРґСЊ РѕР±РЅР°СЂСѓР¶РёР»Рё?
-    if (i == MaxVirtualSoltsQuantity){
-        printf(" Can't find module USB3000 in first 127 virtual slots!\n");
-        return false;
-    }
-    else
-        printf(" OpenDevice(%u) --> OK\n", i);
+    // что-нибудь обнаружили?
 
-    // РїСЂРѕС‡РёС‚Р°РµРј РЅР°Р·РІР°РЅРёРµ РѕР±РЅР°СЂСѓР¶РµРЅРЅРѕРіРѕ РјРѕРґСѓР»СЏ
+        if (i == MaxVirtualSoltsQuantity){
+            qDebug(" Can't find module USB3000 in first 127 virtual slots!\n");
+            return false;
+        }
+        else
+            qDebug(" OpenDevice(%u) --> OK\n", i);
+        qDebug(" FUck");
+
+
+    // прочитаем название обнаруженного модуля
     if (!pModule->GetModuleName(ModuleName)) {
-        printf(" GetModuleName() --> Bad\n");
+        qDebug(" GetModuleName() --> Bad\n");
         return false;
     }
     else
-        printf(" GetModuleName() --> OK\n");
+        qDebug(" GetModuleName() --> OK\n");
 
-    // РїСЂРѕРІРµСЂРёРј, С‡С‚Рѕ СЌС‚Рѕ 'USB3000'
+    // проверим, что это 'USB3000'
     if (strcmp(ModuleName, "USB3000")){
-        printf(" The module is not 'USB3000'\n");
+        qDebug(" The module is not 'USB3000'\n");
         return false;
     }
     else
-        printf(" The module is 'USB3000'\n");
+        qDebug(" The module is 'USB3000'\n");
 
-    // СѓР·РЅР°РµРј С‚РµРєСѓС‰СѓСЋ СЃРєРѕСЂРѕСЃС‚СЊ СЂР°Р±РѕС‚С‹ С€РёРЅС‹ USB20
+    // узнаем текущую скорость работы шины USB20
     if (!pModule->GetUsbSpeed(&UsbSpeed)) {
-        printf(" GetUsbSpeed() --> Bad\n");
+        qDebug(" GetUsbSpeed() --> Bad\n");
         return false;
     } else
-        printf(" GetUsbSpeed() --> OK\n");
-    // С‚РµРїРµСЂСЊ РѕС‚РѕР±СЂР°Р·РёРј РІРµСЂСЃРёСЋ РґСЂР°Р№РІРµСЂР° AVR
-    printf(" USB Speed is %s\n", UsbSpeed ? "HIGH (480 Mbit/s)" : "FULL (12 Mbit/s)");
+        qDebug(" GetUsbSpeed() --> OK\n");
+    // теперь отобразим версию драйвера AVR
+    qDebug(" USB Speed is %s\n", UsbSpeed ? "HIGH (480 Mbit/s)" : "FULL (12 Mbit/s)");
 
-    // РїСЂРѕС‡РёС‚Р°РµРј СЃРµСЂРёР№РЅС‹Р№ РЅРѕРјРµСЂ РјРѕРґСѓР»СЏ
+    // прочитаем серийный номер модуля
     if (!pModule->GetModuleSerialNumber(ModuleSerialNumber)){
-        printf(" GetModuleSerialNumber() --> Bad\n");
+        qDebug(" GetModuleSerialNumber() --> Bad\n");
         return false;
     }
     else
-        printf(" GetModuleSerialNumber() --> OK\n");
-    // С‚РµРїРµСЂСЊ РѕС‚РѕР±СЂР°Р·РёРј СЃРµСЂРёР№РЅС‹Р№ РЅРѕРјРµСЂ РјРѕРґСѓР»СЏ
-    printf(" Module Serial Number is %s\n", ModuleSerialNumber);
+        qDebug(" GetModuleSerialNumber() --> OK\n");
+    // теперь отобразим серийный номер модуля
+    qDebug(" Module Serial Number is %s\n", ModuleSerialNumber);
 
-    // РїСЂРѕС‡РёС‚Р°РµРј РІРµСЂСЃРёСЋ РґСЂР°Р№РІРµСЂР° AVR
+    // прочитаем версию драйвера AVR
     if (!pModule->GetAvrVersion(AvrVersion)){
-        printf(" GetAvrVersion() --> Bad\n");
+        qDebug(" GetAvrVersion() --> Bad\n");
         return false;
     }
     else
-        printf(" GetAvrVersion() --> OK\n");
-    // С‚РµРїРµСЂСЊ РѕС‚РѕР±СЂР°Р·РёРј РІРµСЂСЃРёСЋ РґСЂР°Р№РІРµСЂР° AVR
-    printf(" Avr Driver Version is %s\n", AvrVersion);
+        qDebug(" GetAvrVersion() --> OK\n");
+    // теперь отобразим версию драйвера AVR
+    qDebug(" Avr Driver Version is %s\n", AvrVersion);
 
-    // РєРѕРґ РґСЂР°Р№РІРµСЂР° DSP РІРѕР·СЊРјС‘Рј РёР· СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРіРѕ СЂРµСЃСѓСЂСЃР° С€С‚Р°С‚РЅРѕР№ DLL Р±РёР±Р»РёРѕС‚РµРєРё
+    // код драйвера DSP возьмём из соответствующего ресурса штатной DLL библиотеки
     if (!pModule->LOAD_DSP()){
-        printf(" LOAD_DSP() --> Bad\n");
+        qDebug(" LOAD_DSP() --> Bad\n");
         return false;
     }
     else
-        printf(" LOAD_DSP() --> OK\n");
+        qDebug(" LOAD_DSP() --> OK\n");
 
-    // РїСЂРѕРІРµСЂРёРј Р·Р°РіСЂСѓР·РєСѓ РјРѕРґСѓР»СЏ
+    // проверим загрузку модуля
     if (!pModule->MODULE_TEST()){
-        printf(" MODULE_TEST() --> Bad\n");
+        qDebug(" MODULE_TEST() --> Bad\n");
         return false;
     }
     else
-        printf(" MODULE_TEST() --> OK\n");
+        qDebug(" MODULE_TEST() --> OK\n");
 
-    // РїРѕР»СѓС‡РёРј РІРµСЂСЃРёСЋ Р·Р°РіСЂСѓР¶РµРЅРЅРѕРіРѕ РґСЂР°Р№РІРµСЂР° DSP
+    // получим версию загруженного драйвера DSP
     if (!pModule->GET_DSP_INFO(&di)){
-        printf(" GET_DSP_INFO() --> Bad\n");
+        qDebug(" GET_DSP_INFO() --> Bad\n");
         return false;
     }
     else
-        printf(" GET_DSP_INFO() --> OK\n");
-    // С‚РµРїРµСЂСЊ РѕС‚РѕР±СЂР°Р·РёРј РІРµСЂСЃРёСЋ Р·Р°РіСЂСѓР¶РµРЅРЅРѕРіРѕ РґСЂР°Р№РІРµСЂР° DSP
-    printf(" DSP Driver version is %1u.%1u\n", di.DspMajor, di.DspMinor);
+        qDebug(" GET_DSP_INFO() --> OK\n");
+    // теперь отобразим версию загруженного драйвера DSP
+    qDebug(" DSP Driver version is %1u.%1u\n", di.DspMajor, di.DspMinor);
 
-    // РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ РїСЂРѕРёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РїРѕР»Рµ size СЃС‚СЂСѓРєС‚СѓСЂС‹ RTUSB3000::FLASH
+    // обязательно проинициализируем поле size структуры RTUSB3000::FLASH
     fi.size = sizeof (RTUSB3000::FLASH);
-    // РїРѕР»СѓС‡РёРј РёРЅС„РѕСЂРјР°С†РёСЋ РёР· РџРџР—РЈ РјРѕРґСѓР»СЏ
+    // получим информацию из ППЗУ модуля
     if (!pModule->GET_FLASH(&fi)){
-        printf(" GET_FLASH() --> Bad\n");
+        qDebug(" GET_FLASH() --> Bad\n");
         return false;
     }else
-        printf(" GET_FLASH() --> OK\n");
+        qDebug(" GET_FLASH() --> OK\n");
 
-    // РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ РїСЂРѕРёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РїРѕР»Рµ size СЃС‚СЂСѓРєС‚СѓСЂС‹ RTUSB3000::INPUT_PARS
+    // обязательно проинициализируем поле size структуры RTUSB3000::INPUT_PARS
     ip.size = sizeof (RTUSB3000::INPUT_PARS);
-    // РїРѕР»СѓС‡РёРј С‚РµРєСѓС‰РёРµ РїР°СЂР°РјРµС‚СЂС‹ СЂР°Р±РѕС‚С‹ РђР¦Рџ
+    // получим текущие параметры работы АЦП
     if (!pModule->GET_INPUT_PARS(&ip)){
-        printf(" GET_INPUT_PARS() --> Bad\n");
+        qDebug(" GET_INPUT_PARS() --> Bad\n");
         return false;
     }else
-        printf(" GET_INPUT_PARS() --> OK\n");
+        qDebug(" GET_INPUT_PARS() --> OK\n");
 
-    // СѓСЃС‚Р°РЅРѕРІРёРј Р¶РµР»Р°РµРјС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РІРІРѕРґР° РґР°РЅРЅС‹С…
-    ip.CorrectionEnabled = true; // СЂР°Р·СЂРµС€РёРј РєРѕСЂСЂРµРєС‚РёСЂРѕРІРєСѓ РґР°РЅРЅС‹С…
-    ip.InputClockSource = RTUSB3000::INTERNAL_INPUT_CLOCK; // Р±СѓРґРµРј РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РІРЅСѓС‚СЂРµРЅРЅРёРµ С‚Р°РєС‚РѕРІС‹Рµ РёСЃРїСѓР»СЊСЃС‹ РґР»СЏ РІРІРѕРґР° РґР°РЅРЅС‹С…
-    //	ip.InputClockSource = RTUSB3000::EXTERNAL_INPUT_CLOCK;	// Р±СѓРґРµРј РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РІРЅРµС€РЅРёРµ С‚Р°РєС‚РѕРІС‹Рµ РёСЃРїСѓР»СЊСЃС‹ РґР»СЏ РІРІРѕРґР° РґР°РЅРЅС‹С…
-    ip.SynchroType = RTUSB3000::NO_SYNCHRO; // РЅРµ Р±СѓРґРµРј РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РЅРёРєР°РєСѓСЋ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ РїСЂРё РІРІРѕРґРµ РґР°РЅРЅС‹С…
-    //	ip.SynchroType = RTUSB3000::TTL_START_SYNCHRO;	// Р±СѓРґРµРј РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ С†РёС„СЂРѕРІСѓСЋ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ СЃС‚Р°СЂС‚Р° РїСЂРё РІРІРѕРґРµ РґР°РЅРЅС‹С…
-    ip.ChannelsQuantity = CHANNELS_QUANTITY; // С‡РµС‚С‹СЂРµ Р°РєС‚РёРІРЅС‹С… РєР°РЅР°Р»Р°
+    // установим желаемые параметры ввода данных
+    ip.CorrectionEnabled = true; // разрешим корректировку данных
+    ip.InputClockSource = RTUSB3000::INTERNAL_INPUT_CLOCK; // будем использовать внутренние тактовые испульсы для ввода данных
+    //	ip.InputClockSource = RTUSB3000::EXTERNAL_INPUT_CLOCK;	// будем использовать внешние тактовые испульсы для ввода данных
+    ip.SynchroType = RTUSB3000::NO_SYNCHRO; // не будем использовать никакую синхронизацию при вводе данных
+    //	ip.SynchroType = RTUSB3000::TTL_START_SYNCHRO;	// будем использовать цифровую синхронизацию старта при вводе данных
+    ip.ChannelsQuantity = CHANNELS_QUANTITY; // четыре активных канала
     for (i = 0x0; i < CHANNELS_QUANTITY; i++) ip.ControlTable[i] = (WORD) (i);
-    ip.InputRate = ReadRate; // С‡Р°СЃС‚РѕС‚Р° СЂР°Р±РѕС‚С‹ РђР¦Рџ РІ РєР“С†
+    ip.InputRate = ReadRate; // частота работы АЦП в кГц
     ip.InterKadrDelay = 0.0;
-    // Р±СѓРґРµРј РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ С„РёСЂРјРµРЅРЅС‹Рµ РєР°Р»РёР±СЂРѕРІРѕС‡РЅС‹Рµ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹, РєРѕС‚РѕСЂС‹Рµ С…СЂР°РЅСЏС‚СЊСЃСЏ РІ РџРџР—РЈ РјРѕРґСѓР»СЏ
+    // будем использовать фирменные калибровочные коэффициенты, которые храняться в ППЗУ модуля
     for (i = 0x0; i < 8; i++) {
         ip.AdcOffsetCoef[i] = fi.AdcOffsetCoef[i];
         ip.AdcScaleCoef[i] = fi.AdcScaleCoef[i];
     }
-    // РїРµСЂРµРґР°РґРёРј С‚СЂРµР±СѓРµРјС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ СЂР°Р±РѕС‚С‹ РІРІРѕРґР° РґР°РЅРЅС‹С… РІ РґСЂР°Р№РІРµСЂ DSP РјРѕРґСѓР»СЏ
+    // передадим требуемые параметры работы ввода данных в драйвер DSP модуля
     if (!pModule->SET_INPUT_PARS(&ip)){
-        printf(" SET_INPUT_PARS() --> Bad\n");
+        qDebug(" SET_INPUT_PARS() --> Bad\n");
         return false;
     }else
-        printf(" SET_INPUT_PARS() --> OK\n");
+        qDebug(" SET_INPUT_PARS() --> OK\n");
 
-    // РѕС‚РѕР±СЂР°Р·РёРј РїР°СЂР°РјРµС‚СЂС‹ РјРѕРґСѓР»СЏ РЅР° СЌРєСЂР°РЅРµ РјРѕРЅРёС‚РѕСЂР°
-    printf(" \n");
-    printf(" Module USB3000 (S/N %s) is ready ... \n", fi.SerialNumber);
-    printf(" Adc parameters:\n");
-    printf("   InputClockSource is %s\n", ip.InputClockSource ? "EXTERNAL" : "INTERNAL");
-    printf("   SynchroType is %s\n", ip.SynchroType ? "TTL_START_SYNCHRO" : "NO_SYNCHRO");
-    printf("   ChannelsQuantity = %2d\n", ip.ChannelsQuantity);
-    printf("   AdcRate = %8.3f kHz\n", ip.InputRate);
-    //printf("   InterKadrDelay = %2.4f ms\n", ip.InterKadrDelay);
-    printf("   ChannelRate = %8.3f kHz\n", ip.ChannelRate);
-    printf("\n Press any key to terminate this program...\n");
-    // С†РёРєР» РїРµСЂРјР°РЅРµРЅС‚РЅРѕРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ С„СѓРЅРєС†РёРё ADC_KADR Рё
-    // РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РїРѕР»СѓС‡РµРЅРЅС‹С… РґР°РЅРЅС‹С… РЅР° СЌРєСЂР°РЅРµ РґРёРїР»РµСЏ
-
-    //emit СЃРёРіРЅР°Р» Рѕ С‚РѕРј С‡С‚Рѕ РїРѕС‚РѕРє СЃРѕР·РґР°РЅ
+    // отобразим параметры модуля на экране монитора
+    qDebug(" \n");
+    qDebug(" Module USB3000 (S/N %s) is ready ... \n", fi.SerialNumber);
+    qDebug(" Adc parameters:\n");
+    qDebug("   InputClockSource is %s\n", ip.InputClockSource ? "EXTERNAL" : "INTERNAL");
+    qDebug("   SynchroType is %s\n", ip.SynchroType ? "TTL_START_SYNCHRO" : "NO_SYNCHRO");
+    qDebug("   ChannelsQuantity = %2d\n", ip.ChannelsQuantity);
+    qDebug("   AdcRate = %8.3f kHz\n", ip.InputRate);
+    //qDebug("   InterKadrDelay = %2.4f ms\n", ip.InterKadrDelay);
+    qDebug("   ChannelRate = %8.3f kHz\n", ip.ChannelRate);
+    qDebug("\n Press any key to terminate this program...\n");
+    // цикл перманентного выполнения функции ADC_KADR и
+    // отображения полученных данных на экране диплея
+     }catch(...){
+         qDebug()<<"Exception";
+     }
+    //emit сигнал о том что поток создан
     return true;
+
 }
 
 void TSUsbDataReader::setReadingType(TSUsbReadingType type){
@@ -212,80 +222,77 @@ bool TSUsbDataReader::read(){
     qDebug()<<"read";
     SHORT* adc;
     switch (readingType){
-        case ReadAll:{
-            while( ReadingStarted )
-                if ( pModule ){
-                    if ( (adc=readData()) != NULL )
-                        buffer->append(adc[0],adc[1],adc[2]);
-                    else{
-                        ReadingStarted = false;
-                        qDebug()<<"ReadAll break";
-                        return false;
-                    }
-                    startTimer(10);
-                    qDebug()<<"ReadAll  pModule correct";
+    case ReadAll:{
+        while( ReadingStarted )
+            if ( pModule ){
+                if ( (adc=readData()) != NULL )
+                    buffer->append(adc[0],adc[1],adc[2]);
+                else{
+                    ReadingStarted = false;
+                    qDebug()<<"ReadAll break";
+                    return false;
                 }
-            break;
-        }
-        case ReadForVolZer:{
-            int avg=0;
-            for(int i=0;i<300;i++){
-                if ( pModule ){
-                    if ( (adc=readData()) != NULL ){
-                        avg+=adc[0];
-                        if( i%10 )
-                            emit changeProgress(i/3);
-                    }else{
-                        ReadingStarted=false;
-                        qDebug()<<"ReadForVolZer break";
-                        return false;
-                    }
-                    startTimer(10);
-                    qDebug()<<"ReadForVolZer  pModule correct";
-                }
+                startTimer(10);
+                //qDebug()<<"ReadAll  pModule correct";
             }
-            avg/=300;
-            buffer->setVolumeColibration(avg,true);
-            break;
-        }
-        case ReadForVolVal:{
-            buffer->setEnd(0);
-            for(int i=0;i<1200;i++){
-                if ( ReadingStarted == false ){
-                    i=1300;
-                    break;
+        break;
+    }
+    case ReadForVolZer:{
+        int avg=0;
+        for(int i=0;i<300;i++){
+            if ( pModule ){
+                if ( (adc=readData()) != NULL ){
+                    avg+=adc[0];
+                    if( i%10 )
+                        emit changeProgress(i/3);
+                }else{
+                    ReadingStarted=false;
+                    qDebug()<<"ReadForVolZer break";
+                    return false;
                 }
-                if ( pModule ){
-                    if ( (adc=readData()) != NULL ){
-                        buffer->append(adc[0],0,0);
-                        if( i%24 )
-                            emit changeProgress(i/12);
-                    }else{
-                        ReadingStarted=false;
-                        qDebug()<<"ReadForVolVal break";
-                        return false;
-                    }
-                    qDebug()<<"ReadForVolVal  pModule correct";
-                    startTimer(10);
-                }
+                startTimer(10);
+                qDebug()<<"ReadForVolZer  pModule correct";
             }
-            break;
         }
+        avg/=300;
+        buffer->setVolumeColibration(avg,true);
+        break;
+    }
+    case ReadForVolVal:{
+        buffer->setEnd(0);
+        for(int i=0;i<1200;i++){
+            if ( ReadingStarted == false ){
+                i=1300;
+                break;
+            }
+            if ( pModule ){
+                if ( (adc=readData()) != NULL ){
+                    buffer->append(adc[0],0,0);
+                    if( i%24 )
+                        emit changeProgress(i/12);
+                }else{
+                    //ReadingStarted=false;
+                    qDebug()<<"ReadForVolVal break";
+                    return false;
+                }
+                qDebug()<<"ReadForVolVal  pModule correct";
+                startTimer(10);
+            }
+        }
+        ReadingStarted=false;
+        break;
+    }
     }
     return true;
 }
 
 SHORT *TSUsbDataReader::readData(){
-   /* AdcBuffer[0]=1;
-    AdcBuffer[1]=1;
-    AdcBuffer[2]=1;
-    return AdcBuffer;*/
     try{
         if ( pModule ){
             if (pModule->READ_KADR(AdcBuffer))
                 return AdcBuffer;
             else{
-                printf("Can`t read from device");
+                qDebug("Can`t read from device");
                 return NULL;
             }
         }
@@ -326,6 +333,16 @@ void TSUsbDataReader::releaseReader(){
 
 void TSUsbDataReader::setBuffer(TSCurveBuffer *bffr){
     buffer=bffr;
+}
+
+bool TSUsbDataReader::isReady(){
+    if ( initDevice() == true ){
+        qDebug()<<"init ne true";
+        releaseReader();
+        return true;
+    }
+    releaseReader();
+    return false;
 }
 
 
