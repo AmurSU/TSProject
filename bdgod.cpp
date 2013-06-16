@@ -1,9 +1,7 @@
 #include "bdgod.h"
 #include <QMessageBox>
 
-BDgod::BDgod()
-{
-    index;
+BDgod::BDgod(){
 }
 
 BDgod::~BDgod()

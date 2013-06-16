@@ -219,17 +219,20 @@ void TSUsbDataReader::setReadingType(TSUsbReadingType type){
 }
 
 bool TSUsbDataReader::read(){
+    //freopen("timp.txt","w",stdout);
     qDebug()<<"read";
     SHORT* adc;
     switch (readingType){
     case ReadAll:{
         while( ReadingStarted )
             if ( pModule ){
-                if ( (adc=readData()) != NULL )
+                if ( (adc=readData()) != NULL ){
                     buffer->append(adc[0],adc[1],adc[2]);
+                    //printf("%d %d %d \n",adc[0],adc[1],adc[2]);
+                }
                 else{
                     ReadingStarted = false;
-                    qDebug()<<"ReadAll break";
+                    //qDebug()<<"ReadAll break";
                     return false;
                 }
                 startTimer(10);
@@ -247,11 +250,11 @@ bool TSUsbDataReader::read(){
                         emit changeProgress(i/3);
                 }else{
                     ReadingStarted=false;
-                    qDebug()<<"ReadForVolZer break";
+                    //qDebug()<<"ReadForVolZer break";
                     return false;
                 }
                 startTimer(10);
-                qDebug()<<"ReadForVolZer  pModule correct";
+                //qDebug()<<"ReadForVolZer  pModule correct";
             }
         }
         avg/=300;
@@ -272,10 +275,10 @@ bool TSUsbDataReader::read(){
                         emit changeProgress(i/12);
                 }else{
                     //ReadingStarted=false;
-                    qDebug()<<"ReadForVolVal break";
+                    //qDebug()<<"ReadForVolVal break";
                     return false;
                 }
-                qDebug()<<"ReadForVolVal  pModule correct";
+                //qDebug()<<"ReadForVolVal  pModule correct";
                 startTimer(10);
             }
         }

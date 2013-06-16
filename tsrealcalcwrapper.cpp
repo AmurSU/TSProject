@@ -51,7 +51,6 @@ int tsRealCalcWrapper::getInspirationFreqency(){
 void tsRealCalcWrapper::calc(){
     QThread* rcthread = new QThread();
     tsrealcalc* rcalc = new tsrealcalc();
-
     for (int i=0;i<TempIn.size();i++)
         rcalc->append(TempIn.at(i),TempOut.at(i),Volume.at(i));
     rcalc->moveToThread(rcthread);

@@ -770,16 +770,12 @@ void TSController::openPatientProfile(QModelIndex ind)
     ui->examsTableView->horizontalHeader()->setDefaultSectionSize((ui->examsTableView->width()-2)/3);
 }
 
-void TSController::showAverageData(int avgTempIn, int avgTempOut, int avgDO, int avgCHD)
-{
-    //qDebug()<<"TSController::showAverageData";
-    ui->volumeInfoLabel->setText(tr("дн=")+QString::number(curveBuffer->volToLtr(avgDO),'g',2)
-                                 +tr(" к\nвд=")+QString::number(avgCHD));
+void TSController::showAverageData(int avgTempIn, int avgTempOut, int avgDO, int avgCHD){
+    ui->volumeInfoLabel->setText(tr("дн=")+QString::number(curveBuffer->volToLtr(avgDO),'g',2)+tr(" к\nвд=")+QString::number(avgCHD));
     ui->tinInfoLabel->setText("Tin="+QString::number(curveBuffer->tempInToDeg(avgTempIn),'g',2)+" 'C");
     ui->toutInfolabel->setText("Tout="+QString::number(curveBuffer->tempInToDeg(avgTempOut),'g',2)+" 'C");
-    //int mvl = patientsModel->record(0).value("mvl").toDouble()*100/(curveBuffer->volToLtr(avgDO)*avgCHD);
     int mvl = (curveBuffer->volToLtr(avgDO)*avgCHD)*100/patientsModel->record(0).value("mvl").toDouble();
-    if(recordingStarted&&curveBuffer->end()>500)
+    if(recordingStarted&&curveBuffer->end()>10)
         volWidget->MVL->setText(QString::number(mvl)+"%");
 }
 
@@ -1028,7 +1024,8 @@ bool TSController::eventFilter(QObject *obj, QEvent *e)
     //qDebug()<<"eventFilter";
 
     QMouseEvent *evt;
-    if(e->type() == QEvent::MouseButtonPress) evt = static_cast<QMouseEvent*>(e);
+    if(e->type() == QEvent::MouseButtonPress)
+        evt = static_cast<QMouseEvent*>(e);
     if(obj == ui->backPatientProfileButton && evt->button()==Qt::LeftButton)
     {
         if(currentAction == CreatePatientProfileAction){
