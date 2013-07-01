@@ -219,7 +219,7 @@ void TSUsbDataReader::setReadingType(TSUsbReadingType type){
 }
 
 bool TSUsbDataReader::read(){
-    //freopen("timp.txt","w",stdout);
+    freopen("timp.txt","w",stdout);
     qDebug()<<"read";
     SHORT* adc;
     switch (readingType){
@@ -228,7 +228,7 @@ bool TSUsbDataReader::read(){
             if ( pModule ){
                 if ( (adc=readData()) != NULL ){
                     buffer->append(adc[0],adc[1],adc[2]);
-                    //printf("%d %d %d \n",adc[0],adc[1],adc[2]);
+                    printf("%d %d %d \n",adc[0],adc[1],adc[2]);
                 }
                 else{
                     ReadingStarted = false;
