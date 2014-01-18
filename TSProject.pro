@@ -3,7 +3,9 @@
 # Project created by QtCreator 2012-06-15T02:30:09
 #
 #-------------------------------------------------
-QT       += core gui\
+QT       += core\
+            widgets\
+            printsupport\
             sql
 
 TARGET = TSProject

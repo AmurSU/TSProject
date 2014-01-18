@@ -30,9 +30,9 @@ private:
     TSCurveBuffer *buffer;
     SHORT* readData();
     DWORD DllVersion;
-    IRTUSB3000 *pModule; // указатель на интерфейс модуля
-    const static WORD CHANNELS_QUANTITY = 0x4; // кол-во опрашиваемых каналов модуля
-    SHORT AdcBuffer[CHANNELS_QUANTITY]; // буфер данных для кадра отсчётов
+    IRTUSB3000 *pModule; // СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РёРЅС‚РµСЂС„РµР№СЃ РјРѕРґСѓР»СЏ
+    const static WORD CHANNELS_QUANTITY = 0x4; // РєРѕР»-РІРѕ РѕРїСЂР°С€РёРІР°РµРјС‹С… РєР°РЅР°Р»РѕРІ РјРѕРґСѓР»СЏ
+    SHORT AdcBuffer[CHANNELS_QUANTITY]; // Р±СѓС„РµСЂ РґР°РЅРЅС‹С… РґР»СЏ РєР°РґСЂР° РѕС‚СЃС‡С‘С‚РѕРІ
     TSUsbReadingType readingType;
     bool ReadingStarted;
 };

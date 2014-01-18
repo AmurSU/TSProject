@@ -16,7 +16,7 @@ QSqlDatabase MainWindow::dbConnect()
         qDebug()<<"Connected to database";
     } else {
         QMessageBox msg;
-        msg.setText("Не удалось подсоединится к базе данных. Проверьте права доступа.");
+        msg.setText("Не удалось установить соединение с базой данных.Проверьте права доступа, парасетры соединения");
         msg.show();
         qDebug()<<"Not connected to database";
        }
@@ -42,8 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
     patientsModel->setHeaderData(1, Qt::Horizontal, QString("Код"));
     patientsModel->setHeaderData(2, Qt::Horizontal, QString("Фамилия"));
     patientsModel->setHeaderData(3, Qt::Horizontal, QString("Имя"));
-    patientsModel->setHeaderData(4, Qt::Horizontal, QString("� ождение"));
-    patientsModel->setHeaderData(5, Qt::Horizontal, QString("� ост"));
+    patientsModel->setHeaderData(4, Qt::Horizontal, QString("Год рождения"));
+    patientsModel->setHeaderData(5, Qt::Horizontal, QString("Рост"));
     patientsModel->setHeaderData(6, Qt::Horizontal, QString("Вес"));
     patientsModel->setHeaderData(7, Qt::Horizontal, QString("Пол"));
     patientsModel->setHeaderData(8, Qt::Horizontal, QString("Курит?"));
@@ -101,8 +101,8 @@ void MainWindow::on_rowOfPTDoubleClicked(QModelIndex ind)
     examsModel->setHeaderData(4, Qt::Horizontal, QString("Диагноз"));
     examsModel->setHeaderData(5, Qt::Horizontal, QString("Медсестра"));
     examsModel->setHeaderData(6, Qt::Horizontal, QString("Врач"));
-    examsModel->setHeaderData(7, Qt::Horizontal, QString("t вдох"));
-    examsModel->setHeaderData(8, Qt::Horizontal, QString("t выдох"));
+    examsModel->setHeaderData(7, Qt::Horizontal, QString("T вдох"));
+    examsModel->setHeaderData(8, Qt::Horizontal, QString("T выдох"));
     examsModel->setHeaderData(9, Qt::Horizontal, QString("Объём"));
     ui->examsView->setModel(examsModel);
     ui->examsView->setColumnHidden(0,true);

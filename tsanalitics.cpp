@@ -78,12 +78,12 @@ void tsanalitics::approximate(){
                 }
             }
         }
-        for(i=0;i<ts_vol_exts->size();i++){//отсеиваем мелкие колебания
+        for(i=0;i<ts_vol_exts->size();i++){//РѕС‚СЃРµРёРІР°РµРј РјРµР»РєРёРµ РєРѕР»РµР±Р°РЅРёСЏ
             if(ts_vol_exts->at(i).y!=0 && ts_vol_exts->at(i).y>-20){
                 ts_vol_exts->remove(i,1);
             }
         }
-        for(i=0;i<ts_vol_exts->size()-1;i++){//убираем двойные нули
+        for(i=0;i<ts_vol_exts->size()-1;i++){//СѓР±РёСЂР°РµРј РґРІРѕР№РЅС‹Рµ РЅСѓР»Рё
             if(ts_vol_exts->at(i).y==0 && ts_vol_exts->at(i+1).y==0){
                 ts_vol_exts->remove(i,1);
                 if (i>0)

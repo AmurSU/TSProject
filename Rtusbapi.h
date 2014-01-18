@@ -4,22 +4,22 @@
 //---------------------------------------------------------------------------
 	#include <windows.h>
 
-	// версия библиотеки
-	#define 	VERMAJOR_RTUSBAPI 				(0x1)   	// только одна цифра
-	#define 	VERMINOR_RTUSBAPI 				(0x5)		// только одна цифра
+	// РІРµСЂСЃРёСЏ Р±РёР±Р»РёРѕС‚РµРєРё
+	#define 	VERMAJOR_RTUSBAPI 				(0x1)   	// С‚РѕР»СЊРєРѕ РѕРґРЅР° С†РёС„СЂР°
+	#define 	VERMINOR_RTUSBAPI 				(0x5)		// С‚РѕР»СЊРєРѕ РѕРґРЅР° С†РёС„СЂР°
 	#define 	CURRENT_VERSION_RTUSBAPI     	((VERMAJOR_RTUSBAPI << 0x10) | VERMINOR_RTUSBAPI)
 
-	// вместо ReleaseDevice будем использовать ReleaseInstance
+	// РІРјРµСЃС‚Рѕ ReleaseDevice Р±СѓРґРµРј РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ ReleaseInstance
 	#define ReleaseDevice ReleaseInstance
 
-	// дальше только для C++
+	// РґР°Р»СЊС€Рµ С‚РѕР»СЊРєРѕ РґР»СЏ C++
 	#ifdef __cplusplus
 
-	// экспортируемые функции
+	// СЌРєСЃРїРѕСЂС‚РёСЂСѓРµРјС‹Рµ С„СѓРЅРєС†РёРё
 	extern "C" DWORD WINAPI RtGetDllVersion(void);
 	extern "C" LPVOID WINAPI RtCreateInstance(PCHAR const DeviceName);
 
-	// USB интерфейс для модулей от R-Technology
+	// USB РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ РјРѕРґСѓР»РµР№ РѕС‚ R-Technology
 	struct IRTUSB
 	{
 		virtual BOOL WINAPI OpenDevice(WORD VirtualSlot) = 0;
@@ -32,11 +32,11 @@
 		virtual BOOL WINAPI ReleaseInstance(void) = 0;
 	};
 
-	// USB и DSP интерфейс для модулей от R-Technology
+	// USB Рё DSP РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ РјРѕРґСѓР»РµР№ РѕС‚ R-Technology
 	template <class Type>
 	struct IRTUSBDSP
 	{
-		// функции для работы с USB интерфейсом модуля
+		// С„СѓРЅРєС†РёРё РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ USB РёРЅС‚РµСЂС„РµР№СЃРѕРј РјРѕРґСѓР»СЏ
 		virtual BOOL WINAPI OpenDevice(WORD VirtualSlot) = 0;
 		virtual BOOL WINAPI CloseDevice(void) = 0;
 		virtual HANDLE WINAPI GetModuleHandle(void) = 0;
@@ -46,14 +46,14 @@
 		virtual BOOL WINAPI GetAvrVersion(PCHAR const AvrVersion) = 0;
 		virtual BOOL WINAPI ReleaseInstance(void) = 0;
 
-		// функции для работы с DSP модуля
+		// С„СѓРЅРєС†РёРё РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ DSP РјРѕРґСѓР»СЏ
 		virtual BOOL WINAPI RESET_DSP(void) = 0;
 		virtual BOOL WINAPI LOAD_DSP(PCHAR const FileName = NULL) = 0;
 		virtual BOOL WINAPI MODULE_TEST(void) = 0;
 		virtual BOOL WINAPI GET_DSP_INFO(Type * const DspInfo) = 0;
 		virtual BOOL WINAPI SEND_COMMAND(WORD Command) = 0;
 
-		// функции для работы с памятью DSP модуля
+		// С„СѓРЅРєС†РёРё РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РїР°РјСЏС‚СЊСЋ DSP РјРѕРґСѓР»СЏ
 		virtual BOOL WINAPI PUT_VAR_WORD(WORD Address, SHORT Data) = 0;
 		virtual BOOL WINAPI GET_VAR_WORD(WORD Address, SHORT * const Data) = 0;
 		virtual BOOL WINAPI PUT_DM_WORD(WORD Address, SHORT Data) = 0;
@@ -66,7 +66,7 @@
 		virtual BOOL WINAPI GET_PM_ARRAY(WORD BaseAddress, WORD NPoints, LONG * const Data) = 0;
 	};
 
-	// интерфейс для работы в режиме ввода данных на модулях от R-Technology
+	// РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ СЂР°Р±РѕС‚С‹ РІ СЂРµР¶РёРјРµ РІРІРѕРґР° РґР°РЅРЅС‹С… РЅР° РјРѕРґСѓР»СЏС… РѕС‚ R-Technology
 	template <class Type>
 	struct IRTREAD
 	{
@@ -79,7 +79,7 @@
 		virtual BOOL WINAPI ReadData(SHORT * const lpBuffer, DWORD * const nNumberOfWordsToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped) = 0;
 	};
 
-	// интерфейс для работы в режиме вывода данных на модулях от R-Technology
+	// РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ СЂР°Р±РѕС‚С‹ РІ СЂРµР¶РёРјРµ РІС‹РІРѕРґР° РґР°РЅРЅС‹С… РЅР° РјРѕРґСѓР»СЏС… РѕС‚ R-Technology
 	template <class Type>
 	struct IRTWRITE
 	{
@@ -91,7 +91,7 @@
 		virtual BOOL WINAPI WriteData(SHORT * const lpBuffer, DWORD * const nNumberOfWordsToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped) = 0;
 	};
 
-	// интерфейс для работы с областью пользовательского ППЗУ на модулях от R-Technology
+	// РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РѕР±Р»Р°СЃС‚СЊСЋ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРіРѕ РџРџР—РЈ РЅР° РјРѕРґСѓР»СЏС… РѕС‚ R-Technology
 	template <class Type>
 	struct IRTFLASH
 	{
@@ -100,7 +100,7 @@
 		virtual BOOL WINAPI GET_FLASH(Type * const fi) = 0;
 	};
 
-	// интерфейс для работы с ТТЛ линиями на модулях от R-Technology
+	// РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РўРўР› Р»РёРЅРёСЏРјРё РЅР° РјРѕРґСѓР»СЏС… РѕС‚ R-Technology
 	struct IRTTTL
 	{
 		virtual BOOL WINAPI ENABLE_TTL_OUT(BOOL EnabledTtlOut) = 0;
@@ -109,12 +109,12 @@
 	};
 
 	//==============================================================================
-	//  О Б Н А Р У Ж Е Н И Е   U S B - М О Д У Л Е Й  от  R - T E C H N O L O G Y
+	//  Рћ Р‘ Рќ Рђ Р  РЈ Р– Р• Рќ Р Р•   U S B - Рњ Рћ Р” РЈ Р› Р• Р™  РѕС‚  R - T E C H N O L O G Y
 	//==============================================================================
-	// интерфейс для обнаружения (мониоринга) USB-модулей от R-Technology
+	// РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ (РјРѕРЅРёРѕСЂРёРЅРіР°) USB-РјРѕРґСѓР»РµР№ РѕС‚ R-Technology
 	struct IRTUSBDETECT :	IRTUSB
 	{
-		// функция выдачи строки с последней ошибкой
+		// С„СѓРЅРєС†РёСЏ РІС‹РґР°С‡Рё СЃС‚СЂРѕРєРё СЃ РїРѕСЃР»РµРґРЅРµР№ РѕС€РёР±РєРѕР№
 		virtual int WINAPI GetLastErrorString(LPTSTR const lpBuffer, DWORD nSize) = 0;
 	};
 
@@ -122,18 +122,18 @@
 
 
 	//==============================================================================
-	//                       М О Д У Л Ь       U S B - 2 1 8 5
+	//                       Рњ Рћ Р” РЈ Р› Р¬       U S B - 2 1 8 5
 	//==============================================================================
 
-	// пространство имён для работы с модулем USB-2185
+	// РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ РёРјС‘РЅ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РјРѕРґСѓР»РµРј USB-2185
 	namespace RTUSB2185
 	{
-		// адрес начала сегмента блока данных в памяти программ DSP
+		// Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° СЃРµРіРјРµРЅС‚Р° Р±Р»РѕРєР° РґР°РЅРЅС‹С… РІ РїР°РјСЏС‚Рё РїСЂРѕРіСЂР°РјРј DSP
 		const WORD VarsBaseAddress = 0x30;
-		// тактовая частота работы DSP в кГц
+		// С‚Р°РєС‚РѕРІР°СЏ С‡Р°СЃС‚РѕС‚Р° СЂР°Р±РѕС‚С‹ DSP РІ РєР“С†
 		const DWORD DSP_CLOCK_OUT = 72000;
 
-		// номера доступных пользовательских запросов для USB (vendor request)
+		// РЅРѕРјРµСЂР° РґРѕСЃС‚СѓРїРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёС… Р·Р°РїСЂРѕСЃРѕРІ РґР»СЏ USB (vendor request)
 		enum { 	V_RESET_DSP,
 					V_PUT_ARRAY, V_GET_ARRAY,
 					V_START_READ, V_START_WRITE,
@@ -144,24 +144,24 @@
 					V_GET_MODULE_SERIAL_NUMBER = 13
 			};
 
-		// номера доступных команд штатного драйвера DSP
+		// РЅРѕРјРµСЂР° РґРѕСЃС‚СѓРїРЅС‹С… РєРѕРјР°РЅРґ С€С‚Р°С‚РЅРѕРіРѕ РґСЂР°Р№РІРµСЂР° DSP
 		enum { 	C_TEST,
 					C_START_READ, C_STOP_READ,
 					C_START_WRITE, C_STOP_WRITE,
 					C_LAST_COMMAND
 				};
 
-		// возможные индексы скорости работы шины USB
+		// РІРѕР·РјРѕР¶РЅС‹Рµ РёРЅРґРµРєСЃС‹ СЃРєРѕСЂРѕСЃС‚Рё СЂР°Р±РѕС‚С‹ С€РёРЅС‹ USB
 		enum {	USB11, USB20, INVALID_USB_SPEED };
 
 		#pragma pack(1)
-		// структура пользовательского ППЗУ
+		// СЃС‚СЂСѓРєС‚СѓСЂР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРіРѕ РџРџР—РЈ
 		struct FLASH
 		{
 			BYTE FlashBytes[256];
 		};
 
-		// структура, содержащая информацию о версии драйвера AVR
+		// СЃС‚СЂСѓРєС‚СѓСЂР°, СЃРѕРґРµСЂР¶Р°С‰Р°СЏ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РІРµСЂСЃРёРё РґСЂР°Р№РІРµСЂР° AVR
 		struct AVR_VERSION
 		{
 			BYTE avrstr[10];
@@ -170,7 +170,7 @@
 			BYTE avrminor;
 		};
 
-		// структура, содержащая информацию о версии драйвера DSP
+		// СЃС‚СЂСѓРєС‚СѓСЂР°, СЃРѕРґРµСЂР¶Р°С‰Р°СЏ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РІРµСЂСЃРёРё РґСЂР°Р№РІРµСЂР° DSP
 		struct DSP_INFO
 		{
 			BYTE Target[10];
@@ -181,7 +181,7 @@
 
 		#pragma pack()
 
-		// адреса переменных штатного драйвера DSP (располагаются в памяти программ DSP)
+		// Р°РґСЂРµСЃР° РїРµСЂРµРјРµРЅРЅС‹С… С€С‚Р°С‚РЅРѕРіРѕ РґСЂР°Р№РІРµСЂР° DSP (СЂР°СЃРїРѕР»Р°РіР°СЋС‚СЃСЏ РІ РїР°РјСЏС‚Рё РїСЂРѕРіСЂР°РјРј DSP)
 		const WORD D_PROGRAM_BASE_ADDRESS 		= (VarsBaseAddress + 0x0);
 		const WORD D_TARGET			   			= (VarsBaseAddress + 0x1);
 		const WORD D_LABEL			   			= (VarsBaseAddress + 0x6);
@@ -203,24 +203,24 @@
 		const WORD D_WRITE_FIFO_LENGTH			= (VarsBaseAddress + 0x23);
 	}
 
-	// интерфейс модуля USB2185
+	// РёРЅС‚РµСЂС„РµР№СЃ РјРѕРґСѓР»СЏ USB2185
 	struct IRTUSB2185:	IRTUSBDSP<RTUSB2185::DSP_INFO>
 	{
-		// функции для организации чтения данных из модуля
+		// С„СѓРЅРєС†РёРё РґР»СЏ РѕСЂРіР°РЅРёР·Р°С†РёРё С‡С‚РµРЅРёСЏ РґР°РЅРЅС‹С… РёР· РјРѕРґСѓР»СЏ
 		virtual BOOL WINAPI START_READ(void) = 0;
 		virtual BOOL WINAPI STOP_READ(void) = 0;
 		virtual BOOL WINAPI ReadData(SHORT * const lpBuffer, DWORD * const nNumberOfWordsToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped) = 0;
 
-		// функции для организации передачи данных в модуль
+		// С„СѓРЅРєС†РёРё РґР»СЏ РѕСЂРіР°РЅРёР·Р°С†РёРё РїРµСЂРµРґР°С‡Рё РґР°РЅРЅС‹С… РІ РјРѕРґСѓР»СЊ
 		virtual BOOL WINAPI START_WRITE(void) = 0;
 		virtual BOOL WINAPI STOP_WRITE(void) = 0;
 		virtual BOOL WINAPI WriteData(SHORT * const lpBuffer, DWORD * const nNumberOfWordsToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped) = 0;
 
-		// функции для работы с пользовательским ППЗУ
+		// С„СѓРЅРєС†РёРё РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёРј РџРџР—РЈ
 		virtual BOOL WINAPI GET_FLASH(RTUSB2185::FLASH * const fi) = 0;
 		virtual BOOL WINAPI PUT_FLASH(RTUSB2185::FLASH * const fi) = 0;
 
-		// функция выдачи строки с последней ошибкой
+		// С„СѓРЅРєС†РёСЏ РІС‹РґР°С‡Рё СЃС‚СЂРѕРєРё СЃ РїРѕСЃР»РµРґРЅРµР№ РѕС€РёР±РєРѕР№
 		virtual int WINAPI GetLastErrorString(LPTSTR const lpBuffer, DWORD nSize) = 0;
 	};
 
@@ -228,82 +228,82 @@
 
 
 	//==============================================================================
-	//                       М О Д У Л Ь       U S B - 3 0 0 0
+	//                       Рњ Рћ Р” РЈ Р› Р¬       U S B - 3 0 0 0
 	//==============================================================================
 
-	// пространство имён для работы с модулем USB-3000
+	// РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ РёРјС‘РЅ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РјРѕРґСѓР»РµРј USB-3000
 	namespace RTUSB3000
 	{
-		// адрес начала сегмента блока данных в памяти программ DSP
+		// Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° СЃРµРіРјРµРЅС‚Р° Р±Р»РѕРєР° РґР°РЅРЅС‹С… РІ РїР°РјСЏС‚Рё РїСЂРѕРіСЂР°РјРј DSP
 		const WORD VarsBaseAddress = 0x30;
-		// тактовая частота работы DSP в кГц
+		// С‚Р°РєС‚РѕРІР°СЏ С‡Р°СЃС‚РѕС‚Р° СЂР°Р±РѕС‚С‹ DSP РІ РєР“С†
 		const DWORD DSP_CLOCK_OUT = 72000;
 
-		// возможные источники тактовых импульсов для ввода данных
+		// РІРѕР·РјРѕР¶РЅС‹Рµ РёСЃС‚РѕС‡РЅРёРєРё С‚Р°РєС‚РѕРІС‹С… РёРјРїСѓР»СЊСЃРѕРІ РґР»СЏ РІРІРѕРґР° РґР°РЅРЅС‹С…
 		enum {	INTERNAL_INPUT_CLOCK, EXTERNAL_INPUT_CLOCK, INVALID_INPUT_CLOCK };
-		// возможные типы синхронизации вводимых с модуля даных
+		// РІРѕР·РјРѕР¶РЅС‹Рµ С‚РёРїС‹ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё РІРІРѕРґРёРјС‹С… СЃ РјРѕРґСѓР»СЏ РґР°РЅС‹С…
 		enum {	NO_SYNCHRO, TTL_START_SYNCHRO, TTL_KADR_SYNCHRO, ANALOG_SYNCHRO, INVALID_INPUT_SYNCHRO };
-		// возможные типы вводимых с модуля даных
+		// РІРѕР·РјРѕР¶РЅС‹Рµ С‚РёРїС‹ РІРІРѕРґРёРјС‹С… СЃ РјРѕРґСѓР»СЏ РґР°РЅС‹С…
 		enum {	EMPTY_DATA, ADC_DATA, TTL_DATA, MIXED_DATA, INVALID_INPUT_DATA };
-		// возможные индексы скорости работы шины USB
+		// РІРѕР·РјРѕР¶РЅС‹Рµ РёРЅРґРµРєСЃС‹ СЃРєРѕСЂРѕСЃС‚Рё СЂР°Р±РѕС‚С‹ С€РёРЅС‹ USB
 		enum {	USB11, USB20, INVALID_USB_SPEED };
 
 		#pragma pack(1)
 
-		// структура, задающая режимы ввода данных для модуля USB-3000
+		// СЃС‚СЂСѓРєС‚СѓСЂР°, Р·Р°РґР°СЋС‰Р°СЏ СЂРµР¶РёРјС‹ РІРІРѕРґР° РґР°РЅРЅС‹С… РґР»СЏ РјРѕРґСѓР»СЏ USB-3000
 		struct INPUT_PARS
 		{
 			WORD size;
-			BOOL InputEnabled;			  		// флажок разрешение/запрещение ввода данных (только при чтении)
-			BOOL CorrectionEnabled;				// управление корректировкой входных данных (с АЦП)
-			WORD InputClockSource;				// источник тактовых импульсов для ввода данных
-			WORD InputType;						// тип вводимых с модуля даных (АЦП или ТТЛ)
-			WORD SynchroType;						// тип синхронизации вводимых с модуля даных
-			WORD SynchroAdType;					// тип аналоговой синхронизации
-			WORD SynchroAdMode; 					// режим аналоговой сихронизации
-			WORD SynchroAdChannel;  			// синхроканал АЦП при аналоговой синхронизации
-			SHORT SynchroAdPorog; 				// порог срабатывания АЦП при аналоговой синхронизации
-			WORD ChannelsQuantity;				// число активных логических каналов
-			WORD ControlTable[128];				// управляющая таблица с активными логическими каналами
-			WORD InputFifoBaseAddress;			// базовый адрес FIFO буфера ввода в DSP модуля
-			WORD InputFifoLength;	  			// длина FIFO буфера ввода в DSP модуля
-			double InputRate;	  			  		// тактовая частота ввода данных в кГц
-			double InterKadrDelay;		  		// межкадровая задержка в мс
-			double ChannelRate;					// частота ввода фиксированного логического канала
-			double AdcOffsetCoef[8]; 			// корректировочные коэф. смещение нуля для АЦП
-			double AdcScaleCoef[8];				// корректировочные коэф. масштаба для АЦП
+			BOOL InputEnabled;			  		// С„Р»Р°Р¶РѕРє СЂР°Р·СЂРµС€РµРЅРёРµ/Р·Р°РїСЂРµС‰РµРЅРёРµ РІРІРѕРґР° РґР°РЅРЅС‹С… (С‚РѕР»СЊРєРѕ РїСЂРё С‡С‚РµРЅРёРё)
+			BOOL CorrectionEnabled;				// СѓРїСЂР°РІР»РµРЅРёРµ РєРѕСЂСЂРµРєС‚РёСЂРѕРІРєРѕР№ РІС…РѕРґРЅС‹С… РґР°РЅРЅС‹С… (СЃ РђР¦Рџ)
+			WORD InputClockSource;				// РёСЃС‚РѕС‡РЅРёРє С‚Р°РєС‚РѕРІС‹С… РёРјРїСѓР»СЊСЃРѕРІ РґР»СЏ РІРІРѕРґР° РґР°РЅРЅС‹С…
+			WORD InputType;						// С‚РёРї РІРІРѕРґРёРјС‹С… СЃ РјРѕРґСѓР»СЏ РґР°РЅС‹С… (РђР¦Рџ РёР»Рё РўРўР›)
+			WORD SynchroType;						// С‚РёРї СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё РІРІРѕРґРёРјС‹С… СЃ РјРѕРґСѓР»СЏ РґР°РЅС‹С…
+			WORD SynchroAdType;					// С‚РёРї Р°РЅР°Р»РѕРіРѕРІРѕР№ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+			WORD SynchroAdMode; 					// СЂРµР¶РёРј Р°РЅР°Р»РѕРіРѕРІРѕР№ СЃРёС…СЂРѕРЅРёР·Р°С†РёРё
+			WORD SynchroAdChannel;  			// СЃРёРЅС…СЂРѕРєР°РЅР°Р» РђР¦Рџ РїСЂРё Р°РЅР°Р»РѕРіРѕРІРѕР№ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+			SHORT SynchroAdPorog; 				// РїРѕСЂРѕРі СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РђР¦Рџ РїСЂРё Р°РЅР°Р»РѕРіРѕРІРѕР№ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+			WORD ChannelsQuantity;				// С‡РёСЃР»Рѕ Р°РєС‚РёРІРЅС‹С… Р»РѕРіРёС‡РµСЃРєРёС… РєР°РЅР°Р»РѕРІ
+			WORD ControlTable[128];				// СѓРїСЂР°РІР»СЏСЋС‰Р°СЏ С‚Р°Р±Р»РёС†Р° СЃ Р°РєС‚РёРІРЅС‹РјРё Р»РѕРіРёС‡РµСЃРєРёРјРё РєР°РЅР°Р»Р°РјРё
+			WORD InputFifoBaseAddress;			// Р±Р°Р·РѕРІС‹Р№ Р°РґСЂРµСЃ FIFO Р±СѓС„РµСЂР° РІРІРѕРґР° РІ DSP РјРѕРґСѓР»СЏ
+			WORD InputFifoLength;	  			// РґР»РёРЅР° FIFO Р±СѓС„РµСЂР° РІРІРѕРґР° РІ DSP РјРѕРґСѓР»СЏ
+			double InputRate;	  			  		// С‚Р°РєС‚РѕРІР°СЏ С‡Р°СЃС‚РѕС‚Р° РІРІРѕРґР° РґР°РЅРЅС‹С… РІ РєР“С†
+			double InterKadrDelay;		  		// РјРµР¶РєР°РґСЂРѕРІР°СЏ Р·Р°РґРµСЂР¶РєР° РІ РјСЃ
+			double ChannelRate;					// С‡Р°СЃС‚РѕС‚Р° РІРІРѕРґР° С„РёРєСЃРёСЂРѕРІР°РЅРЅРѕРіРѕ Р»РѕРіРёС‡РµСЃРєРѕРіРѕ РєР°РЅР°Р»Р°
+			double AdcOffsetCoef[8]; 			// РєРѕСЂСЂРµРєС‚РёСЂРѕРІРѕС‡РЅС‹Рµ РєРѕСЌС„. СЃРјРµС‰РµРЅРёРµ РЅСѓР»СЏ РґР»СЏ РђР¦Рџ
+			double AdcScaleCoef[8];				// РєРѕСЂСЂРµРєС‚РёСЂРѕРІРѕС‡РЅС‹Рµ РєРѕСЌС„. РјР°СЃС€С‚Р°Р±Р° РґР»СЏ РђР¦Рџ
 		};
 
-		// структура, задающая режимы вывода данных для модуля USB-3000
+		// СЃС‚СЂСѓРєС‚СѓСЂР°, Р·Р°РґР°СЋС‰Р°СЏ СЂРµР¶РёРјС‹ РІС‹РІРѕРґР° РґР°РЅРЅС‹С… РґР»СЏ РјРѕРґСѓР»СЏ USB-3000
 		struct OUTPUT_PARS
 		{
 			WORD size;
-			BOOL OutputEnabled;					// разрешение/запрещение вывода данных
-			double OutputRate;	  		  		// частота вывода данных в кГц
-			WORD OutputFifoBaseAddress;  		// базовый адрес FIFO буфера вывода
-			WORD OutputFifoLength;				// длина FIFO буфера вывода
+			BOOL OutputEnabled;					// СЂР°Р·СЂРµС€РµРЅРёРµ/Р·Р°РїСЂРµС‰РµРЅРёРµ РІС‹РІРѕРґР° РґР°РЅРЅС‹С…
+			double OutputRate;	  		  		// С‡Р°СЃС‚РѕС‚Р° РІС‹РІРѕРґР° РґР°РЅРЅС‹С… РІ РєР“С†
+			WORD OutputFifoBaseAddress;  		// Р±Р°Р·РѕРІС‹Р№ Р°РґСЂРµСЃ FIFO Р±СѓС„РµСЂР° РІС‹РІРѕРґР°
+			WORD OutputFifoLength;				// РґР»РёРЅР° FIFO Р±СѓС„РµСЂР° РІС‹РІРѕРґР°
 		};
 
 
-		// структура пользовательского ППЗУ
+		// СЃС‚СЂСѓРєС‚СѓСЂР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРіРѕ РџРџР—РЈ
 		struct FLASH
 		{
-			WORD CRC16;								// контрольная сумма
-			WORD size;								// размер данной структуры в байтах
-			BYTE SerialNumber[9];				// серийный номер модуля
-			BYTE Name[11];							// название модуля
-			BYTE Revision;							// ревизия модуля
-			BYTE DspType[17];						// тип установленного DSP
-			BYTE IsDacPresented; 				// флажок наличия ЦАП
-			DWORD DspClockout; 					// тактовая частота DSP в Гц
-			float AdcOffsetCoef[8];				// корректировочные коэф. смещения нуля для АЦП
-			float AdcScaleCoef[8];				// корректировочные коэф. масштаба для АЦП
-			float DacOffsetCoef[2];				// корректировочные коэф. смещения нуля для ЦАП
-			float DacScaleCoef[2];				// корректировочные коэф. масштаба для ЦАП
-			BYTE ReservedByte[129];				// зарезервировано
+			WORD CRC16;								// РєРѕРЅС‚СЂРѕР»СЊРЅР°СЏ СЃСѓРјРјР°
+			WORD size;								// СЂР°Р·РјРµСЂ РґР°РЅРЅРѕР№ СЃС‚СЂСѓРєС‚СѓСЂС‹ РІ Р±Р°Р№С‚Р°С…
+			BYTE SerialNumber[9];				// СЃРµСЂРёР№РЅС‹Р№ РЅРѕРјРµСЂ РјРѕРґСѓР»СЏ
+			BYTE Name[11];							// РЅР°Р·РІР°РЅРёРµ РјРѕРґСѓР»СЏ
+			BYTE Revision;							// СЂРµРІРёР·РёСЏ РјРѕРґСѓР»СЏ
+			BYTE DspType[17];						// С‚РёРї СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅРѕРіРѕ DSP
+			BYTE IsDacPresented; 				// С„Р»Р°Р¶РѕРє РЅР°Р»РёС‡РёСЏ Р¦РђРџ
+			DWORD DspClockout; 					// С‚Р°РєС‚РѕРІР°СЏ С‡Р°СЃС‚РѕС‚Р° DSP РІ Р“С†
+			float AdcOffsetCoef[8];				// РєРѕСЂСЂРµРєС‚РёСЂРѕРІРѕС‡РЅС‹Рµ РєРѕСЌС„. СЃРјРµС‰РµРЅРёСЏ РЅСѓР»СЏ РґР»СЏ РђР¦Рџ
+			float AdcScaleCoef[8];				// РєРѕСЂСЂРµРєС‚РёСЂРѕРІРѕС‡РЅС‹Рµ РєРѕСЌС„. РјР°СЃС€С‚Р°Р±Р° РґР»СЏ РђР¦Рџ
+			float DacOffsetCoef[2];				// РєРѕСЂСЂРµРєС‚РёСЂРѕРІРѕС‡РЅС‹Рµ РєРѕСЌС„. СЃРјРµС‰РµРЅРёСЏ РЅСѓР»СЏ РґР»СЏ Р¦РђРџ
+			float DacScaleCoef[2];				// РєРѕСЂСЂРµРєС‚РёСЂРѕРІРѕС‡РЅС‹Рµ РєРѕСЌС„. РјР°СЃС€С‚Р°Р±Р° РґР»СЏ Р¦РђРџ
+			BYTE ReservedByte[129];				// Р·Р°СЂРµР·РµСЂРІРёСЂРѕРІР°РЅРѕ
 		};
 
-		// структура, содержащая информацию о версии драйвера AVR
+		// СЃС‚СЂСѓРєС‚СѓСЂР°, СЃРѕРґРµСЂР¶Р°С‰Р°СЏ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РІРµСЂСЃРёРё РґСЂР°Р№РІРµСЂР° AVR
 		struct AVR_INFO
 		{
 			BYTE avrstr[10];
@@ -312,18 +312,18 @@
 			BYTE avrminor;
 		};
 
-		// структура, содержащая информацию о версии драйвера DSP
+		// СЃС‚СЂСѓРєС‚СѓСЂР°, СЃРѕРґРµСЂР¶Р°С‰Р°СЏ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РІРµСЂСЃРёРё РґСЂР°Р№РІРµСЂР° DSP
 		struct DSP_INFO
 		{
-			BYTE Target[10];						// модуль, для которого предназначен данный драйвер DSP
-			BYTE Label[6];							// метка разработчика драйвера DSP
-			BYTE DspMajor;							// старшие число версии драйвера DSP
-			BYTE DspMinor;							// младшее число версии драйвера DSP
+			BYTE Target[10];						// РјРѕРґСѓР»СЊ, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅ РґР°РЅРЅС‹Р№ РґСЂР°Р№РІРµСЂ DSP
+			BYTE Label[6];							// РјРµС‚РєР° СЂР°Р·СЂР°Р±РѕС‚С‡РёРєР° РґСЂР°Р№РІРµСЂР° DSP
+			BYTE DspMajor;							// СЃС‚Р°СЂС€РёРµ С‡РёСЃР»Рѕ РІРµСЂСЃРёРё РґСЂР°Р№РІРµСЂР° DSP
+			BYTE DspMinor;							// РјР»Р°РґС€РµРµ С‡РёСЃР»Рѕ РІРµСЂСЃРёРё РґСЂР°Р№РІРµСЂР° DSP
 		};
 
 		#pragma pack()
 
-		// адреса переменных штатного драйвера DSP (располагаются в памяти программ DSP)
+		// Р°РґСЂРµСЃР° РїРµСЂРµРјРµРЅРЅС‹С… С€С‚Р°С‚РЅРѕРіРѕ РґСЂР°Р№РІРµСЂР° DSP (СЂР°СЃРїРѕР»Р°РіР°СЋС‚СЃСЏ РІ РїР°РјСЏС‚Рё РїСЂРѕРіСЂР°РјРј DSP)
 		const WORD D_PROGRAM_BASE_ADDRESS 		= (VarsBaseAddress + 0x0);
 		const WORD D_TARGET			   			= (VarsBaseAddress + 0x1);
 		const WORD D_LABEL			   			= (VarsBaseAddress + 0x6);
@@ -372,10 +372,10 @@
 		const WORD D_CONTROL_TABLE 	 	  		= (0x100);
 	}
 
-	// интерфейс модуля USB3000                                       `
+	// РёРЅС‚РµСЂС„РµР№СЃ РјРѕРґСѓР»СЏ USB3000                                       `
 	struct IRTUSB3000 :	IRTUSBDSP<RTUSB3000::DSP_INFO>
 	{
-		// функции для работы в режиме ввода данных из модуля в РС
+		// С„СѓРЅРєС†РёРё РґР»СЏ СЂР°Р±РѕС‚С‹ РІ СЂРµР¶РёРјРµ РІРІРѕРґР° РґР°РЅРЅС‹С… РёР· РјРѕРґСѓР»СЏ РІ Р РЎ
 		virtual BOOL WINAPI GET_INPUT_PARS(RTUSB3000::INPUT_PARS * const ap) = 0;
 		virtual BOOL WINAPI SET_INPUT_PARS(RTUSB3000::INPUT_PARS * const ap) = 0;
 		virtual BOOL WINAPI START_READ(void) = 0;
@@ -384,7 +384,7 @@
 		virtual BOOL WINAPI READ_SAMPLE(WORD Channel, SHORT * const Sample) = 0;
 		virtual BOOL WINAPI ReadData(SHORT * const lpBuffer, DWORD * const nNumberOfWordsToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped) = 0;
 
-		// функции для работы c выводом данных из РС в модуль
+		// С„СѓРЅРєС†РёРё РґР»СЏ СЂР°Р±РѕС‚С‹ c РІС‹РІРѕРґРѕРј РґР°РЅРЅС‹С… РёР· Р РЎ РІ РјРѕРґСѓР»СЊ
 		virtual BOOL WINAPI GET_OUTPUT_PARS(RTUSB3000::OUTPUT_PARS * const dp) = 0;
 		virtual BOOL WINAPI SET_OUTPUT_PARS(RTUSB3000::OUTPUT_PARS * const dp) = 0;
 		virtual BOOL WINAPI START_WRITE(void) = 0;
@@ -392,17 +392,17 @@
 		virtual BOOL WINAPI WRITE_SAMPLE(WORD Channel, SHORT * const Sample) = 0;
 		virtual BOOL WINAPI WriteData(SHORT * const lpBuffer, DWORD * const nNumberOfWordsToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped) = 0;
 
-		// функции для работы с ТТЛ линиями
+		// С„СѓРЅРєС†РёРё РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РўРўР› Р»РёРЅРёСЏРјРё
 		virtual BOOL WINAPI ENABLE_TTL_OUT(BOOL EnableTtlOut) = 0;
 		virtual BOOL WINAPI TTL_OUT(WORD TtlOut) = 0;
 		virtual BOOL WINAPI TTL_IN(WORD * const TtlIn) = 0;
 
-		// функции для работы с пользовательским ППЗУ
+		// С„СѓРЅРєС†РёРё РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёРј РџРџР—РЈ
 		virtual BOOL WINAPI ENABLE_FLASH_WRITE(BOOL EnableFlashWrite) = 0;
 		virtual BOOL WINAPI PUT_FLASH(RTUSB3000::FLASH * const fi) = 0;
 		virtual BOOL WINAPI GET_FLASH(RTUSB3000::FLASH * const fi) = 0;
 
-		// функция выдачи строки с последней ошибкой
+		// С„СѓРЅРєС†РёСЏ РІС‹РґР°С‡Рё СЃС‚СЂРѕРєРё СЃ РїРѕСЃР»РµРґРЅРµР№ РѕС€РёР±РєРѕР№
 		virtual int WINAPI GetLastErrorString(LPTSTR const lpBuffer, DWORD nSize) = 0;
 	};
 

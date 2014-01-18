@@ -29,7 +29,7 @@ void tsrealcalc::process(){
     InspirationFrequency = ga_vo.getFrequency();
     ga_vo.clear();
 
-    // нада сделать чтобы дергалась функция в curvebuffer и вызывался сигнал обновления
+    // РЅР°РґР° СЃРґРµР»Р°С‚СЊ С‡С‚РѕР±С‹ РґРµСЂРіР°Р»Р°СЃСЊ С„СѓРЅРєС†РёСЏ РІ curvebuffer Рё РІС‹Р·С‹РІР°Р»СЃСЏ СЃРёРіРЅР°Р» РѕР±РЅРѕРІР»РµРЅРёСЏ
     emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);
     emit finished();
 }

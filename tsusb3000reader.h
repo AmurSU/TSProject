@@ -27,18 +27,18 @@ private:
     QString LastError;
     TSCurveBuffer *buffer;
     DWORD DllVersion;
-    IRTUSB3000 *pModule; // указатель на интерфейс модуля
-    char ModuleName[10]; // название модуля
-    BYTE UsbSpeed; // скорость работы шины USB
-    char ModuleSerialNumber[9]; // серийный номер модуля
-    char AvrVersion[5]; // версия драйвера AVR
-    RTUSB3000::DSP_INFO di; // структура, содержащая информацию о версии драйвера DSP
-    RTUSB3000::FLASH fi; // структура информации в ППЗУ модуля
-    RTUSB3000::INPUT_PARS ip; // структура параметров работы АЦП
-    const static WORD CHANNELS_QUANTITY = 0x4; // кол-во опрашиваемых каналов модуля
-    double ReadRate; // частота  ввода данных
+    IRTUSB3000 *pModule; // СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РёРЅС‚РµСЂС„РµР№СЃ РјРѕРґСѓР»СЏ
+    char ModuleName[10]; // РЅР°Р·РІР°РЅРёРµ РјРѕРґСѓР»СЏ
+    BYTE UsbSpeed; // СЃРєРѕСЂРѕСЃС‚СЊ СЂР°Р±РѕС‚С‹ С€РёРЅС‹ USB
+    char ModuleSerialNumber[9]; // СЃРµСЂРёР№РЅС‹Р№ РЅРѕРјРµСЂ РјРѕРґСѓР»СЏ
+    char AvrVersion[5]; // РІРµСЂСЃРёСЏ РґСЂР°Р№РІРµСЂР° AVR
+    RTUSB3000::DSP_INFO di; // СЃС‚СЂСѓРєС‚СѓСЂР°, СЃРѕРґРµСЂР¶Р°С‰Р°СЏ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РІРµСЂСЃРёРё РґСЂР°Р№РІРµСЂР° DSP
+    RTUSB3000::FLASH fi; // СЃС‚СЂСѓРєС‚СѓСЂР° РёРЅС„РѕСЂРјР°С†РёРё РІ РџРџР—РЈ РјРѕРґСѓР»СЏ
+    RTUSB3000::INPUT_PARS ip; // СЃС‚СЂСѓРєС‚СѓСЂР° РїР°СЂР°РјРµС‚СЂРѕРІ СЂР°Р±РѕС‚С‹ РђР¦Рџ
+    const static WORD CHANNELS_QUANTITY = 0x4; // РєРѕР»-РІРѕ РѕРїСЂР°С€РёРІР°РµРјС‹С… РєР°РЅР°Р»РѕРІ РјРѕРґСѓР»СЏ
+    double ReadRate; // С‡Р°СЃС‚РѕС‚Р°  РІРІРѕРґР° РґР°РЅРЅС‹С…
     const static WORD MaxVirtualSoltsQuantity = 4;
-    SHORT AdcBuffer[CHANNELS_QUANTITY]; // буфер данных для кадра отсчётов
+    SHORT AdcBuffer[CHANNELS_QUANTITY]; // Р±СѓС„РµСЂ РґР°РЅРЅС‹С… РґР»СЏ РєР°РґСЂР° РѕС‚СЃС‡С‘С‚РѕРІ
 signals:
 
 public slots:

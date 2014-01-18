@@ -47,7 +47,7 @@ private:
     Ui::TSCalibrateDialog *calibrateDialogUi;
     QDialog *calibrateDialog;
     QMessageBox message;
-    // Все для рисования
+    // Р’СЃРµ РґР»СЏ СЂРёСЃРѕРІР°РЅРёСЏ
     TSCurveBuffer* curveBuffer;
     QTimer plotingTimer;
     QPixmap bVolume;

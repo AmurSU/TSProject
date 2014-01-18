@@ -14,6 +14,8 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTime>
+#include <QPrinter>
+#include <QPrintDialog>
 
 #include <QDate>
 #include <math.h>
@@ -24,8 +26,6 @@
 #include <QSettings>
 #include <tsanalitics.h>
 #include <QTableWidget>
-#include <QPrinter>
-#include <QPrintDialog>
 #include <ui_tsprintview.h>
 #include <QPrintEngine>
 #include <tstempanalitic.h>
@@ -36,7 +36,7 @@ using namespace std;
 TSController::TSController(QWidget *parent):QMainWindow(parent),ui(new Ui::TSView)
 {
     qDebug()<<"TSController::TSController";
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("CP-1251"));
+    //QTextCodec::setCodecForTr(QTextCodec::codecForName("CP-1251"));
     QSettings settings("settings.ini",QSettings::IniFormat);
 
     ui->setupUi(this);
@@ -66,8 +66,8 @@ TSController::TSController(QWidget *parent):QMainWindow(parent),ui(new Ui::TSVie
     if(!patientsConnection.open())
     {
         QMessageBox msgBox(this);
-        msgBox.setWindowTitle(tr("Ошибка"));
-        msgBox.setText(tr("Произошла ошибка.\nОбратитесь к разработчикам.\nКод: 00001.\nПрограмма будет завершена."));
+        msgBox.setWindowTitle(tr("РћС€РёР±РєР°"));
+        msgBox.setText(tr("РџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР°.\nРћР±СЂР°С‚РёС‚РµСЃСЊ Рє СЂР°Р·СЂР°Р±РѕС‚С‡РёРєР°Рј.\nРљРѕРґ: 00001.\nРџСЂРѕРіСЂР°РјРјР° Р±СѓРґРµС‚ Р·Р°РІРµСЂС€РµРЅР°."));
         msgBox.exec();
         QApplication::exit(0);
     }
@@ -159,7 +159,7 @@ void TSController::editPatientProfile()
         QStringList d = record.value("birth_date").toString().split("-");
         QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
         ui->date->setText(date);
-        if(record.value("gender").toString()==tr("м"))
+        if(record.value("gender").toString()==tr("Рј"))
             ui->mGenderRadio->setChecked(true);
         else
             ui->fGenderRadio->setChecked(true);
@@ -175,8 +175,8 @@ void TSController::savePatientProfile()
 {
     qDebug()<<"TSController::savePatientProfile";
     QMessageBox msgBox(this);
-    msgBox.setWindowTitle(tr("Ошибка"));
-    msgBox.setText(tr("Неправильный ввод данных."));
+    msgBox.setWindowTitle(tr("РћС€РёР±РєР°"));
+    msgBox.setText(tr("РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ РІРІРѕРґ РґР°РЅРЅС‹С…."));
     QSqlRecord record;
     record = patientsModel->record();
     record.setValue("sname",ui->sName->text().toUpper());
@@ -186,8 +186,8 @@ void TSController::savePatientProfile()
     record.setValue("mvl",ui->mvl->text().toUpper());
     switch(ui->mGenderRadio->isChecked())
     {
-    case 0: {record.setValue("genger",tr("ж")); break;}
-    case 1: {record.setValue("genger",tr("ж")); break;}
+    case 0: {record.setValue("genger",tr("Р¶")); break;}
+    case 1: {record.setValue("genger",tr("Р¶")); break;}
     }
     QStringList d = ui->date->text().split("-");
     QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
@@ -197,7 +197,7 @@ void TSController::savePatientProfile()
     string = ui->sName->text().toUpper();
     if(TSValidationTools::isNameString(string)==false)
     {
-        msgBox.setInformativeText(tr("Поле фамилия не должно содержать ничего кроме букв русского алфавита"));
+        msgBox.setInformativeText(tr("РџРѕР»Рµ С„Р°РјРёР»РёСЏ РЅРµ РґРѕР»Р¶РЅРѕ СЃРѕРґРµСЂР¶Р°С‚СЊ РЅРёС‡РµРіРѕ РєСЂРѕРјРµ Р±СѓРєРІ СЂСѓСЃСЃРєРѕРіРѕ Р°Р»С„Р°РІРёС‚Р°"));
         msgBox.exec();
         return;
     }
@@ -206,7 +206,7 @@ void TSController::savePatientProfile()
     string = ui->fName->text().toUpper();
     if(TSValidationTools::isNameString(string)==false)
     {
-        msgBox.setInformativeText(tr("Поле имя не должно содержать ничего кроме букв русского алфавита"));
+        msgBox.setInformativeText(tr("РџРѕР»Рµ РёРјСЏ РЅРµ РґРѕР»Р¶РЅРѕ СЃРѕРґРµСЂР¶Р°С‚СЊ РЅРёС‡РµРіРѕ РєСЂРѕРјРµ Р±СѓРєРІ СЂСѓСЃСЃРєРѕРіРѕ Р°Р»С„Р°РІРёС‚Р°"));
         msgBox.exec();
         return;
     }
@@ -215,7 +215,7 @@ void TSController::savePatientProfile()
     string = ui->fdName->text().toUpper();
     if(TSValidationTools::isNameString(string)==false)
     {
-        msgBox.setInformativeText(tr("Поле отчество не должна содержать ничего кроме букв русского алфавита"));
+        msgBox.setInformativeText(tr("РџРѕР»Рµ РѕС‚С‡РµСЃС‚РІРѕ РЅРµ РґРѕР»Р¶РЅР° СЃРѕРґРµСЂР¶Р°С‚СЊ РЅРёС‡РµРіРѕ РєСЂРѕРјРµ Р±СѓРєРІ СЂСѓСЃСЃРєРѕРіРѕ Р°Р»С„Р°РІРёС‚Р°"));
         msgBox.exec();
         return;
     }
@@ -224,16 +224,16 @@ void TSController::savePatientProfile()
     string = ui->mvl->text().toUpper();
     if(TSValidationTools::isInt(string)==false)
     {
-        msgBox.setInformativeText(tr("Поле МВЛ должно содержать целое число"));
+        msgBox.setInformativeText(tr("РџРѕР»Рµ РњР’Р› РґРѕР»Р¶РЅРѕ СЃРѕРґРµСЂР¶Р°С‚СЊ С†РµР»РѕРµ С‡РёСЃР»Рѕ"));
         msgBox.exec();
         return;
     }
     else
         record.setValue("mvl",string);
     if(ui->mGenderRadio->isChecked())
-        record.setValue("gender",tr("м"));
+        record.setValue("gender",tr("Рј"));
     if(ui->fGenderRadio->isChecked())
-        record.setValue("gender",tr("ж"));
+        record.setValue("gender",tr("Р¶"));
     QStringList d = ui->date->text().split("-");
     QString date = d.at(2)+"-"+d.at(1)+"-"+d.at(0);
     record.setValue("birth_date",date);
@@ -258,7 +258,7 @@ void TSController::savePatientProfile()
             qDebug()<<q.lastError().text();
         }
         patientsModel->setFilter("id="+record.value("id").toString());
-        ui->patientPageLabel->setText(tr("Пациент: ")+record.value("sname").toString()+" "
+        ui->patientPageLabel->setText(tr("РџР°С†РёРµРЅС‚: ")+record.value("sname").toString()+" "
                                       +record.value("fname").toString()+" "+record.value("fdname").toString());
         examinationsModel = new TSExaminations(examinationsConnection);
         ui->examsTableView->setModel(examinationsModel);
@@ -319,8 +319,8 @@ void TSController::calibrateVolume(){
     dui.setupUi(&d);
 
     //controller->setWindowFlags(Qt::WindowTitleHint | Qt::WindowMinimizeButtonHint|Qt::SubWindow);
-    d.setWindowTitle(tr("Предупреждение"));
-    dui.information->setText(tr("Идет подготовка..."));
+    d.setWindowTitle(tr("РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ"));
+    dui.information->setText(tr("РРґРµС‚ РїРѕРґРіРѕС‚РѕРІРєР°..."));
     dui.acceptButton->setVisible(false);
 
     TSUsbDataReader *reader = new TSUsbDataReader();
@@ -340,7 +340,7 @@ void TSController::calibrateVolume(){
     readerThread->startRead();*/
     if(d.exec()==1){
         settings.setValue("volZero",curveBuffer->volumeColibration());
-        dui.information->setText(tr("Подготовка завершена.\nНажмите ОК и качайте шприцем."));
+        dui.information->setText(tr("РџРѕРґРіРѕС‚РѕРІРєР° Р·Р°РІРµСЂС€РµРЅР°.\nРќР°Р¶РјРёС‚Рµ РћРљ Рё РєР°С‡Р°Р№С‚Рµ С€РїСЂРёС†РµРј."));
         dui.progressBar->setVisible(false);
         dui.acceptButton->setVisible(true);
     }
@@ -547,7 +547,7 @@ void TSController::plotCalibration(){
         QDialog d(this);
         Ui::TSProgressDialog dui;
         dui.setupUi(&d);
-        d.setWindowTitle(tr("Предупреждение"));
+        d.setWindowTitle(tr("РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ"));
         int *vol = curveBuffer->volume();
         tsanalitics ta;
         qDebug()<<"curvebuff end "<<curveBuffer->end();
@@ -577,7 +577,7 @@ void TSController::plotCalibration(){
         settings.sync();
         dui.progressBar->setVisible(false);
         dui.acceptButton->setVisible(true);
-        dui.information->setText(tr("Калибровка успешно завершена.\nНажмите ОК для продолжения."));
+        dui.information->setText(tr("РљР°Р»РёР±СЂРѕРІРєР° СѓСЃРїРµС€РЅРѕ Р·Р°РІРµСЂС€РµРЅР°.\nРќР°Р¶РјРёС‚Рµ РћРљ РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ."));
         if(d.exec()==1){
             ui->mainBox->setCurrentIndex(5);
             ui->managmentSpaser->setGeometry(QRect(0,0,350,2));
@@ -600,8 +600,8 @@ void TSController::plotCalibration(){
 
 void TSController::startExam()
 {
-    ui->volumeInfoLabel->setText(tr("ДО=0")
-                                 +tr(" Л\nЧД=0"));
+    ui->volumeInfoLabel->setText(tr("Р”Рћ=0")
+                                 +tr(" Р›\nР§Р”=0"));
     ui->tinInfoLabel->setText("Tin=0 'C");
     ui->toutInfolabel->setText("Tout=0 'C");
     ui->volumeInfoLabel->setVisible(true);
@@ -739,7 +739,7 @@ void TSController::openPatientProfile(QModelIndex ind)
         record = patientsModel->record(ind.row());
     }
 
-    ui->patientPageLabel->setText(tr("Пациент: ")+record.value("sname").toString()+" "+record.value("fname").toString()+
+    ui->patientPageLabel->setText(tr("РџР°С†РёРµРЅС‚: ")+record.value("sname").toString()+" "+record.value("fname").toString()+
                                   " "+record.value("fdname").toString());
     openPrivateDB(record);
     /*
@@ -750,8 +750,8 @@ void TSController::openPatientProfile(QModelIndex ind)
     if(!examinationsConnection.open()||!d.exists())
     {
         QMessageBox msg(this);
-        msg.setWindowTitle(tr("Ошибка"));
-        msg.setText(tr("Произошла потеря данных.\nВыполните восстановление."));
+        msg.setWindowTitle(tr("РћС€РёР±РєР°"));
+        msg.setText(tr("РџСЂРѕРёР·РѕС€Р»Р° РїРѕС‚РµСЂСЏ РґР°РЅРЅС‹С….\nР’С‹РїРѕР»РЅРёС‚Рµ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ."));
         msg.exec();
         ui->mainBox->setCurrentIndex(0);
         return;
@@ -771,7 +771,7 @@ void TSController::openPatientProfile(QModelIndex ind)
 }
 
 void TSController::showAverageData(int avgTempIn, int avgTempOut, int avgDO, int avgCHD){
-    ui->volumeInfoLabel->setText(tr("ДО=")+QString::number(curveBuffer->volToLtr(avgDO),'g',2)+tr(" Л\nЧД=")+QString::number(avgCHD));
+    ui->volumeInfoLabel->setText(tr("Р”Рћ=")+QString::number(curveBuffer->volToLtr(avgDO),'g',2)+tr(" Р›\nР§Р”=")+QString::number(avgCHD));
     ui->tinInfoLabel->setText("Tin="+QString::number(curveBuffer->tempInToDeg(avgTempIn),'g',2)+" 'C");
     ui->toutInfolabel->setText("Tout="+QString::number(curveBuffer->tempInToDeg(avgTempOut),'g',2)+" 'C");
     int mvl = (curveBuffer->volToLtr(avgDO)*avgCHD)*100/patientsModel->record(0).value("mvl").toDouble();
@@ -821,10 +821,10 @@ void TSController::createNewExam(){
         plotCalibration();
     }else{
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Внимание"));
-        msgBox.setText(tr("Ошибка"));
+        msgBox.setWindowTitle(tr("Р’РЅРёРјР°РЅРёРµ"));
+        msgBox.setText(tr("РћС€РёР±РєР°"));
         msgBox.setIcon(QMessageBox::Information);
-        msgBox.setInformativeText(tr("Прибор не подключен, или не установлен драйвер"));
+        msgBox.setInformativeText(tr("РџСЂРёР±РѕСЂ РЅРµ РїРѕРґРєР»СЋС‡РµРЅ, РёР»Рё РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ РґСЂР°Р№РІРµСЂ"));
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setDefaultButton(QMessageBox::Ok);
         msgBox.exec();
@@ -857,7 +857,7 @@ void TSController::openExam(QModelIndex ind)
 
     qDebug()<<"setVolumeConverts openExam "<<record.value("volOut").toInt()<<" "<<record.value("volIn").toInt();
     /* curveBuffer->setVolumeConverts(record.value("volOut").toInt(),
-                                   record.value("volIn").toInt());*///перепутано
+                                   record.value("volIn").toInt());*///РїРµСЂРµРїСѓС‚Р°РЅРѕ
     curveBuffer->setVolumeConverts(record.value("volIn").toInt(),
                                    record.value("volOut").toInt());
     ui->startExam->setEnabled(false);
@@ -1087,8 +1087,8 @@ void TSController::openPrivateDB(QSqlRecord record)
     {
         qDebug()<<examinationsConnection.lastError().text();
         QMessageBox msgBox(this);
-        msgBox.setWindowTitle(tr("Ошибка"));
-        msgBox.setText(tr("Произошла ошибка. Обратитесь к разработчикам. Код: 00002"));
+        msgBox.setWindowTitle(tr("РћС€РёР±РєР°"));
+        msgBox.setText(tr("РџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР°. РћР±СЂР°С‚РёС‚РµСЃСЊ Рє СЂР°Р·СЂР°Р±РѕС‚С‡РёРєР°Рј. РљРѕРґ: 00002"));
         msgBox.exec();
         ui->mainBox->setCurrentIndex(0);
         return;
@@ -1127,8 +1127,8 @@ void TSController::processDataParams(){
     qtw->setColumnCount(2);
     qtw->setRowCount(12);
     qtw->verticalHeader()->setVisible(false);
-    qtw->setHorizontalHeaderLabels(QString(tr("Параметр;Значение")).split(";"));
-    qtw->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    qtw->setHorizontalHeaderLabels(QString(tr("РџР°СЂР°РјРµС‚СЂ;Р—РЅР°С‡РµРЅРёРµ")).split(";"));
+    qtw->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tsanalitics* ga = new tsanalitics();
     tstempanalitic* gao = new tstempanalitic();
     tstempanalitic* gai = new tstempanalitic();
@@ -1157,54 +1157,54 @@ void TSController::processDataParams(){
     gao->deleteBadExtremums();
 
     AvgExpirationSpeed = ga->getAvgExpiratorySpeed();
-    qtw->setItem(1,0,getQTableWidgetItem(tr("Средняя скорость выдоха(л/с)")));
+    qtw->setItem(1,0,getQTableWidgetItem(tr("РЎСЂРµРґРЅСЏСЏ СЃРєРѕСЂРѕСЃС‚СЊ РІС‹РґРѕС…Р°(Р»/СЃ)")));
     qtw->setItem(1,1,getQTableWidgetItem(QString::number(100*fabs(curveBuffer->volToLtr(AvgExpirationSpeed)))));
 
     MaxExpirationSpeed = ga->getMaxExpiratorySpeed();
-    qtw->setItem(2,0,getQTableWidgetItem(tr("Максимальная скорость выдоха(л/с)")));
+    qtw->setItem(2,0,getQTableWidgetItem(tr("РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ РІС‹РґРѕС…Р°(Р»/СЃ)")));
     qtw->setItem(2,1,getQTableWidgetItem(QString::number(100*fabs(curveBuffer->volToLtr(MaxExpirationSpeed)))));
 
     AvgExpirationTime = ga->getAvgExpiratoryTime();
-    qtw->setItem(3,0,getQTableWidgetItem(tr("Среднее время выдоха(с)")));
+    qtw->setItem(3,0,getQTableWidgetItem(tr("РЎСЂРµРґРЅРµРµ РІСЂРµРјСЏ РІС‹РґРѕС…Р°(СЃ)")));
     qtw->setItem(3,1,getQTableWidgetItem((QString::number((float)AvgExpirationTime/100))));
 
     AvgInspirationTime = ga->getAvgInspiratoryTime();
-    qtw->setItem(4,0,getQTableWidgetItem(tr("Среднее время вдоха(с)")));
+    qtw->setItem(4,0,getQTableWidgetItem(tr("РЎСЂРµРґРЅРµРµ РІСЂРµРјСЏ РІРґРѕС…Р°(СЃ)")));
     qtw->setItem(4,1,getQTableWidgetItem((QString::number((float)AvgInspirationTime/100))));
 
     AvgRoundTime = AvgExpirationTime+AvgInspirationTime;
-    qtw->setItem(5,0,getQTableWidgetItem(tr("Средняя время цикла(с)")));
+    qtw->setItem(5,0,getQTableWidgetItem(tr("РЎСЂРµРґРЅСЏСЏ РІСЂРµРјСЏ С†РёРєР»Р°(СЃ)")));
     qtw->setItem(5,1,getQTableWidgetItem((QString::number((float)AvgRoundTime/100))));
 
     InspirationFrequency = ga->getFrequency();
-    qtw->setItem(6,0,getQTableWidgetItem(tr("Частота дыхания(ед/мин)")));
+    qtw->setItem(6,0,getQTableWidgetItem(tr("Р§Р°СЃС‚РѕС‚Р° РґС‹С…Р°РЅРёСЏ(РµРґ/РјРёРЅ)")));
     qtw->setItem(6,1,getQTableWidgetItem((QString::number(InspirationFrequency))));
 
     BreathingVolume = ga->getBreathingVolume();
-    qtw->setItem(7,0,getQTableWidgetItem(tr("Дыхательный объем(л)")));
+    qtw->setItem(7,0,getQTableWidgetItem(tr("Р”С‹С…Р°С‚РµР»СЊРЅС‹Р№ РѕР±СЉРµРј(Р»)")));
     qtw->setItem(7,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume)))));
 
 
-    qtw->setItem(8,0,getQTableWidgetItem(tr("Минутная вентиляция легких(л)")));
+    qtw->setItem(8,0,getQTableWidgetItem(tr("РњРёРЅСѓС‚РЅР°СЏ РІРµРЅС‚РёР»СЏС†РёСЏ Р»РµРіРєРёС…(Р»)")));
     qtw->setItem(8,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(BreathingVolume))*InspirationFrequency)));
 
     MVL = ga->getMVL();
-    qtw->setItem(9,0,getQTableWidgetItem(tr("Суммарная вентиляция легких(л)")));
+    qtw->setItem(9,0,getQTableWidgetItem(tr("РЎСѓРјРјР°СЂРЅР°СЏ РІРµРЅС‚РёР»СЏС†РёСЏ Р»РµРіРєРёС…(Р»)")));
     qtw->setItem(9,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr(MVL)))));
 
     ga->clear();
 
     AvgTempIn = gai->getMinAvgs();
-    qtw->setItem(10,0,getQTableWidgetItem(tr("Средняя температура вдоха( 'C)")));
+    qtw->setItem(10,0,getQTableWidgetItem(tr("РЎСЂРµРґРЅСЏСЏ С‚РµРјРїРµСЂР°С‚СѓСЂР° РІРґРѕС…Р°( 'C)")));
     qtw->setItem(10,1,getQTableWidgetItem(QString::number(curveBuffer->tempInToDeg(AvgTempIn))));
     gai->clear();
 
     AvgTempOut = gao->getMaxAvgs();
-    qtw->setItem(11,0,getQTableWidgetItem(tr("Средняя температура выдоха( 'C)")));
+    qtw->setItem(11,0,getQTableWidgetItem(tr("РЎСЂРµРґРЅСЏСЏ С‚РµРјРїРµСЂР°С‚СѓСЂР° РІС‹РґРѕС…Р°( 'C)")));
     qtw->setItem(11,1,getQTableWidgetItem(QString::number(curveBuffer->tempOutToDeg(AvgTempOut))));
 
     AvgTempInMinusAvgTempOut = AvgTempOut-AvgTempIn;
-    qtw->setItem(12,0,getQTableWidgetItem(tr("Средняя Твдоха-Средняя Твыдоха( 'C)")));
+    qtw->setItem(12,0,getQTableWidgetItem(tr("РЎСЂРµРґРЅСЏСЏ РўРІРґРѕС…Р°-РЎСЂРµРґРЅСЏСЏ РўРІС‹РґРѕС…Р°( 'C)")));
     qtw->setItem(12,1,getQTableWidgetItem(curveBuffer->tempOutToDeg(AvgTempOut)-curveBuffer->tempInToDeg(AvgTempIn)));
     qtw->removeRow(0);
     delete gai;
@@ -1239,7 +1239,7 @@ void TSController::printReport()
     //    qDebug()<<"TSController::printReport";
     QPrinter printer;
     QPrintDialog *dialog = new QPrintDialog(&printer, this);
-    dialog->setWindowTitle(tr("Предварительный просмотр"));
+    dialog->setWindowTitle(tr("РџСЂРµРґРІР°СЂРёС‚РµР»СЊРЅС‹Р№ РїСЂРѕСЃРјРѕС‚СЂ"));
 
     int endIndex=curveBuffer->lenght;
 
@@ -1258,8 +1258,8 @@ void TSController::printReport()
     pf.resultsTable->setRowCount(13);
     pf.resultsTable->setColumnCount(2);
     pf.resultsTable->verticalHeader()->setVisible(false);
-    pf.resultsTable->setHorizontalHeaderLabels(QString(tr("Параметр; Значение")).split(";"));
-    pf.resultsTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    pf.resultsTable->setHorizontalHeaderLabels(QString(tr("РџР°СЂР°РјРµС‚СЂ; Р—РЅР°С‡РµРЅРёРµ")).split(";"));
+    pf.resultsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     int i=0,j=0;
     for(i=0;i<ui->resultsTable->rowCount();i++){
         for(j=0;j<2;j++){

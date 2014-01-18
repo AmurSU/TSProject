@@ -20,7 +20,7 @@ QSqlDatabase BDgod::dbConnect(QString baseName)
         qDebug()<<"Connected to database";
     } else {
         QMessageBox msg;
-        msg.setText("Не удалось подсоединится к базе данных. Проверьте права доступа.");
+        msg.setText("РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕРґСЃРѕРµРґРёРЅРёС‚СЃСЏ Рє Р±Р°Р·Рµ РґР°РЅРЅС‹С…. РџСЂРѕРІРµСЂСЊС‚Рµ РїСЂР°РІР° РґРѕСЃС‚СѓРїР°.");
         msg.show();
         qDebug()<<"Not connected to database";
        }
@@ -61,9 +61,9 @@ QString BDgod::Transliterate(QString str)
     QString fn;
     int i, rU, rL;
     QString validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-_,.()[]{}<>~!@#$%^&*+=?";
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
-    QString rusUpper = QObject::tr("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ");
-    QString rusLower = QObject::tr("абвгдеёжзийклмнопрстуфхцчшщыэюя");
+    //QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+    QString rusUpper = QObject::tr("РђР‘Р’Р“Р”Р•РЃР–Р—РР™РљР›РњРќРћРџР РЎРўРЈР¤РҐР¦Р§РЁР©Р«Р­Р®РЇ");
+    QString rusLower = QObject::tr("Р°Р±РІРіРґРµС‘Р¶Р·РёР№РєР»РјРЅРѕРїСЂСЃС‚СѓС„С…С†С‡С€С‰С‹СЌСЋСЏ");
     QStringList latUpper, latLower;
     latUpper <<"A"<<"B"<<"V"<<"G"<<"D"<<"E"<<"Jo"<<"Zh"<<"Z"<<"I"<<"Y"<<"K"<<"L"<<"M"<<"N"
         <<"O"<<"P"<<"R"<<"S"<<"T"<<"U"<<"F"<<"H"<<"C"<<"Ch"<<"Sh"<<"Sh"<<"I"<<"E"<<"Ju"<<"Ja";
