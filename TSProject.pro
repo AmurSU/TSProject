@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     tstempanalitic.cpp \
     tsrealcalc.cpp \
     tsrealcalcwrapper.cpp \
-    tsusbdatareader.cpp
+    tsusbdatareader.cpp \
+    volumesolver.cpp
 
 HEADERS  += \
     tsmodel.h \
@@ -49,7 +50,8 @@ HEADERS  += \
     extremum.h \
     tsrealcalc.h \
     tsrealcalcwrapper.h \
-    tsusbdatareader.h
+    tsusbdatareader.h \
+    volumesolver.h
 
 LIBS += -L"dll/*.dll"
 FORMS    += \

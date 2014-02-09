@@ -14,6 +14,7 @@
 #include <QTableWidget>
 #include "ui_tsprintview.h"
 #include "tsusbdatareader.h"
+#include "volumesolver.h"
 namespace Ui {
     class TSView;
     class TSProgressDialog;

@@ -44,3 +44,5 @@ vc100.pdb
 TSProject.pro.user.*
 out.csv
 volume.csv
+*.txt
+*.csv

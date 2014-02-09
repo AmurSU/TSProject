@@ -1,14 +1,16 @@
 #include "tsanalitics.h"
+#include <stdio.h>
 #include <QDebug>
 tsanalitics::tsanalitics(QObject *parent) :QObject(parent){
+    out = fopen("otvol.txt","w");
     ts_extremums = new QVector<extremum>;
     ts_row_data = new QVector<int>;
     ts_vol_exts = new QVector<extremum>;
     ts_exhls = new QVector<exhalation>;
 }
 
-tsanalitics::~tsanalitics()
-{
+tsanalitics::~tsanalitics(){
+    fclose(out);
     delete ts_extremums;
     delete ts_vol_exts;
     delete ts_exhls;
@@ -163,6 +165,7 @@ int tsanalitics::getMaxExpiratorySpeed(){
 }
 
 void tsanalitics::append(int n){
+    fprintf(out,"%d\n",n);
     try{
         ts_row_data->push_back(n);
     }
@@ -233,6 +236,7 @@ int tsanalitics::fabs(int a){
 }
 
 int tsanalitics::getAvgInspiratoryTime(){
+    qDebug()<<"int tsanalitics::setupData(QVector<int> *row_d){";
     int sum=0,i=0;
     for(i=0;i<ts_exhls->size()-1;i++){
         sum+=fabs(ts_exhls->at(i+1).end-ts_exhls->at(i).start);

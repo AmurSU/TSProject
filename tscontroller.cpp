@@ -110,7 +110,7 @@ TSController::TSController(QWidget *parent):QMainWindow(parent),ui(new Ui::TSVie
     ui->backExamButton->installEventFilter(this);
     _reader=NULL;
     _thread=NULL;
-    this->processDataParams();
+    //this->processDataParams();
 }
 
 TSController::~TSController()
@@ -1129,14 +1129,76 @@ void TSController::processDataParams(){
     qtw->verticalHeader()->setVisible(false);
     qtw->setHorizontalHeaderLabels(QString(tr("Параметр;Значение")).split(";"));
     qtw->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    tsanalitics* ga = new tsanalitics();
+   /* tsanalitics* ga = new tsanalitics();
     tstempanalitic* gao = new tstempanalitic();
-    tstempanalitic* gai = new tstempanalitic();
-    int AvgExpirationSpeed=0, MaxExpirationSpeed=0, AvgExpirationTime=0, AvgInspirationTime=0,
-            AvgRoundTime=0, AvgTempIn=0, AvgTempOut=0, AvgTempInMinusAvgTempOut=0,  BreathingVolume=0, MVL=0;
+    tstempanalitic* gai = new tstempanalitic();*/
+    float AvgExpirationSpeed=0, MaxExpirationSpeed=0, AvgExpirationTime=0, AvgInspirationTime=0,
+            AvgRoundTime=0, AvgTempIn=0, AvgTempOut=0, AvgTempInMinusAvgTempOut=0,  BreathingVolume=0, MVL=0, MinuteVentilation=0;
     float InspirationFrequency=0;
-    int i=0;
     int *vo = curveBuffer->volume();
+    int *ti = curveBuffer->tempIn();
+    int *to = curveBuffer->tempOut();
+    QVector<int> volume,temp_in,temp_out;
+    for(int i=0;i<curveBuffer->getLenght();i++){
+        volume.push_back(vo[i]);
+        temp_in.push_back(ti[i]);
+        temp_out.push_back(to[i]);
+    }
+    VolumeSolver* vs = new VolumeSolver(volume,temp_in,temp_out);
+
+    AvgExpirationSpeed = vs->getAverageExpirationSpeed();
+    qtw->setItem(1,0,getQTableWidgetItem(tr("Средняя скорость выдоха(л/с)")));
+    qtw->setItem(1,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr((int)AvgExpirationSpeed)))));
+
+    MaxExpirationSpeed = vs->getMaxExpirationSpeed();
+    qtw->setItem(2,0,getQTableWidgetItem(tr("Максимальная скорость выдоха(л/с)")));
+    qtw->setItem(2,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr((int)MaxExpirationSpeed)))));
+
+    AvgExpirationTime = vs->getAverageExpirationTime();
+    qtw->setItem(3,0,getQTableWidgetItem(tr("Среднее время выдоха(с)")));
+    qtw->setItem(3,1,getQTableWidgetItem((QString::number((float)AvgExpirationTime))));
+
+    AvgInspirationTime = vs->getAverageInspirationTime();
+    qtw->setItem(4,0,getQTableWidgetItem(tr("Среднее время вдоха(с)")));
+    qtw->setItem(4,1,getQTableWidgetItem((QString::number((float)AvgInspirationTime))));
+
+    AvgRoundTime = vs->getAverageCycleTime();
+    qtw->setItem(5,0,getQTableWidgetItem(tr("Средняя время цикла(с)")));
+    qtw->setItem(5,1,getQTableWidgetItem((QString::number((float)AvgRoundTime))));
+
+    InspirationFrequency = vs->getInspirationFrequancyInOneMinute();
+    qtw->setItem(6,0,getQTableWidgetItem(tr("Частота дыхания(ед/мин)")));
+    qtw->setItem(6,1,getQTableWidgetItem((QString::number(InspirationFrequency))));
+
+    MinuteVentilation = vs->getMinuteVentilation();
+    qtw->setItem(8,0,getQTableWidgetItem(tr("Минутная вентиляция легких(л)")));
+    qtw->setItem(8,1,getQTableWidgetItem(QString::number(curveBuffer->volToLtr(MinuteVentilation))));
+
+    BreathingVolume = vs->getAverageInspiratonVentilation();
+    qtw->setItem(7,0,getQTableWidgetItem(tr("Дыхательный объем(л)")));
+    qtw->setItem(7,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr((int)BreathingVolume)))));
+
+    MVL = vs->getTotalVentilation();
+    qtw->setItem(9,0,getQTableWidgetItem(tr("Суммарная вентиляция легких(л)")));
+    qtw->setItem(9,1,getQTableWidgetItem(QString::number(fabs(curveBuffer->volToLtr((int)MVL)))));
+
+    //ga->clear();
+
+    AvgTempIn = vs->getAverageInspirationTempetature();
+    qtw->setItem(10,0,getQTableWidgetItem(tr("Средняя температура вдоха( 'C)")));
+    qtw->setItem(10,1,getQTableWidgetItem(QString::number(curveBuffer->tempInToDeg(AvgTempIn))));
+    //gai->clear();
+
+    AvgTempOut = vs->getAverageExpirationTempetature();
+    qtw->setItem(11,0,getQTableWidgetItem(tr("Средняя температура выдоха( 'C)")));
+    qtw->setItem(11,1,getQTableWidgetItem(QString::number(curveBuffer->tempOutToDeg(AvgTempOut))));
+
+    AvgTempInMinusAvgTempOut = AvgTempOut-AvgTempIn;
+    qtw->setItem(12,0,getQTableWidgetItem(tr("Средняя Твдоха-Средняя Твыдоха( 'C)")));
+    qtw->setItem(12,1,getQTableWidgetItem(curveBuffer->tempOutToDeg(AvgTempOut)-curveBuffer->tempInToDeg(AvgTempIn)));
+
+    qtw->removeRow(0);
+    /*int *vo = curveBuffer->volume();
     for(i=0;i<curveBuffer->getLenght();i++){
         ga->append(vo[i]);
     }
@@ -1155,6 +1217,12 @@ void TSController::processDataParams(){
     }
     gao->findExtremums();
     gao->deleteBadExtremums();
+
+    FILE *out;
+    out=fopen("triple.csv","w");
+    for(i=0;i<curveBuffer->getLenght();i++){
+        fprintf(out,"%d %d %d\n",vo[i],ti[i],to[i]);
+    }
 
     AvgExpirationSpeed = ga->getAvgExpiratorySpeed();
     qtw->setItem(1,0,getQTableWidgetItem(tr("Средняя скорость выдоха(л/с)")));
@@ -1210,6 +1278,9 @@ void TSController::processDataParams(){
     delete gai;
     delete ga;
     delete gao;
+    delete gai;
+    delete ga;
+    delete gao;*/
     qtw->show();
 }
 
