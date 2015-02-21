@@ -22,13 +22,12 @@ SOURCES += main.cpp\
     bdgod.cpp \
     models/TSPatients.cpp \
     models/TSExaminations.cpp \
-    tsanalitics.cpp \
     inputs/tstableview.cpp \
-    tstempanalitic.cpp \
     tsrealcalc.cpp \
     tsrealcalcwrapper.cpp \
     tsusbdatareader.cpp \
-    volumesolver.cpp
+    volumesolver.cpp \
+    tsanalitics.cpp
 
 HEADERS  += \
     tsmodel.h \
@@ -43,15 +42,14 @@ HEADERS  += \
     bdgod.h \
     models/TSPatients.h \
     models/TSExaminations.h \
-    tsanalitics.h \
     inputs/tstableview.h \
     ui_tsprintview.h \
-    tstempanalitic.h \
     extremum.h \
     tsrealcalc.h \
     tsrealcalcwrapper.h \
     tsusbdatareader.h \
-    volumesolver.h
+    volumesolver.h \
+    tsanalitics.h
 
 LIBS += -L"dll/*.dll"
 FORMS    += \

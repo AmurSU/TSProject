@@ -7,9 +7,14 @@ TSPatients::TSPatients(QSqlDatabase connection) :
     setTable("patients");
     setEditStrategy(QSqlTableModel::OnRowChange);
     select();
-    setHeaderData(1, Qt::Horizontal, tr("ID пациента"));
-    setHeaderData(2, Qt::Horizontal, tr("Фамилия"));
-    setHeaderData(3, Qt::Horizontal,tr("Имя"));
-    setHeaderData(4, Qt::Horizontal, tr("Отчество"));
-    setHeaderData(7, Qt::Horizontal, tr("Дата рождения"));
+    /*setHeaderData(1, Qt::Horizontal, "ID пациента");
+    setHeaderData(2, Qt::Horizontal, "Фамилия");
+    setHeaderData(3, Qt::Horizontal,"Имя");
+    setHeaderData(4, Qt::Horizontal, "Отчество");
+    setHeaderData(7, Qt::Horizontal, "Дата рождения");*/
+    setHeaderData(1, Qt::Horizontal, "ID");
+    setHeaderData(2, Qt::Horizontal, "Second name");
+    setHeaderData(3, Qt::Horizontal,"First name");
+    setHeaderData(4, Qt::Horizontal, "Patronymic");
+    setHeaderData(7, Qt::Horizontal, "Date of birth");
 }

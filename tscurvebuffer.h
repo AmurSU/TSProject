@@ -4,10 +4,7 @@
 #include <QObject>
 #include <QColor>
 #include <QSettings>
-#include <tsanalitics.h>
 #include <QVector>
-#include <tsanalitics.h>
-#include <tstempanalitic.h>
 #include <QThread>
 #include "tsrealcalcwrapper.h"
 using namespace std;

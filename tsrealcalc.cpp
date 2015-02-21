@@ -7,29 +7,19 @@ tsrealcalc::~tsrealcalc(){
 }
 
 void tsrealcalc::append(int in_temp = 0, int out_temp = 0, int volume = 0 ){
-    ga_it.append(in_temp);
-    ga_vo.append(volume);
-    ga_ot.append(out_temp);
+    vo.push_back(volume);
+    ti.push_back(in_temp);
+    to.push_back(out_temp);
 }
 
 void tsrealcalc::process(){
-    int AvgTempIn,AvgTempOut,InspirationFrequency=0,BreathingVolume=0;
-    ga_it.findExtremums();
-    ga_it.deleteBadExtremums();
-    AvgTempIn = ga_it.getMinAvgs();
-    ga_it.clear();
-
-    ga_ot.findExtremums();
-    ga_ot.deleteBadExtremums();
-    AvgTempOut = ga_ot.getMaxAvgs();
-    ga_ot.clear();
-
-    ga_vo.approximate();
-    BreathingVolume = ga_vo.getBreathingVolume();
-    InspirationFrequency = ga_vo.getFrequency();
-    ga_vo.clear();
-
+    VolumeSolver vs(vo,ti,to);
+    float AvgTempIn,AvgTempOut,InspirationFrequency=0,BreathingVolume=0;
+    AvgTempIn = vs.getAverageInspirationTempetature();
+    AvgTempOut = vs.getAverageExpirationTempetature();
+    InspirationFrequency = vs.getInspirationFrequancyInOneMinute();
+    BreathingVolume = vs.getAverageInspiratonVentilation();
     // нада сделать чтобы дергалась функция в curvebuffer и вызывался сигнал обновления
-    emit updateAverageData(AvgTempIn,AvgTempOut,BreathingVolume,InspirationFrequency);
+    emit updateAverageData((int)AvgTempIn,(int)AvgTempOut,(int)BreathingVolume,(int)InspirationFrequency);
     emit finished();
 }

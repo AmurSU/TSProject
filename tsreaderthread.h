@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include "tsusb3000reader.h"
+#include "extremum.h"
 
 
 class TSReaderThread : public QThread
@@ -12,7 +13,6 @@ public:
     explicit TSReaderThread(TSCurveBuffer *b,QObject *parent = 0);
     ~TSReaderThread();
     void run();
-    void f1();
     void stopRead();
     void startRead();
     void setReadingType(TSUsbReadingType type);

@@ -13,8 +13,8 @@ void TSTableView::keyReleaseEvent(QKeyEvent *event){
 
     if(event->key()==Qt::Key_Delete){
         QMessageBox mess((QWidget*)parent());
-        mess.setWindowTitle(tr("Âîïðîñ"));
-        mess.setText(tr("Âû óâåðåíû, ÷òî õîòèòå óäàëèòü çàïèñü."));
+        mess.setWindowTitle(tr("Ð’Ð¾Ð¿Ñ€Ð¾Ñ"));
+        mess.setText(tr("Ð’Ñ‹ ÑƒÐ²ÐµÑ€ÐµÐ½Ñ‹, Ñ‡Ñ‚Ð¾ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ ÑƒÐ´Ð°Ð»Ð¸Ñ‚ÑŒ Ð·Ð°Ð¿Ð¸ÑÑŒ."));
         mess.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
         if(mess.exec()==QMessageBox::Ok){
             int ind = selectionModel()->selectedRows().at(0).row();

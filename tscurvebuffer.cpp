@@ -1,7 +1,5 @@
 #include "tscurvebuffer.h"
 #include <QDebug>
-#include <tsanalitics.h>
-#include <tstempanalitic.h>
 
 TSCurveBuffer::TSCurveBuffer(QObject *parent) :QObject(parent){
     lenght=0;
@@ -198,7 +196,7 @@ QVector<int> TSCurveBuffer::volumeConverts(){
 float TSCurveBuffer::volToLtr(int vol){
     if (vol==0)
         return 0;
-    if(vol<0)
+    if(vol>0)
         return (float)vol/ts_volumeNegConvert;
     else
         return (float)vol/ts_volumePosConvert;
